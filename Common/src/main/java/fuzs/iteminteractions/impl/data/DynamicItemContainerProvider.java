@@ -14,7 +14,7 @@ public class DynamicItemContainerProvider extends AbstractItemContainerProvider 
     }
 
     @Override
-    protected void addItemProviders() {
+    public void addItemProviders() {
         this.add(Items.ENDER_CHEST, new EnderChestProvider());
         this.add(Items.SHULKER_BOX, BlockEntityProvider.shulkerBoxProvider(BlockEntityType.SHULKER_BOX, 9, 3, null));
     }

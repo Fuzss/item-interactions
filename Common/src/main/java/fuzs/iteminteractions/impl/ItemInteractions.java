@@ -44,6 +44,7 @@ public class ItemInteractions implements ModConstructor {
         ModRegistry.touch();
         registerMessages();
         registerHandlers();
+        setupDevelopmentEnvironment();
     }
 
     private static void registerMessages() {
@@ -58,11 +59,6 @@ public class ItemInteractions implements ModConstructor {
     private static void registerHandlers() {
         PlayerTickEvents.START.register(EnderChestMenuHandler::onLivingTick);
         SyncDataPackContentsCallback.EVENT.register(ItemContainerProviders.INSTANCE::sendProvidersToPlayer);
-    }
-
-    @Override
-    public void onCommonSetup() {
-        setupDevelopmentEnvironment();
     }
 
     private static void setupDevelopmentEnvironment() {

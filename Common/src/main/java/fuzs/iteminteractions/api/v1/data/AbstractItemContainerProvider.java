@@ -43,7 +43,7 @@ public abstract class AbstractItemContainerProvider implements DataProvider {
         return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));
     }
 
-    protected abstract void addItemProviders();
+    public abstract void addItemProviders();
 
     public void add(ItemLike item, ItemContainerProvider provider) {
         this.add(BuiltInRegistries.ITEM.getKey(item.asItem()), provider);
