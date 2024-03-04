@@ -8,7 +8,6 @@ import fuzs.iteminteractions.api.v1.provider.ItemContainerProvider;
 import fuzs.iteminteractions.impl.ItemInteractions;
 import fuzs.iteminteractions.impl.network.S2CSyncItemContainerProvider;
 import fuzs.puzzleslib.api.config.v3.json.JsonConfigFileUtil;
-import fuzs.puzzleslib.api.core.v1.ModLoaderEnvironment;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -60,9 +59,7 @@ public class ItemContainerProviders extends SimpleJsonResourceReloadListener {
         this.providers = builder.build();
     }
 
-    public void sendProvidersToPlayer(ServerPlayer player, boolean joined) {
-        if (ModLoaderEnvironment.INSTANCE.isServer()) {
-            ItemInteractions.NETWORK.sendTo(new S2CSyncItemContainerProvider(this.rawProviders), player);
-        }
+    public void onSyncDataPackContents(ServerPlayer player, boolean joined) {
+        ItemInteractions.NETWORK.sendTo(new S2CSyncItemContainerProvider(this.rawProviders), player);
     }
 }
