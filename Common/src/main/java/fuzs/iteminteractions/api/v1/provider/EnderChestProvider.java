@@ -46,7 +46,15 @@ public class EnderChestProvider implements TooltipItemContainerProvider {
 
     @Override
     public TooltipComponent createTooltipImageComponent(ItemStack containerStack, Player player, NonNullList<ItemStack> items) {
-        return new ContainerItemTooltip(items, 9, 3, DEFAULT_ENDER_CHEST_COLOR);
+        int gridSizeX;
+        if (player.getEnderChestInventory().getContainerSize() % 3 == 0) {
+            // try support mods that add more ender chest rows
+            gridSizeX = player.getEnderChestInventory().size / 3;
+        } else {
+            gridSizeX = 9;
+        }
+
+        return new ContainerItemTooltip(items, gridSizeX, 3, DEFAULT_ENDER_CHEST_COLOR);
     }
 
     @Override

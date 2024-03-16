@@ -9,11 +9,11 @@ import fuzs.iteminteractions.impl.config.ServerConfig;
 import fuzs.iteminteractions.impl.data.DynamicItemContainerProvider;
 import fuzs.iteminteractions.impl.handler.EnderChestMenuHandler;
 import fuzs.iteminteractions.impl.init.ModRegistry;
+import fuzs.iteminteractions.impl.network.S2CEnderChestMenuMessage;
 import fuzs.iteminteractions.impl.network.S2CEnderChestSetContentMessage;
 import fuzs.iteminteractions.impl.network.S2CEnderChestSetSlotMessage;
 import fuzs.iteminteractions.impl.network.S2CSyncItemContainerProvider;
 import fuzs.iteminteractions.impl.network.client.C2SContainerClientInputMessage;
-import fuzs.iteminteractions.impl.network.client.C2SEnderChestMenuMessage;
 import fuzs.iteminteractions.impl.network.client.C2SEnderChestSetSlotMessage;
 import fuzs.iteminteractions.impl.world.item.container.ItemContainerProviders;
 import fuzs.puzzleslib.api.config.v3.ConfigHolder;
@@ -21,7 +21,7 @@ import fuzs.puzzleslib.api.core.v1.ModConstructor;
 import fuzs.puzzleslib.api.core.v1.ModLoaderEnvironment;
 import fuzs.puzzleslib.api.core.v1.context.AddReloadListenersContext;
 import fuzs.puzzleslib.api.core.v1.context.PackRepositorySourcesContext;
-import fuzs.puzzleslib.api.event.v1.entity.player.PlayerTickEvents;
+import fuzs.puzzleslib.api.event.v1.entity.player.ContainerEvents;
 import fuzs.puzzleslib.api.event.v1.server.SyncDataPackContentsCallback;
 import fuzs.puzzleslib.api.network.v2.NetworkHandlerV2;
 import fuzs.puzzleslib.api.resources.v1.DynamicPackResources;
@@ -52,12 +52,12 @@ public class ItemInteractions implements ModConstructor {
         NETWORK.registerClientbound(S2CEnderChestSetContentMessage.class, S2CEnderChestSetContentMessage::new);
         NETWORK.registerClientbound(S2CEnderChestSetSlotMessage.class, S2CEnderChestSetSlotMessage::new);
         NETWORK.registerServerbound(C2SEnderChestSetSlotMessage.class, C2SEnderChestSetSlotMessage::new);
-        NETWORK.registerServerbound(C2SEnderChestMenuMessage.class, C2SEnderChestMenuMessage::new);
+        NETWORK.registerClientbound(S2CEnderChestMenuMessage.class, S2CEnderChestMenuMessage::new);
         NETWORK.registerClientbound(S2CSyncItemContainerProvider.class, S2CSyncItemContainerProvider::new);
     }
 
     private static void registerHandlers() {
-        PlayerTickEvents.START.register(EnderChestMenuHandler::onStartPlayerTick);
+        ContainerEvents.OPEN.register(EnderChestMenuHandler::onContainerOpen);
         SyncDataPackContentsCallback.EVENT.register(ItemContainerProviders.INSTANCE::onSyncDataPackContents);
     }
 

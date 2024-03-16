@@ -6,6 +6,7 @@ import fuzs.iteminteractions.impl.capability.EnderChestMenuCapability;
 import fuzs.puzzleslib.api.capability.v3.CapabilityController;
 import fuzs.puzzleslib.api.capability.v3.data.CopyStrategy;
 import fuzs.puzzleslib.api.capability.v3.data.EntityCapabilityKey;
+import fuzs.puzzleslib.api.capability.v3.data.SyncStrategy;
 import net.minecraft.world.entity.player.Player;
 
 public class ModRegistry {
@@ -21,7 +22,7 @@ public class ModRegistry {
             EnderChestMenuCapability.class,
             EnderChestMenuCapability::new,
             Player.class
-    );
+    ).setSyncStrategy(SyncStrategy.PLAYER);
 
     public static void touch() {
 

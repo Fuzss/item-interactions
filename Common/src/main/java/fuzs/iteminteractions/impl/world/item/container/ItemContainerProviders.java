@@ -51,7 +51,9 @@ public class ItemContainerProviders extends SimpleJsonResourceReloadListener {
                 // modded items may not be present, but we register default providers for some
                 if (!BuiltInRegistries.ITEM.containsKey(item)) continue;
                 ItemContainerProvider provider = ItemContainerProviderSerializers.deserialize(jsonObject);
-                builder.put(BuiltInRegistries.ITEM.get(item), new ForwardingItemContainerProvider(provider));
+                if (provider != null) {
+                    builder.put(BuiltInRegistries.ITEM.get(item), new ForwardingItemContainerProvider(provider));
+                }
             } catch (Exception e) {
                 ItemInteractions.LOGGER.error("Couldn't parse item container provider {}", item, e);
             }

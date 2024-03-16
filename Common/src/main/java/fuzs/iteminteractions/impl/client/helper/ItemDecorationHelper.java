@@ -7,7 +7,6 @@ import fuzs.iteminteractions.api.v1.provider.ItemContainerProvider;
 import fuzs.iteminteractions.impl.ItemInteractions;
 import fuzs.iteminteractions.impl.config.ClientConfig;
 import fuzs.iteminteractions.impl.world.item.container.ItemContainerProviders;
-import fuzs.puzzleslib.api.client.gui.v2.screen.ScreenHelper;
 import fuzs.puzzleslib.api.client.init.v1.DynamicItemDecorator;
 import fuzs.puzzleslib.api.core.v1.ModLoaderEnvironment;
 import net.minecraft.client.Minecraft;
@@ -50,9 +49,9 @@ public class ItemDecorationHelper {
                 if (type != ItemDecoratorType.NONE) {
                     guiGraphics.pose().pushPose();
                     guiGraphics.pose().translate(0.0, 0.0, 200.0);
-                    MultiBufferSource.BufferSource multibuffersource$buffersource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-                    font.drawInBatch(type.getText(), (float) (itemPosX + 19 - 2 - type.getWidth(font)), (float) (itemPosY + 6 + 3), type.getColor(), true, guiGraphics.pose().last().pose(), multibuffersource$buffersource, Font.DisplayMode.NORMAL, 0, 15728880);
-                    multibuffersource$buffersource.endBatch();
+                    MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+                    font.drawInBatch(type.getText(), (float) (itemPosX + 19 - 2 - type.getWidth(font)), (float) (itemPosY + 6 + 3), type.getColor(), true, guiGraphics.pose().last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, 15728880);
+                    bufferSource.endBatch();
                     guiGraphics.pose().popPose();
                     // font renderer modifies render states, so this tells the implementation to reset them
                     return true;
@@ -72,8 +71,7 @@ public class ItemDecorationHelper {
         if (provider != null) {
             resetRenderState();
             DynamicItemDecorator itemDecorator = DECORATORS_CACHE.computeIfAbsent(provider, $ -> ItemDecorationHelper.getDynamicItemDecorator((AbstractContainerScreen<?> screen, ItemStack containerStack, ItemStack carriedStack) -> {
-                Minecraft minecraft = ScreenHelper.INSTANCE.getMinecraft(screen);
-                return ItemDecoratorType.getItemDecoratorType(provider, containerStack, carriedStack, minecraft.player);
+                return ItemDecoratorType.getItemDecoratorType(provider, containerStack, carriedStack, screen.minecraft.player);
             }, () -> ItemInteractions.CONFIG.get(ClientConfig.class).containerItemIndicator));
             if (itemDecorator.renderItemDecorations(guiGraphics, font, stack, itemPosX, itemPosY)) {
                 resetRenderState();

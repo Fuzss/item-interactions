@@ -8,11 +8,9 @@ import fuzs.iteminteractions.impl.config.ServerConfig;
 import fuzs.iteminteractions.impl.network.client.C2SContainerClientInputMessage;
 import fuzs.iteminteractions.impl.world.inventory.ContainerSlotHelper;
 import fuzs.iteminteractions.impl.world.item.container.ItemContainerProviders;
-import fuzs.puzzleslib.api.client.gui.v2.screen.ScreenHelper;
 import fuzs.puzzleslib.api.event.v1.core.EventResult;
 import fuzs.puzzleslib.api.event.v1.data.DefaultedFloat;
 import fuzs.puzzleslib.api.event.v1.data.MutableValue;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -38,8 +36,7 @@ public class ClientInputActionHandler {
         // this must be sent before any slot click action is performed server side, by vanilla this can be caused by either mouse clicks (normal menu interactions)
         // or key presses (hotbar keys for swapping items to those slots)
         // this is already added via mixin to where vanilla sends the click packet, but creative screen doesn't use it, and you never know with other mods...
-        Minecraft minecraft = ScreenHelper.INSTANCE.getMinecraft(screen);
-        ensureHasSentContainerClientInput(screen, minecraft.player);
+        ensureHasSentContainerClientInput(screen, screen.minecraft.player);
         return EventResult.PASS;
     }
 
@@ -47,8 +44,7 @@ public class ClientInputActionHandler {
         // this must be sent before any slot click action is performed server side, by vanilla this can be caused by either mouse clicks (normal menu interactions)
         // or key presses (hotbar keys for swapping items to those slots)
         // this is already added via mixin to where vanilla sends the click packet, but creative screen doesn't use it, and you never know with other mods...
-        Minecraft minecraft = ScreenHelper.INSTANCE.getMinecraft(screen);
-        ensureHasSentContainerClientInput(screen, minecraft.player);
+        ensureHasSentContainerClientInput(screen, screen.minecraft.player);
         return EventResult.PASS;
     }
 
@@ -68,7 +64,7 @@ public class ClientInputActionHandler {
         if (!screen.getMenu().getCarried().isEmpty()) {
             ItemStack stack = getContainerStack(screen, false);
             if (!stack.isEmpty()) {
-                guiGraphics.renderTooltip(ScreenHelper.INSTANCE.getFont(screen), stack, mouseX, mouseY);
+                guiGraphics.renderTooltip(screen.font, stack, mouseX, mouseY);
             }
         }
     }
@@ -78,11 +74,12 @@ public class ClientInputActionHandler {
         if (verticalAmount == 0.0) return EventResult.PASS;
         if (!ItemInteractions.CONFIG.get(ClientConfig.class).revealContents.isActive()) return EventResult.PASS;
         if (precisionModeAllowedAndActive()) {
-            Slot slot = ScreenHelper.INSTANCE.getHoveredSlot(screen);
-            if (slot != null) {
-                if (ItemContainerProviders.INSTANCE.get(screen.getMenu().getCarried()) != null || ItemContainerProviders.INSTANCE.get(slot.getItem()) != null) {
+            Slot hoveredSlot = screen.hoveredSlot;
+            if (hoveredSlot != null) {
+                if (ItemContainerProviders.INSTANCE.get(screen.getMenu().getCarried()) != null || ItemContainerProviders.INSTANCE.get(
+                        hoveredSlot.getItem()) != null) {
                     int mouseButton = (ItemInteractions.CONFIG.get(ClientConfig.class).invertPrecisionModeScrolling ? verticalAmount < 0.0 : verticalAmount > 0.0) ? InputConstants.MOUSE_BUTTON_RIGHT : InputConstants.MOUSE_BUTTON_LEFT;
-                    screen.slotClicked(slot, slot.index, mouseButton, ClickType.PICKUP);
+                    screen.slotClicked(hoveredSlot, hoveredSlot.index, mouseButton, ClickType.PICKUP);
                     return EventResult.INTERRUPT;
                 }
             }
@@ -93,13 +90,12 @@ public class ClientInputActionHandler {
             }
             ItemStack stack = getContainerStack(screen, true);
             if (!stack.isEmpty()) {
-                Minecraft minecraft = ScreenHelper.INSTANCE.getMinecraft(screen);
-                int currentContainerSlot = ContainerSlotHelper.getCurrentContainerSlot(minecraft.player);
+                int currentContainerSlot = ContainerSlotHelper.getCurrentContainerSlot(screen.minecraft.player);
                 ItemContainerProvider provider = ItemContainerProviders.INSTANCE.get(stack);
                 Objects.requireNonNull(provider, "provider is null");
-                SimpleContainer container = provider.getItemContainer(stack, minecraft.player, false);
+                SimpleContainer container = provider.getItemContainer(stack, screen.minecraft.player, false);
                 currentContainerSlot = ContainerSlotHelper.findClosestSlotWithContent(container, currentContainerSlot, verticalAmount < 0.0);
-                ContainerSlotHelper.setCurrentContainerSlot(minecraft.player, currentContainerSlot);
+                ContainerSlotHelper.setCurrentContainerSlot(screen.minecraft.player, currentContainerSlot);
                 return EventResult.INTERRUPT;
             }
         }
@@ -112,9 +108,8 @@ public class ClientInputActionHandler {
         if (provider != null && (!requireItemContainerData || provider.hasItemContainerData(stack))) {
             return stack;
         }
-        Slot slot = ScreenHelper.INSTANCE.getHoveredSlot(screen);
-        if (slot != null) {
-            stack = slot.getItem();
+        if (screen.hoveredSlot != null) {
+            stack = screen.hoveredSlot.getItem();
             provider = ItemContainerProviders.INSTANCE.get(stack);
             if (provider != null && (!requireItemContainerData || provider.hasItemContainerData(stack))) {
                 return stack;

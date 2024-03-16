@@ -7,13 +7,10 @@ import fuzs.iteminteractions.impl.ItemInteractions;
 import fuzs.iteminteractions.impl.config.ClientConfig;
 import fuzs.iteminteractions.impl.config.ServerConfig;
 import fuzs.iteminteractions.impl.world.item.container.ItemContainerProviders;
-import fuzs.puzzleslib.api.client.gui.v2.screen.ScreenHelper;
 import fuzs.puzzleslib.api.event.v1.core.EventResult;
 import fuzs.puzzleslib.api.event.v1.data.DefaultedFloat;
 import fuzs.puzzleslib.api.event.v1.data.MutableValue;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
@@ -37,13 +34,13 @@ public class MouseDraggingHandler {
     @Nullable
     private static ContainerDragType containerDragType;
 
-    public static EventResult onBeforeMousePressed(Screen screen, double mouseX, double mouseY, int button) {
-        if (!shouldHandleMouseDragging(screen)) return EventResult.PASS;
-        ItemStack carriedStack = ((AbstractContainerScreen<?>) screen).getMenu().getCarried();
+    public static EventResult onBeforeMousePressed(AbstractContainerScreen<?> screen, double mouseX, double mouseY, int button) {
+        if (!ItemInteractions.CONFIG.get(ServerConfig.class).allowMouseDragging) return EventResult.PASS;
+        ItemStack carriedStack = screen.getMenu().getCarried();
         ItemContainerProvider provider = ItemContainerProviders.INSTANCE.get(carriedStack);
-        Minecraft minecraft = ScreenHelper.INSTANCE.getMinecraft(screen);
-        if (validMouseButton(button) && provider != null && provider.allowsPlayerInteractions(carriedStack, minecraft.player)) {
-            Slot slot = ((AbstractContainerScreen<?>) screen).findSlot(mouseX, mouseY);
+        if (validMouseButton(button) && provider != null &&
+                provider.allowsPlayerInteractions(carriedStack, screen.minecraft.player)) {
+            Slot slot = screen.findSlot(mouseX, mouseY);
             if (slot != null) {
                 if (slot.hasItem() && !ClientInputActionHandler.precisionModeAllowedAndActive()) {
                     containerDragType = ContainerDragType.INSERT;
@@ -58,32 +55,34 @@ public class MouseDraggingHandler {
         return EventResult.PASS;
     }
 
-    public static EventResult onBeforeMouseDragged(Screen screen, double mouseX, double mouseY, int button, double dragX, double dragY) {
-        if (!shouldHandleMouseDragging(screen)) return EventResult.PASS;
+    public static EventResult onBeforeMouseDragged(AbstractContainerScreen<?> screen, double mouseX, double mouseY, int button, double dragX, double dragY) {
+        if (!ItemInteractions.CONFIG.get(ServerConfig.class).allowMouseDragging) return EventResult.PASS;
         if (containerDragType != null) {
             if (!validMouseButton(button)) {
                 containerDragType = null;
                 CONTAINER_DRAG_SLOTS.clear();
                 return EventResult.PASS;
             }
-            Slot slot = ((AbstractContainerScreen<?>) screen).findSlot(mouseX, mouseY);
-            AbstractContainerMenu menu = ((AbstractContainerScreen<?>) screen).getMenu();
+            Slot slot = screen.findSlot(mouseX, mouseY);
+            AbstractContainerMenu menu = screen.getMenu();
             if (slot != null && menu.canDragTo(slot) && !CONTAINER_DRAG_SLOTS.contains(slot)) {
                 ItemStack carriedStack = menu.getCarried();
                 ItemContainerProvider provider = ItemContainerProviders.INSTANCE.get(carriedStack);
                 Objects.requireNonNull(provider, "provider is null");
-                Minecraft minecraft = ScreenHelper.INSTANCE.getMinecraft(screen);
                 boolean interact = false;
-                if (containerDragType == ContainerDragType.INSERT && slot.hasItem() && provider.canAddItem(carriedStack, slot.getItem(), minecraft.player)) {
+                if (containerDragType == ContainerDragType.INSERT && slot.hasItem() &&
+                        provider.canAddItem(carriedStack, slot.getItem(), screen.minecraft.player)) {
                     interact = true;
                 } else if (containerDragType == ContainerDragType.REMOVE) {
-                    boolean normalInteraction = button == InputConstants.MOUSE_BUTTON_RIGHT && !slot.hasItem() && !provider.getItemContainer(carriedStack, minecraft.player, false).isEmpty();
-                    if (normalInteraction || slot.hasItem() && ClientInputActionHandler.precisionModeAllowedAndActive()) {
+                    boolean normalInteraction = button == InputConstants.MOUSE_BUTTON_RIGHT && !slot.hasItem() &&
+                            !provider.getItemContainer(carriedStack, screen.minecraft.player, false).isEmpty();
+                    if (normalInteraction ||
+                            slot.hasItem() && ClientInputActionHandler.precisionModeAllowedAndActive()) {
                         interact = true;
                     }
                 }
                 if (interact) {
-                    ((AbstractContainerScreen<?>) screen).slotClicked(slot, slot.index, button, ClickType.PICKUP);
+                    screen.slotClicked(slot, slot.index, button, ClickType.PICKUP);
                     CONTAINER_DRAG_SLOTS.add(slot);
                     return EventResult.INTERRUPT;
                 }
@@ -92,14 +91,17 @@ public class MouseDraggingHandler {
         return EventResult.PASS;
     }
 
-    public static EventResult onBeforeMouseRelease(Screen screen, double mouseX, double mouseY, int button) {
-        if (!shouldHandleMouseDragging(screen)) return EventResult.PASS;
+    public static EventResult onBeforeMouseRelease(AbstractContainerScreen<?> screen, double mouseX, double mouseY, int button) {
+        if (!ItemInteractions.CONFIG.get(ServerConfig.class).allowMouseDragging) return EventResult.PASS;
         if (containerDragType != null) {
             if (validMouseButton(button) && !CONTAINER_DRAG_SLOTS.isEmpty()) {
                 if (!ItemInteractions.CONFIG.get(ClientConfig.class).disableInteractionSounds) {
                     // play this manually at the end, we suppress all interaction sounds played while dragging
-                    SimpleSoundInstance sound = SimpleSoundInstance.forUI(containerDragType.sound, 0.8F, 0.8F + SoundInstance.createUnseededRandom().nextFloat() * 0.4F);
-                    ScreenHelper.INSTANCE.getMinecraft(screen).getSoundManager().play(sound);
+                    SimpleSoundInstance sound = SimpleSoundInstance.forUI(containerDragType.sound,
+                            0.8F,
+                            0.8F + SoundInstance.createUnseededRandom().nextFloat() * 0.4F
+                    );
+                    screen.minecraft.getSoundManager().play(sound);
                 }
                 containerDragType = null;
                 CONTAINER_DRAG_SLOTS.clear();
@@ -109,11 +111,6 @@ public class MouseDraggingHandler {
         }
         CONTAINER_DRAG_SLOTS.clear();
         return EventResult.PASS;
-    }
-
-    private static boolean shouldHandleMouseDragging(Screen screen) {
-        if (!(screen instanceof AbstractContainerScreen<?>)) return false;
-        return ItemInteractions.CONFIG.get(ServerConfig.class).allowMouseDragging;
     }
 
     private static boolean validMouseButton(int button) {
@@ -127,21 +124,11 @@ public class MouseDraggingHandler {
         for (Slot slot : screen.getMenu().slots) {
             if (CONTAINER_DRAG_SLOTS.contains(slot)) {
                 // slots will sometimes be added to dragged slots when simply clicking on a slot, so don't render our overlay then
-                if (CONTAINER_DRAG_SLOTS.size() > 1 || !isHovering(screen, slot, mouseX, mouseY)) {
-                    guiGraphics.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, -2130706433);
+                if (CONTAINER_DRAG_SLOTS.size() > 1 || !screen.isHovering(slot, mouseX, mouseY)) {
+                    guiGraphics.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, 0x80FFFFFF);
                 }
             }
         }
-    }
-
-    private static boolean isHovering(AbstractContainerScreen<?> screen, Slot slot, double mouseX, double mouseY) {
-        return isHovering(slot.x, slot.y, 16, 16, ScreenHelper.INSTANCE.getLeftPos(screen), ScreenHelper.INSTANCE.getTopPos(screen), mouseX, mouseY);
-    }
-
-    private static boolean isHovering(int x, int y, int width, int height, int leftPos, int topPos, double mouseX, double mouseY) {
-        mouseX -= leftPos;
-        mouseY -= topPos;
-        return mouseX >= (double)(x - 1) && mouseX < (double)(x + width + 1) && mouseY >= (double)(y - 1) && mouseY < (double)(y + height + 1);
     }
 
     public static EventResult onPlaySoundAtPosition(Level level, Entity entity, MutableValue<Holder<SoundEvent>> sound, MutableValue<SoundSource> source, DefaultedFloat volume, DefaultedFloat pitch) {
@@ -155,7 +142,8 @@ public class MouseDraggingHandler {
     }
 
     private enum ContainerDragType {
-        INSERT(SoundEvents.BUNDLE_INSERT), REMOVE(SoundEvents.BUNDLE_REMOVE_ONE);
+        INSERT(SoundEvents.BUNDLE_INSERT),
+        REMOVE(SoundEvents.BUNDLE_REMOVE_ONE);
 
         public final SoundEvent sound;
 

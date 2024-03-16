@@ -4,8 +4,10 @@ import com.google.common.collect.Maps;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import fuzs.iteminteractions.api.v1.provider.ItemContainerProvider;
+import fuzs.iteminteractions.impl.ItemInteractions;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.Map;
@@ -53,6 +55,7 @@ public class ItemContainerProviderSerializers {
      * @param jsonObject json object containing provider data
      * @return the provider
      */
+    @Nullable
     public static ItemContainerProvider deserialize(JsonObject jsonObject) {
         ResourceLocation identifier = new ResourceLocation(GsonHelper.getAsString(jsonObject, "type"));
         Serializer serializer = SERIALIZERS_BY_ID.get(identifier);
@@ -60,8 +63,13 @@ public class ItemContainerProviderSerializers {
         return serializer.deserializer().apply(jsonObject);
     }
 
+    static {
+        Serializer serializer = new Serializer(null, ItemInteractions.id("none"), $ -> null);
+        SERIALIZERS_BY_ID.put(serializer.id(), serializer);
+    }
+
     private record Serializer(Class<? extends ItemContainerProvider> clazz, ResourceLocation id,
-                              Function<JsonElement, ItemContainerProvider> deserializer) {
+                              Function<JsonElement, @Nullable ItemContainerProvider> deserializer) {
 
     }
 }

@@ -2,7 +2,6 @@ package fuzs.iteminteractions.impl.network;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonElement;
-import fuzs.iteminteractions.impl.client.helper.ItemDecorationHelper;
 import fuzs.iteminteractions.impl.world.item.container.ItemContainerProviders;
 import fuzs.puzzleslib.api.config.v3.json.JsonConfigFileUtil;
 import fuzs.puzzleslib.api.network.v2.WritableMessage;
@@ -40,7 +39,6 @@ public class S2CSyncItemContainerProvider implements WritableMessage<S2CSyncItem
             @Override
             public void handle(S2CSyncItemContainerProvider message, Player player, Object gameInstance) {
                 ItemContainerProviders.INSTANCE.buildProviders(message.providers);
-                ItemDecorationHelper.clearCache();
             }
         };
     }
