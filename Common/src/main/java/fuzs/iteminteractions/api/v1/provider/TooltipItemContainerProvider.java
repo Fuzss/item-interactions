@@ -1,8 +1,6 @@
 package fuzs.iteminteractions.api.v1.provider;
 
-import fuzs.iteminteractions.api.v1.ContainerItemHelper;
 import net.minecraft.core.NonNullList;
-import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
@@ -13,13 +11,13 @@ public interface TooltipItemContainerProvider extends ItemContainerProvider {
 
     @Override
     default boolean canProvideTooltipImage(ItemStack containerStack, Player player) {
-        return this.hasItemContainerData(containerStack);
+        return this.hasItemContainerData(containerStack) &&
+                !this.getItemContainer(containerStack, player, false).isEmpty();
     }
 
     @Override
     default Optional<TooltipComponent> getTooltipImage(ItemStack containerStack, Player player) {
-        SimpleContainer container = this.getItemContainer(containerStack, player, false);
-        NonNullList<ItemStack> items = ContainerItemHelper.INSTANCE.getListFromContainer(container);
+        NonNullList<ItemStack> items = this.getItemContainer(containerStack, player, false).items;
         return Optional.of(this.createTooltipImageComponent(containerStack, player, items));
     }
 

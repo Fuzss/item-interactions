@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v20.4.3-1.20.4] - 2024-03-16
+### Changed
+- Empty item container providers no longer show a tooltip
+- Some internal refactors
+### Fixed
+- Fix dynamic ender chest size support from last release
+
 ## [v20.4.2-1.20.4] - 2024-03-16
 ### Added
 - Add `iteminteractions:none` for preventing an item that would otherwise support item interactions from being able to do so

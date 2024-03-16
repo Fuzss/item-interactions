@@ -23,7 +23,13 @@ public class ItemInteractionHelper {
         boolean extractSingleItemOnly = ContainerSlotHelper.extractSingleItemOnly(player);
         if (clickAction == ClickAction.SECONDARY && (stackBelowMe.isEmpty() || extractSingleItemOnly)) {
             BiConsumer<ItemStack, Integer> addToSlot = (stackToAdd, index) -> {
-                addStack(containerSupplier, player, slot.safeInsert(stackToAdd), acceptableItemCount, index, maxStackSize);
+                addStack(containerSupplier,
+                        player,
+                        slot.safeInsert(stackToAdd),
+                        acceptableItemCount,
+                        index,
+                        maxStackSize
+                );
             };
             handleRemoveItem(containerSupplier, stackBelowMe, player, extractSingleItemOnly, addToSlot, maxStackSize);
             return true;
@@ -62,8 +68,8 @@ public class ItemInteractionHelper {
         SimpleContainer container = containerSupplier.get();
         ToIntFunction<ItemStack> amountToRemove = stack -> extractSingleItemOnly ? 1 : stack.getCount();
         Predicate<ItemStack> itemFilter = stackInSlot -> {
-            return stackOnMe.isEmpty() || (ItemStack.isSameItemSameTags(stackOnMe, stackInSlot) && stackOnMe.getCount() <
-                    maxStackSize.applyAsInt(container, stackOnMe));
+            return stackOnMe.isEmpty() || (ItemStack.isSameItemSameTags(stackOnMe, stackInSlot) &&
+                    stackOnMe.getCount() < maxStackSize.applyAsInt(container, stackOnMe));
         };
         Pair<ItemStack, Integer> result = removeLastStack(container, player, itemFilter, amountToRemove);
         ItemStack stackToAdd = result.getLeft();
@@ -76,7 +82,12 @@ public class ItemInteractionHelper {
     private static void handleAddItem(Supplier<SimpleContainer> containerSupplier, ClickAction clickAction, Player player, ToIntFunction<ItemStack> acceptableItemCount, ItemStack stackInSlot, ToIntBiFunction<Container, ItemStack> maxStackSize) {
         int transferredCount;
         if (clickAction == ClickAction.PRIMARY) {
-            transferredCount = addStack(containerSupplier, player, stackInSlot, stack -> Math.min(1, acceptableItemCount.applyAsInt(stack)), maxStackSize);
+            transferredCount = addStack(containerSupplier,
+                    player,
+                    stackInSlot,
+                    stack -> Math.min(1, acceptableItemCount.applyAsInt(stack)),
+                    maxStackSize
+            );
         } else {
             transferredCount = addStack(containerSupplier, player, stackInSlot, acceptableItemCount, maxStackSize);
         }
@@ -87,7 +98,13 @@ public class ItemInteractionHelper {
     }
 
     private static int addStack(Supplier<SimpleContainer> containerSupplier, Player player, ItemStack newStack, ToIntFunction<ItemStack> acceptableItemCount, ToIntBiFunction<Container, ItemStack> maxStackSize) {
-        return addStack(containerSupplier, player, newStack, acceptableItemCount, ContainerSlotHelper.getCurrentContainerSlot(player), maxStackSize);
+        return addStack(containerSupplier,
+                player,
+                newStack,
+                acceptableItemCount,
+                ContainerSlotHelper.getCurrentContainerSlot(player),
+                maxStackSize
+        );
     }
 
     private static int addStack(Supplier<SimpleContainer> containerSupplier, Player player, ItemStack newStack, ToIntFunction<ItemStack> acceptableItemCount, int prioritizedSlot, ToIntBiFunction<Container, ItemStack> maxStackSize) {
@@ -108,6 +125,7 @@ public class ItemInteractionHelper {
             int amount = amountToRemove.applyAsInt(container.getItem(index));
             return Pair.of(container.removeItem(index, amount), index);
         }
+
         return Pair.of(ItemStack.EMPTY, -1);
     }
 
@@ -123,6 +141,7 @@ public class ItemInteractionHelper {
                 return OptionalInt.of(currentContainerSlot);
             }
         }
+
         for (int i = container.getContainerSize() - 1; i >= 0; i--) {
             ItemStack stackInSlot = container.getItem(i);
             if (!stackInSlot.isEmpty() && itemFilter.test(stackInSlot)) {
@@ -136,6 +155,7 @@ public class ItemInteractionHelper {
                 return OptionalInt.of(i);
             }
         }
+
         return OptionalInt.empty();
     }
 }

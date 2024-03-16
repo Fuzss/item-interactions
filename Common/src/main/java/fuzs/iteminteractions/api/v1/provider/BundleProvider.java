@@ -8,6 +8,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
+import net.minecraft.world.item.BundleItem;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -26,20 +27,25 @@ public class BundleProvider extends NestedTagItemProvider {
         this.capacity = capacity;
     }
 
-    protected int getCapacity() {
+    public int getCapacity() {
         return this.capacity;
     }
 
     @Override
     public SimpleContainer getItemContainer(ItemStack containerStack, Player player, boolean allowSaving) {
         // add one additional slot, so we can add items in the inventory
-        String nbtKey = this.getNbtKey();
-        return ContainerItemHelper.INSTANCE.loadItemContainer(containerStack, this, items -> new SimpleContainer(items + 1), allowSaving, nbtKey);
+        return ContainerItemHelper.INSTANCE.loadItemContainer(containerStack,
+                this,
+                items -> new SimpleContainer(items + 1),
+                allowSaving,
+                this.getNbtKey()
+        );
     }
 
     @Override
     public boolean isItemAllowedInContainer(ItemStack containerStack, ItemStack stackToAdd) {
-        return super.isItemAllowedInContainer(containerStack, stackToAdd) && stackToAdd.getItem().canFitInsideContainerItems();
+        return super.isItemAllowedInContainer(containerStack, stackToAdd) &&
+                stackToAdd.getItem().canFitInsideContainerItems();
     }
 
     @Override
@@ -49,7 +55,9 @@ public class BundleProvider extends NestedTagItemProvider {
 
     @Override
     public int getAcceptableItemCount(ItemStack containerStack, ItemStack stackToAdd, Player player) {
-        return Math.min(this.getAvailableBundleItemSpace(containerStack, stackToAdd, player), super.getAcceptableItemCount(containerStack, stackToAdd, player));
+        return Math.min(this.getAvailableBundleItemSpace(containerStack, stackToAdd, player),
+                super.getAcceptableItemCount(containerStack, stackToAdd, player)
+        );
     }
 
     protected int getAvailableBundleItemSpace(ItemStack containerStack, ItemStack stackToAdd, Player player) {
@@ -67,24 +75,30 @@ public class BundleProvider extends NestedTagItemProvider {
     @Override
     public Optional<TooltipComponent> getTooltipImage(ItemStack containerStack, Player player) {
         // make sure to always override bundle tooltip, as otherwise vanilla tooltip would show for empty bundles
-        if (!this.hasItemContainerData(containerStack)) return Optional.empty();
-        return super.getTooltipImage(containerStack, player);
+        if (this.hasItemContainerData(containerStack)) {
+            return super.getTooltipImage(containerStack, player);
+        } else {
+            return Optional.empty();
+        }
     }
 
     @Override
     public TooltipComponent createTooltipImageComponent(ItemStack containerStack, Player player, NonNullList<ItemStack> items) {
-        return new ModBundleTooltip(items, this.getContentWeight(containerStack, player) >= this.getCapacity(), this.getBackgroundColor());
+        return new ModBundleTooltip(items,
+                this.getContentWeight(containerStack, player) >= this.getCapacity(),
+                this.getBackgroundColor()
+        );
     }
 
-    protected int getContentWeight(ItemStack containerStack, Player player) {
+    public int getContentWeight(ItemStack containerStack, Player player) {
         SimpleContainer container = this.getItemContainer(containerStack, player, false);
-        return ContainerItemHelper.INSTANCE.getListFromContainer(container).stream().mapToInt(stack -> {
+        return container.items.stream().mapToInt(stack -> {
             return this.getItemWeight(stack) * stack.getCount();
         }).sum();
     }
 
-    protected int getItemWeight(ItemStack stack) {
-        return ContainerItemHelper.INSTANCE.getItemWeight(stack);
+    public int getItemWeight(ItemStack stack) {
+        return BundleItem.getWeight(stack);
     }
 
     @Override

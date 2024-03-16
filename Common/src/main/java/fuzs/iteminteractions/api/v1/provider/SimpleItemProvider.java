@@ -59,8 +59,8 @@ public class SimpleItemProvider extends NestedTagItemProvider {
 
     @Override
     public SimpleContainer getItemContainer(ItemStack containerStack, Player player, boolean allowSaving) {
-        int inventorySize = this.getInventorySize();
-        return ContainerItemHelper.INSTANCE.loadItemContainer(containerStack, this, inventorySize, allowSaving, this.getNbtKey());
+        return ContainerItemHelper.INSTANCE.loadItemContainer(containerStack, this,
+                this.getInventorySize(), allowSaving, this.getNbtKey());
     }
 
     @Override

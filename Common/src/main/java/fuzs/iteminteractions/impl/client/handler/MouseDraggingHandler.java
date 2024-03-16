@@ -2,10 +2,10 @@ package fuzs.iteminteractions.impl.client.handler;
 
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.InputConstants;
-import fuzs.iteminteractions.api.v1.provider.ItemContainerProvider;
 import fuzs.iteminteractions.impl.ItemInteractions;
 import fuzs.iteminteractions.impl.config.ClientConfig;
 import fuzs.iteminteractions.impl.config.ServerConfig;
+import fuzs.iteminteractions.api.v1.provider.ItemContainerBehavior;
 import fuzs.iteminteractions.impl.world.item.container.ItemContainerProviders;
 import fuzs.puzzleslib.api.event.v1.core.EventResult;
 import fuzs.puzzleslib.api.event.v1.data.DefaultedFloat;
@@ -26,7 +26,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Objects;
 import java.util.Set;
 
 public class MouseDraggingHandler {
@@ -37,18 +36,18 @@ public class MouseDraggingHandler {
     public static EventResult onBeforeMousePressed(AbstractContainerScreen<?> screen, double mouseX, double mouseY, int button) {
         if (!ItemInteractions.CONFIG.get(ServerConfig.class).allowMouseDragging) return EventResult.PASS;
         ItemStack carriedStack = screen.getMenu().getCarried();
-        ItemContainerProvider provider = ItemContainerProviders.INSTANCE.get(carriedStack);
-        if (validMouseButton(button) && provider != null &&
-                provider.allowsPlayerInteractions(carriedStack, screen.minecraft.player)) {
-            Slot slot = screen.findSlot(mouseX, mouseY);
-            if (slot != null) {
-                if (slot.hasItem() && !ClientInputActionHandler.precisionModeAllowedAndActive()) {
-                    containerDragType = ContainerDragType.INSERT;
-                } else {
-                    containerDragType = ContainerDragType.REMOVE;
+        if (validMouseButton(button)) {
+            if (ItemContainerProviders.INSTANCE.get(carriedStack).allowsPlayerInteractions(carriedStack, screen.minecraft.player)) {
+                Slot slot = screen.findSlot(mouseX, mouseY);
+                if (slot != null) {
+                    if (slot.hasItem() && !ClientInputActionHandler.precisionModeAllowedAndActive()) {
+                        containerDragType = ContainerDragType.INSERT;
+                    } else {
+                        containerDragType = ContainerDragType.REMOVE;
+                    }
+                    CONTAINER_DRAG_SLOTS.clear();
+                    return EventResult.INTERRUPT;
                 }
-                CONTAINER_DRAG_SLOTS.clear();
-                return EventResult.INTERRUPT;
             }
         }
         containerDragType = null;
@@ -67,15 +66,14 @@ public class MouseDraggingHandler {
             AbstractContainerMenu menu = screen.getMenu();
             if (slot != null && menu.canDragTo(slot) && !CONTAINER_DRAG_SLOTS.contains(slot)) {
                 ItemStack carriedStack = menu.getCarried();
-                ItemContainerProvider provider = ItemContainerProviders.INSTANCE.get(carriedStack);
-                Objects.requireNonNull(provider, "provider is null");
+                ItemContainerBehavior behavior = ItemContainerProviders.INSTANCE.get(carriedStack);
                 boolean interact = false;
                 if (containerDragType == ContainerDragType.INSERT && slot.hasItem() &&
-                        provider.canAddItem(carriedStack, slot.getItem(), screen.minecraft.player)) {
+                        behavior.canAddItem(carriedStack, slot.getItem(), screen.minecraft.player)) {
                     interact = true;
                 } else if (containerDragType == ContainerDragType.REMOVE) {
                     boolean normalInteraction = button == InputConstants.MOUSE_BUTTON_RIGHT && !slot.hasItem() &&
-                            !provider.getItemContainer(carriedStack, screen.minecraft.player, false).isEmpty();
+                            !behavior.getItemContainerView(carriedStack, screen.minecraft.player).isEmpty();
                     if (normalInteraction ||
                             slot.hasItem() && ClientInputActionHandler.precisionModeAllowedAndActive()) {
                         interact = true;

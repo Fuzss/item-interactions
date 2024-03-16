@@ -1,23 +1,29 @@
 package fuzs.iteminteractions.impl.world.item.container;
 
 import fuzs.iteminteractions.api.v1.ContainerItemHelper;
+import fuzs.iteminteractions.api.v1.provider.ItemContainerBehavior;
 import fuzs.iteminteractions.api.v1.provider.ItemContainerProvider;
-import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.world.SimpleContainer;
-import net.minecraft.world.item.BundleItem;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.IntFunction;
 
-public class ContainerItemHelperImpl implements ContainerItemHelper {
+public final class ContainerItemHelperImpl implements ContainerItemHelper {
 
     @Override
-    public @Nullable ItemContainerProvider getItemContainerProvider(ItemStack stack) {
-        return ItemContainerProviders.INSTANCE.get(stack);
+    public ItemContainerBehavior getItemContainerBehavior(ItemStack itemStack) {
+        return ItemContainerProviders.INSTANCE.get(itemStack);
+    }
+
+    @Override
+    public ItemContainerBehavior getItemContainerBehavior(Item item) {
+        return ItemContainerProviders.INSTANCE.get(item);
     }
 
     @Override
@@ -25,7 +31,7 @@ public class ContainerItemHelperImpl implements ContainerItemHelper {
         CompoundTag tag = provider.getItemContainerData(stack);
         ListTag items = null;
         if (tag != null && tag.contains(nbtKey)) {
-            items = tag.getList(nbtKey, 10);
+            items = tag.getList(nbtKey, Tag.TAG_COMPOUND);
         }
         SimpleContainer simpleContainer = containerFactory.apply(items != null ? items.size() : 0);
         if (items != null) {
@@ -38,20 +44,6 @@ public class ContainerItemHelperImpl implements ContainerItemHelper {
             });
         }
         return simpleContainer;
-    }
-
-    @Override
-    public int getItemWeight(ItemStack stack) {
-        return BundleItem.getWeight(stack);
-    }
-
-    @Override
-    public NonNullList<ItemStack> getListFromContainer(SimpleContainer container) {
-        NonNullList<ItemStack> items = NonNullList.create();
-        for (int i = 0; i < container.getContainerSize(); i++) {
-            items.add(container.getItem(i));
-        }
-        return items;
     }
 
     @Override

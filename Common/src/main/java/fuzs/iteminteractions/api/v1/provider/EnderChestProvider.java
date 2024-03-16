@@ -15,9 +15,10 @@ import org.jetbrains.annotations.Nullable;
 
 public class EnderChestProvider implements TooltipItemContainerProvider {
     /**
-     * pretty ender color from tinted mod
+     * Pretty ender color from <a href="https://www.curseforge.com/minecraft/mc-mods/tinted">Tinted mod</a>.
      */
     private static final float[] DEFAULT_ENDER_CHEST_COLOR = {0.16470589F, 0.38431373F, 0.33333334F};
+    private static final int GRID_SIZE_X = 9;
 
     @Override
     public SimpleContainer getItemContainer(ItemStack containerStack, Player player, boolean allowSaving) {
@@ -36,25 +37,26 @@ public class EnderChestProvider implements TooltipItemContainerProvider {
 
     @Override
     public void setItemContainerData(ItemStack containerStack, ListTag itemsTag, String nbtKey) {
-
+        // NO-OP
     }
 
     @Override
     public boolean canProvideTooltipImage(ItemStack containerStack, Player player) {
-        return true;
+        return !this.getItemContainer(containerStack, player, false).isEmpty();
     }
 
     @Override
     public TooltipComponent createTooltipImageComponent(ItemStack containerStack, Player player, NonNullList<ItemStack> items) {
-        int gridSizeX;
-        if (player.getEnderChestInventory().getContainerSize() % 3 == 0) {
-            // try support mods that add more ender chest rows
-            gridSizeX = player.getEnderChestInventory().size / 3;
-        } else {
-            gridSizeX = 9;
-        }
+        return new ContainerItemTooltip(items, GRID_SIZE_X, this.getGridSizeY(player), DEFAULT_ENDER_CHEST_COLOR);
+    }
 
-        return new ContainerItemTooltip(items, gridSizeX, 3, DEFAULT_ENDER_CHEST_COLOR);
+    private int getGridSizeY(Player player) {
+        if (player.getEnderChestInventory().getContainerSize() % GRID_SIZE_X == 0) {
+            // try support mods that add more ender chest rows
+            return player.getEnderChestInventory().size / GRID_SIZE_X;
+        } else {
+            return 3;
+        }
     }
 
     @Override
@@ -71,6 +73,6 @@ public class EnderChestProvider implements TooltipItemContainerProvider {
 
     @Override
     public void toJson(JsonObject jsonObject) {
-
+        // NO-OP
     }
 }

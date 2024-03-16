@@ -1,12 +1,12 @@
 package fuzs.iteminteractions.impl.client.handler;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import fuzs.iteminteractions.api.v1.provider.ItemContainerProvider;
 import fuzs.iteminteractions.impl.ItemInteractions;
 import fuzs.iteminteractions.impl.config.ClientConfig;
 import fuzs.iteminteractions.impl.config.ServerConfig;
 import fuzs.iteminteractions.impl.network.client.C2SContainerClientInputMessage;
 import fuzs.iteminteractions.impl.world.inventory.ContainerSlotHelper;
+import fuzs.iteminteractions.api.v1.provider.ItemContainerBehavior;
 import fuzs.iteminteractions.impl.world.item.container.ItemContainerProviders;
 import fuzs.puzzleslib.api.event.v1.core.EventResult;
 import fuzs.puzzleslib.api.event.v1.data.DefaultedFloat;
@@ -25,8 +25,6 @@ import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-
-import java.util.Objects;
 
 public class ClientInputActionHandler {
     private static int lastSentContainerSlot = -1;
@@ -54,6 +52,7 @@ public class ClientInputActionHandler {
         if (precisionModeAllowedAndActive() && !getContainerStack(screen, false).isEmpty()) {
             screen.doubleclick = false;
         }
+
         return EventResult.PASS;
     }
 
@@ -76,8 +75,8 @@ public class ClientInputActionHandler {
         if (precisionModeAllowedAndActive()) {
             Slot hoveredSlot = screen.hoveredSlot;
             if (hoveredSlot != null) {
-                if (ItemContainerProviders.INSTANCE.get(screen.getMenu().getCarried()) != null || ItemContainerProviders.INSTANCE.get(
-                        hoveredSlot.getItem()) != null) {
+                if (!ItemContainerProviders.INSTANCE.get(screen.getMenu().getCarried()).isEmpty() || !ItemContainerProviders.INSTANCE.get(
+                        hoveredSlot.getItem()).isEmpty()) {
                     int mouseButton = (ItemInteractions.CONFIG.get(ClientConfig.class).invertPrecisionModeScrolling ? verticalAmount < 0.0 : verticalAmount > 0.0) ? InputConstants.MOUSE_BUTTON_RIGHT : InputConstants.MOUSE_BUTTON_LEFT;
                     screen.slotClicked(hoveredSlot, hoveredSlot.index, mouseButton, ClickType.PICKUP);
                     return EventResult.INTERRUPT;
@@ -88,33 +87,34 @@ public class ClientInputActionHandler {
             if (!carriedStack.isEmpty() && !ItemInteractions.CONFIG.get(ClientConfig.class).carriedItemTooltips.isActive()) {
                 return EventResult.PASS;
             }
-            ItemStack stack = getContainerStack(screen, true);
-            if (!stack.isEmpty()) {
+            ItemStack itemStack = getContainerStack(screen, true);
+            if (!itemStack.isEmpty()) {
                 int currentContainerSlot = ContainerSlotHelper.getCurrentContainerSlot(screen.minecraft.player);
-                ItemContainerProvider provider = ItemContainerProviders.INSTANCE.get(stack);
-                Objects.requireNonNull(provider, "provider is null");
-                SimpleContainer container = provider.getItemContainer(stack, screen.minecraft.player, false);
+                SimpleContainer container = ItemContainerProviders.INSTANCE.get(itemStack)
+                        .getItemContainerView(itemStack, screen.minecraft.player);
                 currentContainerSlot = ContainerSlotHelper.findClosestSlotWithContent(container, currentContainerSlot, verticalAmount < 0.0);
                 ContainerSlotHelper.setCurrentContainerSlot(screen.minecraft.player, currentContainerSlot);
                 return EventResult.INTERRUPT;
             }
         }
+
         return EventResult.PASS;
     }
 
     public static ItemStack getContainerStack(AbstractContainerScreen<?> screen, boolean requireItemContainerData) {
-        ItemStack stack = screen.getMenu().getCarried();
-        ItemContainerProvider provider = ItemContainerProviders.INSTANCE.get(stack);
-        if (provider != null && (!requireItemContainerData || provider.hasItemContainerData(stack))) {
-            return stack;
+        ItemStack itemStack = screen.getMenu().getCarried();
+        ItemContainerBehavior behavior = ItemContainerProviders.INSTANCE.get(itemStack);
+        if (!behavior.isEmpty() && (!requireItemContainerData || behavior.provider().hasItemContainerData(itemStack))) {
+            return itemStack;
         }
         if (screen.hoveredSlot != null) {
-            stack = screen.hoveredSlot.getItem();
-            provider = ItemContainerProviders.INSTANCE.get(stack);
-            if (provider != null && (!requireItemContainerData || provider.hasItemContainerData(stack))) {
-                return stack;
+            itemStack = screen.hoveredSlot.getItem();
+            behavior = ItemContainerProviders.INSTANCE.get(itemStack);
+            if (!behavior.isEmpty() && (!requireItemContainerData || behavior.provider().hasItemContainerData(itemStack))) {
+                return itemStack;
             }
         }
+
         return ItemStack.EMPTY;
     }
 
@@ -123,6 +123,7 @@ public class ClientInputActionHandler {
         if (source.get() == SoundSource.PLAYERS && (sound.get().value() == SoundEvents.BUNDLE_INSERT || sound.get().value() == SoundEvents.BUNDLE_REMOVE_ONE)) {
             return EventResult.INTERRUPT;
         }
+
         return EventResult.PASS;
     }
 

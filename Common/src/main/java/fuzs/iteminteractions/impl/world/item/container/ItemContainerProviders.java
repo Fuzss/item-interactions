@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import fuzs.iteminteractions.api.v1.ItemContainerProviderSerializers;
+import fuzs.iteminteractions.api.v1.provider.ItemContainerBehavior;
 import fuzs.iteminteractions.api.v1.provider.ItemContainerProvider;
 import fuzs.iteminteractions.impl.ItemInteractions;
 import fuzs.iteminteractions.impl.network.S2CSyncItemContainerProvider;
@@ -16,7 +17,6 @@ import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
@@ -25,15 +25,18 @@ public class ItemContainerProviders extends SimpleJsonResourceReloadListener {
     public static final String ITEM_CONTAINER_PROVIDERS_KEY = "item_container_providers";
 
     private Map<ResourceLocation, JsonElement> rawProviders = ImmutableMap.of();
-    private Map<Item, ItemContainerProvider> providers = ImmutableMap.of();
+    private Map<Item, ItemContainerBehavior> providers = ImmutableMap.of();
 
     private ItemContainerProviders() {
         super(JsonConfigFileUtil.GSON, ITEM_CONTAINER_PROVIDERS_KEY);
     }
 
-    @Nullable
-    public ItemContainerProvider get(ItemStack stack) {
-        return stack.isEmpty() ? null : this.providers.get(stack.getItem());
+    public ItemContainerBehavior get(ItemStack itemStack) {
+        return itemStack.isEmpty() ? ItemContainerBehavior.empty() : this.get(itemStack.getItem());
+    }
+
+    public ItemContainerBehavior get(Item item) {
+        return this.providers.getOrDefault(item, ItemContainerBehavior.empty());
     }
 
     @Override
@@ -43,7 +46,7 @@ public class ItemContainerProviders extends SimpleJsonResourceReloadListener {
     }
 
     public void buildProviders(Map<ResourceLocation, JsonElement> object) {
-        ImmutableMap.Builder<Item, ItemContainerProvider> builder = ImmutableMap.builder();
+        ImmutableMap.Builder<Item, ItemContainerBehavior> builder = ImmutableMap.builder();
         for (Map.Entry<ResourceLocation, JsonElement> entry : object.entrySet()) {
             ResourceLocation item = entry.getKey();
             try {
@@ -52,7 +55,7 @@ public class ItemContainerProviders extends SimpleJsonResourceReloadListener {
                 if (!BuiltInRegistries.ITEM.containsKey(item)) continue;
                 ItemContainerProvider provider = ItemContainerProviderSerializers.deserialize(jsonObject);
                 if (provider != null) {
-                    builder.put(BuiltInRegistries.ITEM.get(item), new ForwardingItemContainerProvider(provider));
+                    builder.put(BuiltInRegistries.ITEM.get(item), new ItemContainerBehavior(provider));
                 }
             } catch (Exception e) {
                 ItemInteractions.LOGGER.error("Couldn't parse item container provider {}", item, e);

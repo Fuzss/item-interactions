@@ -73,8 +73,8 @@ public interface ItemContainerProvider {
     @Nullable CompoundTag getItemContainerData(ItemStack containerStack);
 
     /**
-     * sets items stored in a {@link ListTag} to an item stack's tag, if the list is empty the tag key
-     * (<code>nbtKey</code>) is properly removed (possibly removing the whole stack tag if it is empty afterward)
+     * Sets items stored in a {@link ListTag} to an item stack's tag, if the list is empty the tag key
+     * (<code>nbtKey</code>) is properly removed (possibly removing the whole stack tag if it is empty afterward).
      *
      * @param containerStack stack to set item tag data for
      * @param itemsTag       items to save as {@link ListTag}
@@ -94,10 +94,11 @@ public interface ItemContainerProvider {
     }
 
     /**
-     * is <code>stack</code> allowed to be added to the container supplied by <code>containerStack</code>
-     * <p>this should be the same behavior as vanilla's {@link Item#canFitInsideContainerItems()}
+     * Is <code>stackToAdd</code> allowed to be added to the container supplied by <code>containerStack</code>.
+     * <p>
+     * This should be the same behavior as vanilla's {@link Item#canFitInsideContainerItems()}.
      *
-     * @param containerStack the item stack providing the container to add <code>stack</code> to
+     * @param containerStack the item stack providing the container to add <code>stackToAdd</code> to
      * @param stackToAdd     the stack to be added to the container
      * @return is <code>stack</code> allowed to be added to the container
      */
@@ -108,7 +109,8 @@ public interface ItemContainerProvider {
     /**
      * Is there enough space in the container provided by <code>containerStack</code> to add <code>stack</code> (not
      * necessarily the full stack).
-     * <p>Before this is called {@link #allowsPlayerInteractions(ItemStack, Player)} and
+     * <p>
+     * Before this is called {@link #allowsPlayerInteractions(ItemStack, Player)} and
      * {@link #isItemAllowedInContainer(ItemStack, ItemStack)} are checked.
      *
      * @param containerStack the item stack providing the container to add <code>stack</code> to
@@ -133,31 +135,17 @@ public interface ItemContainerProvider {
     SimpleContainer getItemContainer(ItemStack containerStack, Player player, boolean allowSaving);
 
     /**
-     * Is there any item of the same type as <code>stackToAdd</code> already in the container provided by
-     * <code>containerStack</code>.
-     * <p>Before this is called {@link #allowsPlayerInteractions(ItemStack, Player)} and
-     * {@link #isItemAllowedInContainer(ItemStack, ItemStack)} are checked.
-     *
-     * @param containerStack the item stack providing the container to add <code>stack</code> to
-     * @param stackToAdd     the stack to be searched for in the container
-     * @param player         the player interacting with both items
-     * @return is any item of the same type as <code>stackToAdd</code> already in the container
-     */
-    default boolean hasAnyOf(ItemStack containerStack, ItemStack stackToAdd, Player player) {
-        return this.getItemContainer(containerStack, player, false)
-                .hasAnyMatching(stack -> ItemStack.isSameItem(stack, stackToAdd));
-    }
-
-    /**
      * How much space is available in the container provided by <code>containerStack</code> to add
      * <code>stackToAdd</code>.
-     * <p>Mainly used by bundles, otherwise {@link ItemContainerProvider#canAddItem} should be enough.
-     * <p>Before this is called {@link #allowsPlayerInteractions(ItemStack, Player)} and
+     * <p>
+     * Mainly used by bundles, otherwise {@link ItemContainerProvider#canAddItem} should be enough.
+     * <p>
+     * Before this is called {@link #allowsPlayerInteractions(ItemStack, Player)} and
      * {@link #isItemAllowedInContainer(ItemStack, ItemStack)} are checked.
      *
-     * @param containerStack the item stack providing the container to add <code>stack</code> to
+     * @param containerStack the item stack providing the container to add <code>stackToAdd</code> to
      * @param stackToAdd     the stack to be added to the container
-     * @param player         the player interacting with both items
+     * @param player         the player interacting with both item stacks
      * @return the portion of <code>stackToAdd</code> that can be added to the container
      */
     default int getAcceptableItemCount(ItemStack containerStack, ItemStack stackToAdd, Player player) {
@@ -165,9 +153,10 @@ public interface ItemContainerProvider {
     }
 
     /**
-     * does this provider support an image tooltip
-     * <p>this is required despite {@link #getTooltipImage} providing an {@link Optional} when overriding
-     * the tooltip image for items which normally provide their own (like bundles)
+     * Does this provider support an image tooltip.
+     * <p>
+     * This is required despite {@link #getTooltipImage} providing an {@link Optional} when overriding the tooltip image
+     * for items which normally provide their own (like bundles).
      *
      * @param containerStack the item stack providing the container to show a tooltip for
      * @param player         player involved in the interaction
@@ -176,17 +165,18 @@ public interface ItemContainerProvider {
     boolean canProvideTooltipImage(ItemStack containerStack, Player player);
 
     /**
-     * the image tooltip provided by <code>containerStack</code>
+     * The image tooltip provided by the item stack.
      *
      * @param containerStack the item stack providing the container to show a tooltip for
      * @param player         player involved in the interaction
-     * @return the image tooltip provided by <code>containerStack</code>
+     * @return the image tooltip provided by the item stack.
      */
     Optional<TooltipComponent> getTooltipImage(ItemStack containerStack, Player player);
 
     /**
-     * serialize this provider to json for syncing to client (as part of data pack contents)
-     * <p>a serializer needs to be registered in {@link ItemContainerProviderSerializers#register} additionally
+     * Serialize this provider to json for syncing to client (as part of data pack contents).
+     * <p>
+     * A serializer needs to be registered in {@link ItemContainerProviderSerializers#register} additionally.
      *
      * @param jsonObject the json object to add data to
      */
