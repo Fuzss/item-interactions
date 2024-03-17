@@ -34,7 +34,7 @@ abstract class ItemStackMixin {
                     stack -> behavior.getAcceptableItemCount(containerStack, stack, player),
                     behavior.provider()::getMaxStackSize
             );
-            if (result) behavior.provider().broadcastContainerChanges(player);
+            if (result) behavior.provider().broadcastContainerChanges(containerStack, player);
             callback.setReturnValue(result);
         }
     }
@@ -56,7 +56,7 @@ abstract class ItemStackMixin {
                     stack -> behavior.getAcceptableItemCount(containerStack, stack, player),
                     behavior.provider()::getMaxStackSize
             );
-            if (result) behavior.provider().broadcastContainerChanges(player);
+            if (result) behavior.provider().broadcastContainerChanges(containerStack, player);
             callback.setReturnValue(result);
         }
     }

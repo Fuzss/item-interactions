@@ -47,7 +47,7 @@ public class ItemContainerProviderImpl implements ItemContainerProvider {
     }
 
     @Override
-    public SimpleContainer getItemContainer(ItemStack containerStack, Player player, boolean allowSaving) {
+    public SimpleContainer getItemContainer(ItemStack containerStack, @Nullable Player player, boolean allowSaving) {
         // should never be able to reach here
         throw new UnsupportedOperationException();
     }

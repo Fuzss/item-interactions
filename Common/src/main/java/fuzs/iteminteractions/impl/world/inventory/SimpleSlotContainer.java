@@ -6,8 +6,8 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * copied from ender chest, as over there only difference from simple container is that slot ids are saved along with items
- * TODO implement this with containerhelper
+ * Copied from ender chest, as over there only difference from simple container is that slot ids are saved along with
+ * items.
  */
 public class SimpleSlotContainer extends SimpleContainer {
 
@@ -17,14 +17,12 @@ public class SimpleSlotContainer extends SimpleContainer {
 
     @Override
     public void fromTag(ListTag listTag) {
-        for (int i = 0; i < this.getContainerSize(); ++i) {
-            this.setItem(i, ItemStack.EMPTY);
-        }
+        this.clearContent();
         for (int k = 0; k < listTag.size(); ++k) {
             CompoundTag compoundtag = listTag.getCompound(k);
-            int j = compoundtag.getByte("Slot") & 255;
-            if (j >= 0 && j < this.getContainerSize()) {
-                this.setItem(j, ItemStack.of(compoundtag));
+            int slot = compoundtag.getByte("Slot") & 255;
+            if (slot < this.getContainerSize()) {
+                this.setItem(slot, ItemStack.of(compoundtag));
             }
         }
     }

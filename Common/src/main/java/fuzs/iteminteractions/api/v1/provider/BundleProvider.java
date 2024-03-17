@@ -32,7 +32,7 @@ public class BundleProvider extends NestedTagItemProvider {
     }
 
     @Override
-    public SimpleContainer getItemContainer(ItemStack containerStack, Player player, boolean allowSaving) {
+    public SimpleContainer getItemContainer(ItemStack containerStack, @Nullable Player player, boolean allowSaving) {
         // add one additional slot, so we can add items in the inventory
         return ContainerItemHelper.INSTANCE.loadItemContainer(containerStack,
                 this,

@@ -2,16 +2,21 @@ package fuzs.iteminteractions.api.v1.provider;
 
 import com.google.gson.JsonObject;
 import fuzs.iteminteractions.api.v1.tooltip.ContainerItemTooltip;
-import fuzs.iteminteractions.impl.init.ModRegistry;
+import fuzs.iteminteractions.impl.client.handler.ClientEnderChestHandler;
+import fuzs.iteminteractions.impl.handler.EnderChestSyncHandler;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
 
 public class EnderChestProvider implements TooltipItemContainerProvider {
     /**
@@ -21,7 +26,8 @@ public class EnderChestProvider implements TooltipItemContainerProvider {
     private static final int GRID_SIZE_X = 9;
 
     @Override
-    public SimpleContainer getItemContainer(ItemStack containerStack, Player player, boolean allowSaving) {
+    public SimpleContainer getItemContainer(ItemStack containerStack, @NotNull Player player, boolean allowSaving) {
+        Objects.requireNonNull(player, "player is null");
         return player.getEnderChestInventory();
     }
 
@@ -47,27 +53,28 @@ public class EnderChestProvider implements TooltipItemContainerProvider {
 
     @Override
     public TooltipComponent createTooltipImageComponent(ItemStack containerStack, Player player, NonNullList<ItemStack> items) {
-        return new ContainerItemTooltip(items, GRID_SIZE_X, this.getGridSizeY(player), DEFAULT_ENDER_CHEST_COLOR);
+        return new ContainerItemTooltip(items, GRID_SIZE_X, this.getGridSizeY(items), DEFAULT_ENDER_CHEST_COLOR);
     }
 
-    private int getGridSizeY(Player player) {
-        if (player.getEnderChestInventory().getContainerSize() % GRID_SIZE_X == 0) {
-            // try support mods that add more ender chest rows
-            return player.getEnderChestInventory().size / GRID_SIZE_X;
+    private int getGridSizeY(NonNullList<ItemStack> items) {
+        if (items.size() % GRID_SIZE_X == 0) {
+            // try support mods that add more ender chest rows, like Carpet mod
+            return items.size() / GRID_SIZE_X;
         } else {
             return 3;
         }
     }
 
     @Override
-    public void broadcastContainerChanges(Player player) {
+    public void broadcastContainerChanges(ItemStack containerStack, Player player) {
+        SimpleContainer container = this.getItemContainer(containerStack, player, false);
         if (player.level().isClientSide) {
             // will only actually broadcast when in creative menu as that menu needs manual syncing
-            ModRegistry.ENDER_CHEST_MENU_CAPABILITY.get(player).getEnderChestMenu().broadcastChanges();
-        } else if (player.containerMenu instanceof ChestMenu menu && menu.getContainer() == player.getEnderChestInventory()) {
+            ClientEnderChestHandler.broadcastFullState(container.items);
+        } else if (player.containerMenu instanceof ChestMenu menu && menu.getContainer() == container) {
             // sync full state, client ender chest will otherwise likely be messed up when using item interactions
             // for the ender chest inside the ender chest menu due to packet spam and corresponding delays
-            ModRegistry.ENDER_CHEST_MENU_CAPABILITY.get(player).getEnderChestMenu().broadcastFullState();
+            EnderChestSyncHandler.broadcastFullState((ServerPlayer) player);
         }
     }
 

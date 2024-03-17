@@ -87,9 +87,10 @@ public interface ItemContainerProvider {
      * <p>this only works in the creative inventory, as any other menu does not allow the client to sync changes
      * <p>only really need for ender chests right now
      *
-     * @param player the player performing the item interaction
+     * @param containerStack item stack providing the container
+     * @param player         the player performing the item interaction
      */
-    default void broadcastContainerChanges(Player player) {
+    default void broadcastContainerChanges(ItemStack containerStack, Player player) {
         // NO-OP
     }
 
@@ -132,7 +133,7 @@ public interface ItemContainerProvider {
      *                       a container e.g. for rendering a tooltip)
      * @return the provided container
      */
-    SimpleContainer getItemContainer(ItemStack containerStack, Player player, boolean allowSaving);
+    SimpleContainer getItemContainer(ItemStack containerStack, @Nullable Player player, boolean allowSaving);
 
     /**
      * How much space is available in the container provided by <code>containerStack</code> to add
