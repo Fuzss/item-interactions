@@ -18,13 +18,13 @@ abstract class AbstractContainerScreenMixin extends Screen {
         super(component);
     }
 
-    @Inject(method = "renderSlot", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;renderItemDecorations(Lnet/minecraft/client/gui/Font;Lnet/minecraft/world/item/ItemStack;IILjava/lang/String;)V", shift = At.Shift.BEFORE))
+    @Inject(method = "renderSlot", at = @At("HEAD"))
     private void renderSlot$1(GuiGraphics guiGraphics, Slot slot, CallbackInfo callback) {
-        ItemDecorationHelper.setActiveSlot(slot);
+        ItemDecorationHelper.setSlotBeingRendered(slot);
     }
 
-    @Inject(method = "renderSlot", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;renderItemDecorations(Lnet/minecraft/client/gui/Font;Lnet/minecraft/world/item/ItemStack;IILjava/lang/String;)V", shift = At.Shift.AFTER))
+    @Inject(method = "renderSlot", at = @At("RETURN"))
     private void renderSlot$2(GuiGraphics guiGraphics, Slot slot, CallbackInfo callback) {
-        ItemDecorationHelper.setActiveSlot(null);
+        ItemDecorationHelper.setSlotBeingRendered(null);
     }
 }

@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v20.4.5-1.20.4] - 2024-04-03
+### Fixed
+- Fix start-up crash on NeoForge 20.4.201+
+
 ## [v20.4.4-1.20.4] - 2024-03-17
 ### Changed
 - Rewrite ender chest syncing logic to allow for properly supporting modified ender chest sizes

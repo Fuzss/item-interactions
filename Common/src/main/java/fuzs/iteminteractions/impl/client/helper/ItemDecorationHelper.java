@@ -27,7 +27,7 @@ public class ItemDecorationHelper {
     private static final Map<ItemContainerBehavior, DynamicItemDecorator> DECORATORS_CACHE = Maps.newIdentityHashMap();
 
     @Nullable
-    private static Slot activeSlot;
+    private static Slot slotBeingRendered;
 
     private static DynamicItemDecorator getDynamicItemDecorator(ItemDecoratorType.Provider filter, BooleanSupplier allow) {
         return (GuiGraphics guiGraphics, Font font, ItemStack stack, int itemPosX, int itemPosY) -> {
@@ -37,15 +37,16 @@ public class ItemDecorationHelper {
     }
 
     @SuppressWarnings("ConstantConditions")
-    private static boolean tryRenderItemDecorations(GuiGraphics guiGraphics, Font font, ItemStack stack, int itemPosX, int itemPosY, ItemDecoratorType.Provider filter) {
+    private static boolean tryRenderItemDecorations(GuiGraphics guiGraphics, Font font, ItemStack itemStack, int itemPosX, int itemPosY, ItemDecoratorType.Provider filter) {
         Minecraft minecraft = Minecraft.getInstance();
         // prevent rendering on items used as icons for creative mode tabs and for backpacks in locked slots (like Inmis)
         if (!(minecraft.screen instanceof AbstractContainerScreen<?> screen)) return false;
         AbstractContainerMenu menu = screen.getMenu();
-        if (activeSlot != null && activeSlot.getItem() == stack && activeSlot.allowModification(minecraft.player) && !isCreativeInventorySlot(menu, activeSlot)) {
-            ItemStack carriedStack = menu.getCarried();
-            if (stack != carriedStack) {
-                ItemDecoratorType type = filter.get(screen, stack, carriedStack);
+        if (slotBeingRendered != null && slotBeingRendered.getItem() == itemStack && slotBeingRendered.allowModification(minecraft.player) && !isCreativeInventorySlot(menu,
+                slotBeingRendered
+        )) {
+            if (itemStack != menu.getCarried()) {
+                ItemDecoratorType type = filter.get(screen, itemStack, menu.getCarried());
                 if (type != ItemDecoratorType.NONE) {
                     guiGraphics.pose().pushPose();
                     guiGraphics.pose().translate(0.0, 0.0, 200.0);
@@ -89,7 +90,7 @@ public class ItemDecorationHelper {
         DECORATORS_CACHE.clear();
     }
 
-    public static void setActiveSlot(@Nullable Slot activeSlot) {
-        ItemDecorationHelper.activeSlot = activeSlot;
+    public static void setSlotBeingRendered(@Nullable Slot slotBeingRendered) {
+        ItemDecorationHelper.slotBeingRendered = slotBeingRendered;
     }
 }
