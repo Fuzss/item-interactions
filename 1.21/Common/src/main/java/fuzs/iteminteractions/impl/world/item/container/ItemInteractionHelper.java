@@ -68,7 +68,7 @@ public class ItemInteractionHelper {
         SimpleContainer container = containerSupplier.get();
         ToIntFunction<ItemStack> amountToRemove = stack -> extractSingleItemOnly ? 1 : stack.getCount();
         Predicate<ItemStack> itemFilter = stackInSlot -> {
-            return stackOnMe.isEmpty() || (ItemStack.isSameItemSameTags(stackOnMe, stackInSlot) &&
+            return stackOnMe.isEmpty() || (ItemStack.isSameItemSameComponents(stackOnMe, stackInSlot) &&
                     stackOnMe.getCount() < maxStackSize.applyAsInt(container, stackOnMe));
         };
         Pair<ItemStack, Integer> result = removeLastStack(container, player, itemFilter, amountToRemove);

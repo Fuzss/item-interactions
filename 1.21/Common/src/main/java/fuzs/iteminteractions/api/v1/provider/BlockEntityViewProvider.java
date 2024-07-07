@@ -29,12 +29,12 @@ public class BlockEntityViewProvider extends BlockEntityProvider {
     }
 
     @Override
-    public NestedTagItemProvider disallowValues(Collection<String> value) {
+    public AbstractItemContainerProvider disallowValues(Collection<String> value) {
         return this;
     }
 
     @Override
-    public NestedTagItemProvider disallowValue(String value) {
+    public AbstractItemContainerProvider disallowValue(String value) {
         return this;
     }
 

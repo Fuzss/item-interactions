@@ -1,21 +1,26 @@
 package fuzs.iteminteractions.api.v1.provider;
 
+import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonObject;
-import fuzs.iteminteractions.api.v1.ContainerItemHelper;
 import fuzs.iteminteractions.api.v1.tooltip.ModBundleTooltip;
 import fuzs.iteminteractions.impl.world.item.container.ItemInteractionHelper;
+import fuzs.puzzleslib.api.container.v1.ContainerMenuHelper;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
-import net.minecraft.world.item.BundleItem;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.BundleContents;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
-public class BundleProvider extends NestedTagItemProvider {
+public class BundleProvider extends AbstractItemContainerProvider {
     private final int capacity;
 
     public BundleProvider(int capacity, @Nullable DyeColor dyeColor) {
@@ -32,14 +37,24 @@ public class BundleProvider extends NestedTagItemProvider {
     }
 
     @Override
-    public SimpleContainer getItemContainer(ItemStack containerStack, @Nullable Player player, boolean allowSaving) {
-        // add one additional slot, so we can add items in the inventory
-        return ContainerItemHelper.INSTANCE.loadItemContainer(containerStack,
-                this,
-                items -> new SimpleContainer(items + 1),
-                allowSaving,
-                this.getNbtKey()
-        );
+    public boolean hasContents(ItemStack containerStack) {
+        return !containerStack.getOrDefault(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY).isEmpty();
+    }
+
+    @Override
+    public SimpleContainer getItemContainer(ItemStack containerStack, Player player, boolean allowSaving) {
+        BundleContents contents = containerStack.getOrDefault(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY);
+        ItemStack[] itemStacks = Stream.concat(contents.itemCopyStream(), Stream.of(ItemStack.EMPTY)).toArray(ItemStack[]::new);
+        NonNullList<ItemStack> items = NonNullList.of(ItemStack.EMPTY, itemStacks);
+        return ContainerMenuHelper.createListBackedContainer(items, allowSaving ? (Container container) -> {
+            BundleContents newContents;
+            if (container.isEmpty()) {
+                newContents = BundleContents.EMPTY;
+            } else {
+                newContents = new BundleContents(ImmutableList.copyOf(items));
+            }
+            containerStack.set(DataComponents.BUNDLE_CONTENTS, newContents);
+        } : null);
     }
 
     @Override
@@ -75,7 +90,7 @@ public class BundleProvider extends NestedTagItemProvider {
     @Override
     public Optional<TooltipComponent> getTooltipImage(ItemStack containerStack, Player player) {
         // make sure to always override bundle tooltip, as otherwise vanilla tooltip would show for empty bundles
-        if (this.hasItemContainerData(containerStack)) {
+        if (this.hasContents(containerStack)) {
             return super.getTooltipImage(containerStack, player);
         } else {
             return Optional.empty();
@@ -97,8 +112,10 @@ public class BundleProvider extends NestedTagItemProvider {
         }).sum();
     }
 
-    public int getItemWeight(ItemStack stack) {
-        return BundleItem.getWeight(stack);
+    public int getItemWeight(ItemStack itemStack) {
+        // TODO fix this
+//        return BundleContents.getWeight(itemStack);
+        return 0;
     }
 
     @Override

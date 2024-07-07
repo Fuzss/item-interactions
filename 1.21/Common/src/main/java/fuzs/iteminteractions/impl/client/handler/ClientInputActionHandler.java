@@ -1,12 +1,12 @@
 package fuzs.iteminteractions.impl.client.handler;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import fuzs.iteminteractions.api.v1.provider.ItemContainerBehavior;
 import fuzs.iteminteractions.impl.ItemInteractions;
 import fuzs.iteminteractions.impl.config.ClientConfig;
 import fuzs.iteminteractions.impl.config.ServerConfig;
 import fuzs.iteminteractions.impl.network.client.C2SContainerClientInputMessage;
 import fuzs.iteminteractions.impl.world.inventory.ContainerSlotHelper;
-import fuzs.iteminteractions.api.v1.provider.ItemContainerBehavior;
 import fuzs.iteminteractions.impl.world.item.container.ItemContainerProviders;
 import fuzs.puzzleslib.api.event.v1.core.EventResult;
 import fuzs.puzzleslib.api.event.v1.data.DefaultedFloat;
@@ -104,13 +104,13 @@ public class ClientInputActionHandler {
     public static ItemStack getContainerStack(AbstractContainerScreen<?> screen, boolean requireItemContainerData) {
         ItemStack itemStack = screen.getMenu().getCarried();
         ItemContainerBehavior behavior = ItemContainerProviders.INSTANCE.get(itemStack);
-        if (!behavior.isEmpty() && (!requireItemContainerData || behavior.provider().hasItemContainerData(itemStack))) {
+        if (!behavior.isEmpty() && (!requireItemContainerData || behavior.provider().hasContents(itemStack))) {
             return itemStack;
         }
         if (screen.hoveredSlot != null) {
             itemStack = screen.hoveredSlot.getItem();
             behavior = ItemContainerProviders.INSTANCE.get(itemStack);
-            if (!behavior.isEmpty() && (!requireItemContainerData || behavior.provider().hasItemContainerData(itemStack))) {
+            if (!behavior.isEmpty() && (!requireItemContainerData || behavior.provider().hasContents(itemStack))) {
                 return itemStack;
             }
         }
@@ -140,7 +140,7 @@ public class ClientInputActionHandler {
             lastSentExtractSingleItem = extractSingleItem;
             // this is where the client sets this value, so it's important to call before click actions even when syncing isn't so important (applies mostly to creative menu)
             ContainerSlotHelper.extractSingleItem(player, extractSingleItem);
-            ItemInteractions.NETWORK.sendToServer(new C2SContainerClientInputMessage(currentContainerSlot, extractSingleItem));
+            ItemInteractions.NETWORK.sendToServer(new C2SContainerClientInputMessage(currentContainerSlot, extractSingleItem).toServerboundMessage());
         }
     }
 }

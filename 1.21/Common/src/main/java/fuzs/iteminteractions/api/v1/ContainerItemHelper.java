@@ -1,34 +1,34 @@
 package fuzs.iteminteractions.api.v1;
 
-import fuzs.iteminteractions.api.v1.provider.ItemContainerProvider;
-import fuzs.iteminteractions.impl.world.inventory.SimpleSlotContainer;
-import fuzs.iteminteractions.impl.world.item.container.ContainerItemHelperImpl;
 import fuzs.iteminteractions.api.v1.provider.ItemContainerBehavior;
-import fuzs.iteminteractions.impl.world.item.container.ItemInteractionHelper;
-import net.minecraft.world.SimpleContainer;
+import fuzs.iteminteractions.impl.world.item.container.ItemContainerProviders;
+import net.minecraft.util.FastColor;
+import net.minecraft.world.entity.animal.Sheep;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.function.IntFunction;
+public final class ContainerItemHelper {
 
-public interface ContainerItemHelper {
-    ContainerItemHelper INSTANCE = new ContainerItemHelperImpl();
-
-    ItemContainerBehavior getItemContainerBehavior(ItemStack itemStack);
-
-    ItemContainerBehavior getItemContainerBehavior(Item item);
-
-    default SimpleContainer loadItemContainer(ItemStack stack, ItemContainerProvider provider, int inventorySize, boolean allowSaving) {
-        return this.loadItemContainer(stack, provider, inventorySize, allowSaving, ItemInteractionHelper.TAG_ITEMS);
+    private ContainerItemHelper() {
+        // NO-OP
     }
 
-    default SimpleContainer loadItemContainer(ItemStack stack, ItemContainerProvider provider, int inventorySize, boolean allowSaving, String nbtKey) {
-        return this.loadItemContainer(stack, provider, items -> new SimpleSlotContainer(inventorySize), allowSaving, nbtKey);
+    public static ItemContainerBehavior getItemContainerBehavior(ItemStack itemStack) {
+        return ItemContainerProviders.INSTANCE.get(itemStack);
     }
 
-    SimpleContainer loadItemContainer(ItemStack stack, ItemContainerProvider provider, IntFunction<SimpleContainer> containerFactory, boolean allowSaving, String nbtKey);
+    public static ItemContainerBehavior getItemContainerBehavior(Item item) {
+        return ItemContainerProviders.INSTANCE.get(item);
+    }
 
-    float[] getBackgroundColor(@Nullable DyeColor backgroundColor);
+    public static float[] getBackgroundColor(@Nullable DyeColor dyeColor) {
+        if (dyeColor == null) {
+            return new float[]{1.0F, 1.0F, 1.0F};
+        } else {
+            int color = Sheep.createSheepColor(dyeColor);
+            return new float[]{FastColor.ARGB32.red(color) / 255.0F, FastColor.ARGB32.green(color) / 255.0F, FastColor.ARGB32.blue(color) / 255.0F};
+        }
+    }
 }

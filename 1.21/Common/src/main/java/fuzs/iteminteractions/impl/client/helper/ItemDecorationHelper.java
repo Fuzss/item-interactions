@@ -2,10 +2,9 @@ package fuzs.iteminteractions.impl.client.helper;
 
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.Tesselator;
+import fuzs.iteminteractions.api.v1.provider.ItemContainerBehavior;
 import fuzs.iteminteractions.impl.ItemInteractions;
 import fuzs.iteminteractions.impl.config.ClientConfig;
-import fuzs.iteminteractions.api.v1.provider.ItemContainerBehavior;
 import fuzs.iteminteractions.impl.world.item.container.ItemContainerProviders;
 import fuzs.puzzleslib.api.client.init.v1.DynamicItemDecorator;
 import fuzs.puzzleslib.api.core.v1.ModLoaderEnvironment;
@@ -14,7 +13,6 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -50,9 +48,7 @@ public class ItemDecorationHelper {
                 if (type != ItemDecoratorType.NONE) {
                     guiGraphics.pose().pushPose();
                     guiGraphics.pose().translate(0.0, 0.0, 200.0);
-                    MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-                    font.drawInBatch(type.getText(), (float) (itemPosX + 19 - 2 - type.getWidth(font)), (float) (itemPosY + 6 + 3), type.getColor(), true, guiGraphics.pose().last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, 15728880);
-                    bufferSource.endBatch();
+                    font.drawInBatch(type.getText(), (float) (itemPosX + 19 - 2 - type.getWidth(font)), (float) (itemPosY + 6 + 3), type.getColor(), true, guiGraphics.pose().last().pose(), guiGraphics.bufferSource(), Font.DisplayMode.NORMAL, 0, 15728880);
                     guiGraphics.pose().popPose();
                     // font renderer modifies render states, so this tells the implementation to reset them
                     return true;

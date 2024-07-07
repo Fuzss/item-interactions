@@ -14,7 +14,7 @@ public class ClientEnderChestHandler {
         // instead it uses custom packets which do not work for item interactions in a menu
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.gameMode.hasInfiniteItems() && minecraft.player.containerMenu instanceof CreativeModeInventoryScreen.ItemPickerMenu) {
-            ItemInteractions.NETWORK.sendToServer(new C2SEnderChestContentMessage(items));
+            ItemInteractions.NETWORK.sendToServer(new C2SEnderChestContentMessage(items).toServerboundMessage());
         }
     }
 }

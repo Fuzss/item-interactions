@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import fuzs.iteminteractions.api.v1.provider.ItemContainerProvider;
 import fuzs.iteminteractions.impl.ItemInteractions;
+import fuzs.puzzleslib.api.core.v1.utility.ResourceLocationHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import org.jetbrains.annotations.Nullable;
@@ -57,7 +58,7 @@ public class ItemContainerProviderSerializers {
      */
     @Nullable
     public static ItemContainerProvider deserialize(JsonObject jsonObject) {
-        ResourceLocation identifier = new ResourceLocation(GsonHelper.getAsString(jsonObject, "type"));
+        ResourceLocation identifier = ResourceLocationHelper.parse(GsonHelper.getAsString(jsonObject, "type"));
         Serializer serializer = SERIALIZERS_BY_ID.get(identifier);
         Objects.requireNonNull(serializer, "no serializer registered for identifier %s".formatted(identifier));
         return serializer.deserializer().apply(jsonObject);

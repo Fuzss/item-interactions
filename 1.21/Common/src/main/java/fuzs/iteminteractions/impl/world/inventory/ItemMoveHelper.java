@@ -57,7 +57,7 @@ public class ItemMoveHelper {
     private static int addItemToSlot(Container container, ItemStack stack, int slotIndex, ToIntBiFunction<Container, ItemStack> maxStackSize) {
         if (slotIndex != -1) {
             ItemStack itemStack = container.getItem(slotIndex);
-            if (ItemStack.isSameItemSameTags(itemStack, stack)) {
+            if (ItemStack.isSameItemSameComponents(itemStack, stack)) {
                 moveItemsBetweenStacks(container, stack, itemStack, maxStackSize);
                 if (stack.isEmpty()) {
                     return slotIndex;

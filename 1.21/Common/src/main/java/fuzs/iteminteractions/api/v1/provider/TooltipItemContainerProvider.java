@@ -11,7 +11,7 @@ public interface TooltipItemContainerProvider extends ItemContainerProvider {
 
     @Override
     default boolean canProvideTooltipImage(ItemStack containerStack, Player player) {
-        return this.hasItemContainerData(containerStack) &&
+        return this.hasContents(containerStack) &&
                 !this.getItemContainer(containerStack, player, false).isEmpty();
     }
 

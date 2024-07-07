@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import fuzs.iteminteractions.api.v1.provider.*;
 import fuzs.iteminteractions.impl.world.item.container.ItemInteractionHelper;
 import fuzs.puzzleslib.api.config.v3.json.GsonEnumHelper;
+import fuzs.puzzleslib.api.core.v1.utility.ResourceLocationHelper;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
@@ -44,7 +45,7 @@ public class ItemContainerProviderBuilder {
             if (provider instanceof SimpleItemProvider itemProvider && builder.filterContainerItems) {
                 itemProvider.filterContainerItems();
             }
-            if (provider instanceof NestedTagItemProvider nestedTagProvider) {
+            if (provider instanceof AbstractItemContainerProvider nestedTagProvider) {
                 nestedTagProvider.disallowValues(builder.disallowedItems);
             }
             return provider;
@@ -59,7 +60,7 @@ public class ItemContainerProviderBuilder {
         this.nbtKey = GsonHelper.getAsString(jsonObject, "nbt_key", ItemInteractionHelper.TAG_ITEMS).split("/");
         this.filterContainerItems = GsonHelper.getAsBoolean(jsonObject, "filter_container_items", false);
         if (jsonObject.has("block_entity_type")) {
-            ResourceLocation blockEntityTypeKey = new ResourceLocation(GsonHelper.getAsString(jsonObject, "block_entity_type"));
+            ResourceLocation blockEntityTypeKey = ResourceLocationHelper.parse(GsonHelper.getAsString(jsonObject, "block_entity_type"));
             this.blockEntityType = BuiltInRegistries.BLOCK_ENTITY_TYPE.get(blockEntityTypeKey);
         }
         this.capacity = GsonHelper.getAsInt(jsonObject, "capacity", -1);

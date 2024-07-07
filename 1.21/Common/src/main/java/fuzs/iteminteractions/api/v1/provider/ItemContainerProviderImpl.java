@@ -1,13 +1,10 @@
 package fuzs.iteminteractions.api.v1.provider;
 
 import com.google.gson.JsonObject;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -22,18 +19,8 @@ public class ItemContainerProviderImpl implements ItemContainerProvider {
     }
 
     @Override
-    public boolean hasItemContainerData(ItemStack containerStack) {
+    public boolean hasContents(ItemStack containerStack) {
         return false;
-    }
-
-    @Override
-    public @Nullable CompoundTag getItemContainerData(ItemStack containerStack) {
-        return null;
-    }
-
-    @Override
-    public void setItemContainerData(ItemStack containerStack, ListTag itemsTag, String nbtKey) {
-        // NO-OP
     }
 
     @Override
@@ -47,7 +34,7 @@ public class ItemContainerProviderImpl implements ItemContainerProvider {
     }
 
     @Override
-    public SimpleContainer getItemContainer(ItemStack containerStack, @Nullable Player player, boolean allowSaving) {
+    public SimpleContainer getItemContainer(ItemStack containerStack, Player player, boolean allowSaving) {
         // should never be able to reach here
         throw new UnsupportedOperationException();
     }

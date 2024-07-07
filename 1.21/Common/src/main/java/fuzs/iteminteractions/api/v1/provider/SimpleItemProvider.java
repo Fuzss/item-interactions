@@ -1,19 +1,22 @@
 package fuzs.iteminteractions.api.v1.provider;
 
 import com.google.gson.JsonObject;
-import fuzs.iteminteractions.api.v1.ContainerItemHelper;
 import fuzs.iteminteractions.api.v1.tooltip.ContainerItemTooltip;
 import fuzs.iteminteractions.impl.world.item.container.ItemInteractionHelper;
+import fuzs.puzzleslib.api.container.v1.ContainerMenuHelper;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.ItemContainerContents;
 import org.jetbrains.annotations.Nullable;
 
-public class SimpleItemProvider extends NestedTagItemProvider {
+public class SimpleItemProvider extends AbstractItemContainerProvider {
     private final int inventoryWidth;
     private final int inventoryHeight;
     private boolean filterContainerItems;
@@ -48,29 +51,44 @@ public class SimpleItemProvider extends NestedTagItemProvider {
         return this.inventoryHeight;
     }
 
-    protected int getInventorySize() {
+    public int getInventorySize() {
         return this.getInventoryWidth() * this.getInventoryHeight();
     }
 
     @Override
-    public boolean allowsPlayerInteractions(ItemStack containerStack, Player player) {
-        return super.allowsPlayerInteractions(containerStack, player) && (player.getAbilities().instabuild || this.equipmentSlot == null || player.getItemBySlot(this.equipmentSlot) == containerStack);
+    public boolean hasContents(ItemStack containerStack) {
+        return containerStack.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY) != ItemContainerContents.EMPTY;
     }
 
     @Override
-    public SimpleContainer getItemContainer(ItemStack containerStack, @Nullable Player player, boolean allowSaving) {
-        return ContainerItemHelper.INSTANCE.loadItemContainer(containerStack, this,
-                this.getInventorySize(), allowSaving, this.getNbtKey());
+    public boolean allowsPlayerInteractions(ItemStack containerStack, Player player) {
+        return super.allowsPlayerInteractions(containerStack, player) &&
+                (player.getAbilities().instabuild || this.equipmentSlot == null ||
+                        player.getItemBySlot(this.equipmentSlot) == containerStack);
+    }
+
+    @Override
+    public SimpleContainer getItemContainer(ItemStack containerStack, Player player, boolean allowSaving) {
+        NonNullList<ItemStack> items = NonNullList.withSize(this.getInventorySize(), ItemStack.EMPTY);
+        containerStack.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).copyInto(items);
+        return ContainerMenuHelper.createListBackedContainer(items, allowSaving ? (Container container) -> {
+            containerStack.set(DataComponents.CONTAINER, ItemContainerContents.fromItems(items));
+        } : null);
     }
 
     @Override
     public boolean isItemAllowedInContainer(ItemStack containerStack, ItemStack stackToAdd) {
-        return super.isItemAllowedInContainer(containerStack, stackToAdd) && (!this.filterContainerItems || stackToAdd.getItem().canFitInsideContainerItems());
+        return super.isItemAllowedInContainer(containerStack, stackToAdd) &&
+                (!this.filterContainerItems || stackToAdd.getItem().canFitInsideContainerItems());
     }
 
     @Override
     public TooltipComponent createTooltipImageComponent(ItemStack containerStack, Player player, NonNullList<ItemStack> items) {
-        return new ContainerItemTooltip(items, this.getInventoryWidth(), this.getInventoryHeight(), this.getBackgroundColor());
+        return new ContainerItemTooltip(items,
+                this.getInventoryWidth(),
+                this.getInventoryHeight(),
+                this.getBackgroundColor()
+        );
     }
 
     @Override

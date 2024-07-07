@@ -65,6 +65,6 @@ public class ItemContainerProviders extends SimpleJsonResourceReloadListener {
     }
 
     public void onSyncDataPackContents(ServerPlayer player, boolean joined) {
-        ItemInteractions.NETWORK.sendTo(new S2CSyncItemContainerProvider(this.rawProviders), player);
+        ItemInteractions.NETWORK.sendTo(player, new S2CSyncItemContainerProvider(this.rawProviders).toClientboundMessage());
     }
 }

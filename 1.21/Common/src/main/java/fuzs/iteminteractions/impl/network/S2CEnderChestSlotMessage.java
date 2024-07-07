@@ -1,6 +1,7 @@
 package fuzs.iteminteractions.impl.network;
 
 import fuzs.puzzleslib.api.network.v2.WritableMessage;
+import fuzs.puzzleslib.api.network.v3.codec.ExtraStreamCodecs;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -16,13 +17,13 @@ public class S2CEnderChestSlotMessage implements WritableMessage<S2CEnderChestSl
 
     public S2CEnderChestSlotMessage(FriendlyByteBuf buf) {
         this.slot = buf.readShort();
-        this.itemStack = buf.readItem();
+        this.itemStack = ExtraStreamCodecs.readItem(buf);
     }
 
     @Override
     public void write(FriendlyByteBuf buf) {
         buf.writeShort(this.slot);
-        buf.writeItem(this.itemStack);
+        ExtraStreamCodecs.writeItem(buf, this.itemStack);
     }
 
     @Override

@@ -2,6 +2,7 @@ package fuzs.iteminteractions.impl.network.client;
 
 import fuzs.iteminteractions.impl.handler.EnderChestSyncHandler;
 import fuzs.puzzleslib.api.network.v2.WritableMessage;
+import fuzs.puzzleslib.api.network.v3.codec.ExtraStreamCodecs;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
@@ -12,7 +13,7 @@ public class C2SEnderChestContentMessage implements WritableMessage<C2SEnderChes
     private final NonNullList<ItemStack> items;
 
     public C2SEnderChestContentMessage(FriendlyByteBuf buf) {
-        this.items = buf.readCollection(NonNullList::createWithCapacity, FriendlyByteBuf::readItem);
+        this.items = buf.readCollection(NonNullList::createWithCapacity, ExtraStreamCodecs::readItem);
     }
 
     public C2SEnderChestContentMessage(NonNullList<ItemStack> items) {
@@ -24,7 +25,7 @@ public class C2SEnderChestContentMessage implements WritableMessage<C2SEnderChes
 
     @Override
     public void write(FriendlyByteBuf buf) {
-        buf.writeCollection(this.items, FriendlyByteBuf::writeItem);
+        buf.writeCollection(this.items, ExtraStreamCodecs::writeItem);
     }
 
     @Override

@@ -1,12 +1,13 @@
 package fuzs.iteminteractions.impl.world.inventory;
 
-import net.minecraft.nbt.CompoundTag;
+import fuzs.puzzleslib.api.container.v1.ContainerSerializationHelper;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * Copied from ender chest, as over there only difference from simple container is that slot ids are saved along with
+ * Copied from {@link net.minecraft.world.inventory.PlayerEnderChestContainer}, as over there only difference from simple container is that slot ids are saved along with
  * items.
  */
 public class SimpleSlotContainer extends SimpleContainer {
@@ -16,29 +17,14 @@ public class SimpleSlotContainer extends SimpleContainer {
     }
 
     @Override
-    public void fromTag(ListTag listTag) {
-        this.clearContent();
-        for (int k = 0; k < listTag.size(); ++k) {
-            CompoundTag compoundtag = listTag.getCompound(k);
-            int slot = compoundtag.getByte("Slot") & 255;
-            if (slot < this.getContainerSize()) {
-                this.setItem(slot, ItemStack.of(compoundtag));
-            }
-        }
+    public void fromTag(ListTag listTag, HolderLookup.Provider registries) {
+        ContainerSerializationHelper.fromTag(listTag, this.getContainerSize(), (ItemStack itemStack, int value) -> {
+            this.setItem(value, itemStack);
+        }, registries);
     }
 
     @Override
-    public ListTag createTag() {
-        ListTag listtag = new ListTag();
-        for (int i = 0; i < this.getContainerSize(); ++i) {
-            ItemStack itemstack = this.getItem(i);
-            if (!itemstack.isEmpty()) {
-                CompoundTag compoundtag = new CompoundTag();
-                compoundtag.putByte("Slot", (byte) i);
-                itemstack.save(compoundtag);
-                listtag.add(compoundtag);
-            }
-        }
-        return listtag;
+    public ListTag createTag(HolderLookup.Provider registries) {
+        return ContainerSerializationHelper.createTag(this.getContainerSize(), this::getItem, registries);
     }
 }

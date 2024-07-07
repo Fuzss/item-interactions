@@ -5,18 +5,12 @@ import fuzs.iteminteractions.api.v1.tooltip.ContainerItemTooltip;
 import fuzs.iteminteractions.impl.client.handler.ClientEnderChestHandler;
 import fuzs.iteminteractions.impl.handler.EnderChestSyncHandler;
 import net.minecraft.core.NonNullList;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.Objects;
 
 public class EnderChestProvider implements TooltipItemContainerProvider {
     /**
@@ -26,24 +20,13 @@ public class EnderChestProvider implements TooltipItemContainerProvider {
     private static final int GRID_SIZE_X = 9;
 
     @Override
-    public SimpleContainer getItemContainer(ItemStack containerStack, @NotNull Player player, boolean allowSaving) {
-        Objects.requireNonNull(player, "player is null");
+    public SimpleContainer getItemContainer(ItemStack containerStack, Player player, boolean allowSaving) {
         return player.getEnderChestInventory();
     }
 
     @Override
-    public boolean hasItemContainerData(ItemStack containerStack) {
+    public boolean hasContents(ItemStack containerStack) {
         return true;
-    }
-
-    @Override
-    public @Nullable CompoundTag getItemContainerData(ItemStack containerStack) {
-        return null;
-    }
-
-    @Override
-    public void setItemContainerData(ItemStack containerStack, ListTag itemsTag, String nbtKey) {
-        // NO-OP
     }
 
     @Override

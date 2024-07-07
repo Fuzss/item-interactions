@@ -6,6 +6,7 @@ import fuzs.iteminteractions.impl.client.handler.ClientInputActionHandler;
 import fuzs.iteminteractions.impl.config.ClientConfig;
 import fuzs.iteminteractions.impl.world.inventory.ContainerSlotHelper;
 import fuzs.puzzleslib.api.client.gui.v2.components.TooltipRenderHelper;
+import fuzs.puzzleslib.api.core.v1.utility.ResourceLocationHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -23,7 +24,7 @@ import java.util.List;
 import java.util.Optional;
 
 public abstract class AbstractClientContainerItemTooltip extends ExpandableClientTooltipComponent {
-    private static final ResourceLocation HOTBAR_SELECTION_SPRITE = new ResourceLocation("hud/hotbar_selection");
+    private static final ResourceLocation HOTBAR_SELECTION_SPRITE = ResourceLocationHelper.withDefaultNamespace("hud/hotbar_selection");
     public static final ResourceLocation TEXTURE_LOCATION = ItemInteractions.id("textures/gui/container/inventory_tooltip.png");
     private static final int BORDER_SIZE = 7;
     private static final MutableInt ACTIVE_CONTAINER_ITEM_TOOLTIPS = new MutableInt();

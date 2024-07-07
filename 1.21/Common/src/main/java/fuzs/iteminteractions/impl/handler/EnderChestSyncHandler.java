@@ -34,8 +34,8 @@ public class EnderChestSyncHandler {
                     // but since this is what we use for item interactions make sure to sync it
                     Slot slot = menu.getSlot(slotIndex);
                     if (slot.container == player.getEnderChestInventory()) {
-                        ItemInteractions.NETWORK.sendTo(new S2CEnderChestSlotMessage(slot.getContainerSlot(), itemStack),
-                                player
+                        ItemInteractions.NETWORK.sendTo(player,
+                                new S2CEnderChestSlotMessage(slot.getContainerSlot(), itemStack).toClientboundMessage()
                         );
                     }
                 }
@@ -49,8 +49,8 @@ public class EnderChestSyncHandler {
     }
 
     public static void broadcastFullState(ServerPlayer player) {
-        ItemInteractions.NETWORK.sendTo(new S2CEnderChestContentMessage(player.getEnderChestInventory().items),
-                player
+        ItemInteractions.NETWORK.sendTo(player,
+                new S2CEnderChestContentMessage(player.getEnderChestInventory().items).toClientboundMessage()
         );
     }
 

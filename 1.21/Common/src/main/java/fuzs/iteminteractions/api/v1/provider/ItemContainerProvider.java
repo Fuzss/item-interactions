@@ -2,15 +2,12 @@ package fuzs.iteminteractions.api.v1.provider;
 
 import com.google.gson.JsonObject;
 import fuzs.iteminteractions.api.v1.ItemContainerProviderSerializers;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -60,27 +57,7 @@ public interface ItemContainerProvider {
      * @param containerStack the container stack
      * @return is the item stack tag with stored item data present
      */
-    boolean hasItemContainerData(ItemStack containerStack);
-
-    /**
-     * read the item tag containing the stored inventory (usually as an <code>Items</code> sub-tag)
-     * <p>this method is mainly required for items with block entity data, as the inventory is stored as part of the
-     * block entity data, not directly in the item tag, so we need to override this method then
-     *
-     * @param containerStack stack to read item tag from
-     * @return the tag
-     */
-    @Nullable CompoundTag getItemContainerData(ItemStack containerStack);
-
-    /**
-     * Sets items stored in a {@link ListTag} to an item stack's tag, if the list is empty the tag key
-     * (<code>nbtKey</code>) is properly removed (possibly removing the whole stack tag if it is empty afterward).
-     *
-     * @param containerStack stack to set item tag data for
-     * @param itemsTag       items to save as {@link ListTag}
-     * @param nbtKey         nbt key to store <code>itemsTag</code> as
-     */
-    void setItemContainerData(ItemStack containerStack, ListTag itemsTag, String nbtKey);
+    boolean hasContents(ItemStack containerStack);
 
     /**
      * called on the client-side to sync changes made during inventory item interactions back to the server
@@ -133,7 +110,7 @@ public interface ItemContainerProvider {
      *                       a container e.g. for rendering a tooltip)
      * @return the provided container
      */
-    SimpleContainer getItemContainer(ItemStack containerStack, @Nullable Player player, boolean allowSaving);
+    SimpleContainer getItemContainer(ItemStack containerStack, Player player, boolean allowSaving);
 
     /**
      * How much space is available in the container provided by <code>containerStack</code> to add

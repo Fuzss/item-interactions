@@ -2,10 +2,8 @@ package fuzs.iteminteractions.api.v1.provider;
 
 import com.google.gson.JsonObject;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -51,16 +49,6 @@ public class BlockEntityProvider extends SimpleItemProvider {
     @Override
     public boolean allowsPlayerInteractions(ItemStack containerStack, Player player) {
         return super.allowsPlayerInteractions(containerStack, player) && (this.anyGameMode || player.getAbilities().instabuild);
-    }
-
-    @Override
-    protected @Nullable CompoundTag getItemDataBase(ItemStack containerStack) {
-        return BlockItem.getBlockEntityData(containerStack);
-    }
-
-    @Override
-    protected void setItemDataToStack(ItemStack containerStack, @Nullable CompoundTag tag) {
-        BlockItem.setBlockEntityData(containerStack, this.getBlockEntityType(), tag == null ? new CompoundTag() : tag);
     }
 
     public BlockEntityType<?> getBlockEntityType() {
