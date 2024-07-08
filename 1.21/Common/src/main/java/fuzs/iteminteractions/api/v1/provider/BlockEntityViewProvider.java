@@ -1,14 +1,14 @@
 package fuzs.iteminteractions.api.v1.provider;
 
+import net.minecraft.core.HolderSet;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Collection;
 
 public class BlockEntityViewProvider extends BlockEntityProvider {
 
@@ -20,26 +20,21 @@ public class BlockEntityViewProvider extends BlockEntityProvider {
         super(blockEntityTypeId, inventoryWidth, inventoryHeight);
     }
 
-    public BlockEntityViewProvider(BlockEntityType<?> blockEntityType, int inventoryWidth, int inventoryHeight, @Nullable DyeColor dyeColor, String... nbtKey) {
-        super(blockEntityType, inventoryWidth, inventoryHeight, dyeColor, nbtKey);
+    public BlockEntityViewProvider(BlockEntityType<?> blockEntityType, int inventoryWidth, int inventoryHeight, @Nullable DyeColor dyeColor) {
+        super(blockEntityType, inventoryWidth, inventoryHeight, dyeColor);
     }
 
-    public BlockEntityViewProvider(ResourceLocation blockEntityTypeId, int inventoryWidth, int inventoryHeight, @Nullable DyeColor dyeColor, String... nbtKey) {
-        super(blockEntityTypeId, inventoryWidth, inventoryHeight, dyeColor, nbtKey);
+    public BlockEntityViewProvider(ResourceLocation blockEntityTypeId, int inventoryWidth, int inventoryHeight, @Nullable DyeColor dyeColor) {
+        super(blockEntityTypeId, inventoryWidth, inventoryHeight, dyeColor);
     }
 
     @Override
-    public AbstractItemContainerProvider disallowValues(Collection<String> value) {
+    public AbstractItemContainerProvider disallowedItems(HolderSet<Item> disallowedItems) {
         return this;
     }
 
     @Override
-    public AbstractItemContainerProvider disallowValue(String value) {
-        return this;
-    }
-
-    @Override
-    public SimpleItemProvider filterContainerItems() {
+    public SimpleItemContainerProvider filterContainerItems() {
         return this;
     }
 
@@ -49,7 +44,7 @@ public class BlockEntityViewProvider extends BlockEntityProvider {
     }
 
     @Override
-    public SimpleItemProvider equipmentSlot(@Nullable EquipmentSlot equipmentSlot) {
+    public SimpleItemContainerProvider equipmentSlot(@Nullable EquipmentSlot equipmentSlot) {
         return this;
     }
 

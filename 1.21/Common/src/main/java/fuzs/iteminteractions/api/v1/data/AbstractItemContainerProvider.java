@@ -28,7 +28,7 @@ public abstract class AbstractItemContainerProvider implements DataProvider {
     }
 
     public AbstractItemContainerProvider(PackOutput packOutput) {
-        this.pathProvider = packOutput.createPathProvider(PackOutput.Target.DATA_PACK, ItemContainerProviders.ITEM_CONTAINER_PROVIDERS_KEY);
+        this.pathProvider = packOutput.createPathProvider(PackOutput.Target.DATA_PACK, ItemContainerProviders.ITEM_CONTAINER_PROVIDERS_ID.getPath());
     }
 
     @Override

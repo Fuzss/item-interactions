@@ -9,7 +9,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import org.jetbrains.annotations.Nullable;
 
-public class BlockEntityProvider extends SimpleItemProvider {
+public class BlockEntityProvider extends SimpleItemContainerProvider {
     private final ResourceLocation blockEntityTypeId;
     @Nullable
     private BlockEntityType<?> blockEntityType;
@@ -24,12 +24,12 @@ public class BlockEntityProvider extends SimpleItemProvider {
         this.blockEntityTypeId = blockEntityTypeId;
     }
 
-    public BlockEntityProvider(BlockEntityType<?> blockEntityType, int inventoryWidth, int inventoryHeight, @Nullable DyeColor dyeColor, String... nbtKey) {
-        this(BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(blockEntityType), inventoryWidth, inventoryHeight, dyeColor, nbtKey);
+    public BlockEntityProvider(BlockEntityType<?> blockEntityType, int inventoryWidth, int inventoryHeight, @Nullable DyeColor dyeColor) {
+        this(BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(blockEntityType), inventoryWidth, inventoryHeight, dyeColor);
     }
 
-    public BlockEntityProvider(ResourceLocation blockEntityTypeId, int inventoryWidth, int inventoryHeight, @Nullable DyeColor dyeColor, String... nbtKey) {
-        super(inventoryWidth, inventoryHeight, dyeColor, nbtKey);
+    public BlockEntityProvider(ResourceLocation blockEntityTypeId, int inventoryWidth, int inventoryHeight, @Nullable DyeColor dyeColor) {
+        super(inventoryWidth, inventoryHeight, dyeColor);
         this.blockEntityTypeId = blockEntityTypeId;
     }
 

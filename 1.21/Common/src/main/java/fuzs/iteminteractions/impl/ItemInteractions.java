@@ -3,10 +3,10 @@ package fuzs.iteminteractions.impl;
 import fuzs.iteminteractions.api.v1.ItemContainerProviderBuilder;
 import fuzs.iteminteractions.api.v1.ItemContainerProviderSerializers;
 import fuzs.iteminteractions.api.v1.provider.BlockEntityProvider;
+import fuzs.iteminteractions.api.v1.provider.BundleProvider;
 import fuzs.iteminteractions.api.v1.provider.EnderChestProvider;
 import fuzs.iteminteractions.impl.config.ClientConfig;
 import fuzs.iteminteractions.impl.config.ServerConfig;
-import fuzs.iteminteractions.impl.data.DynamicItemContainerProvider;
 import fuzs.iteminteractions.impl.handler.EnderChestSyncHandler;
 import fuzs.iteminteractions.impl.init.ModRegistry;
 import fuzs.iteminteractions.impl.network.S2CEnderChestContentMessage;
@@ -18,20 +18,22 @@ import fuzs.iteminteractions.impl.world.item.container.ItemContainerProviders;
 import fuzs.puzzleslib.api.config.v3.ConfigHolder;
 import fuzs.puzzleslib.api.core.v1.ModConstructor;
 import fuzs.puzzleslib.api.core.v1.ModLoaderEnvironment;
-import fuzs.puzzleslib.api.core.v1.context.AddReloadListenersContext;
 import fuzs.puzzleslib.api.core.v1.context.PackRepositorySourcesContext;
 import fuzs.puzzleslib.api.core.v1.utility.ResourceLocationHelper;
 import fuzs.puzzleslib.api.event.v1.entity.player.AfterChangeDimensionCallback;
 import fuzs.puzzleslib.api.event.v1.entity.player.ContainerEvents;
 import fuzs.puzzleslib.api.event.v1.entity.player.PlayerCopyEvents;
 import fuzs.puzzleslib.api.event.v1.entity.player.PlayerNetworkEvents;
+import fuzs.puzzleslib.api.event.v1.server.AddDataPackReloadListenersCallback;
 import fuzs.puzzleslib.api.event.v1.server.SyncDataPackContentsCallback;
 import fuzs.puzzleslib.api.network.v3.NetworkHandler;
-import fuzs.puzzleslib.api.resources.v1.DynamicPackResources;
-import fuzs.puzzleslib.api.resources.v1.PackResourcesHelper;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.ReloadableServerResources;
+import net.minecraft.server.packs.resources.PreparableReloadListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.function.BiConsumer;
 
 public class ItemInteractions implements ModConstructor {
     public static final String MOD_ID = "iteminteractions";
@@ -62,6 +64,10 @@ public class ItemInteractions implements ModConstructor {
         PlayerNetworkEvents.LOGGED_IN.register(EnderChestSyncHandler::onLoggedIn);
         AfterChangeDimensionCallback.EVENT.register(EnderChestSyncHandler::onAfterChangeDimension);
         PlayerCopyEvents.RESPAWN.register(EnderChestSyncHandler::onRespawn);
+        AddDataPackReloadListenersCallback.EVENT.register((ReloadableServerResources serverResources, BiConsumer<ResourceLocation, PreparableReloadListener> consumer) -> {
+            ItemContainerProviders.INSTANCE.injectRegistries(serverResources.registryLookup);
+            consumer.accept(ItemContainerProviders.ITEM_CONTAINER_PROVIDERS_ID, ItemContainerProviders.INSTANCE);
+        });
     }
 
     private static void setupDevelopmentEnvironment() {
@@ -74,24 +80,21 @@ public class ItemInteractions implements ModConstructor {
                     id("ender_chest"),
                     ItemContainerProviderBuilder.fromJson(ItemContainerProviderBuilder::toEnderChestProvider)
             );
+            ItemContainerProviderSerializers.register(BundleProvider.class,
+                    id("bundle"),
+                    ItemContainerProviderBuilder.fromJson(ItemContainerProviderBuilder::toBundleProvider)
+            );
         }
-    }
-
-    @Override
-    public void onRegisterDataPackReloadListeners(AddReloadListenersContext context) {
-        context.registerReloadListener(ItemContainerProviders.ITEM_CONTAINER_PROVIDERS_KEY,
-                ItemContainerProviders.INSTANCE
-        );
     }
 
     @Override
     public void onAddDataPackFinders(PackRepositorySourcesContext context) {
-        if (ModLoaderEnvironment.INSTANCE.isDevelopmentEnvironment()) {
-            context.addRepositorySource(PackResourcesHelper.buildServerPack(id("test_item_interactions"),
-                    DynamicPackResources.create(DynamicItemContainerProvider::new),
-                    false
-            ));
-        }
+//        if (ModLoaderEnvironment.INSTANCE.isDevelopmentEnvironment()) {
+//            context.addRepositorySource(PackResourcesHelper.buildServerPack(id("test_item_interactions"),
+//                    DynamicPackResources.create(DynamicItemContainerProvider::new),
+//                    false
+//            ));
+//        }
     }
 
     public static ResourceLocation id(String path) {

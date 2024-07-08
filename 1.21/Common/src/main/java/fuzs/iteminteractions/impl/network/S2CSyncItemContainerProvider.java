@@ -38,7 +38,7 @@ public class S2CSyncItemContainerProvider implements WritableMessage<S2CSyncItem
 
             @Override
             public void handle(S2CSyncItemContainerProvider message, Player player, Object gameInstance) {
-                ItemContainerProviders.INSTANCE.buildProviders(message.providers);
+                ItemContainerProviders.INSTANCE.buildProviders(message.providers, player.registryAccess());
             }
         };
     }

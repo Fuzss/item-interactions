@@ -2,7 +2,6 @@ package fuzs.iteminteractions.api.v1.provider;
 
 import com.google.gson.JsonObject;
 import fuzs.iteminteractions.api.v1.tooltip.ContainerItemTooltip;
-import fuzs.iteminteractions.impl.world.item.container.ItemInteractionHelper;
 import fuzs.puzzleslib.api.container.v1.ContainerMenuHelper;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
@@ -16,29 +15,29 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemContainerContents;
 import org.jetbrains.annotations.Nullable;
 
-public class SimpleItemProvider extends AbstractItemContainerProvider {
+public class SimpleItemContainerProvider extends AbstractItemContainerProvider {
     private final int inventoryWidth;
     private final int inventoryHeight;
     private boolean filterContainerItems;
     @Nullable
     private EquipmentSlot equipmentSlot;
 
-    public SimpleItemProvider(int inventoryWidth, int inventoryHeight) {
-        this(inventoryWidth, inventoryHeight, null, ItemInteractionHelper.TAG_ITEMS);
+    public SimpleItemContainerProvider(int inventoryWidth, int inventoryHeight) {
+        this(inventoryWidth, inventoryHeight, null);
     }
 
-    public SimpleItemProvider(int inventoryWidth, int inventoryHeight, @Nullable DyeColor dyeColor, String... nbtKey) {
-        super(dyeColor, nbtKey);
+    public SimpleItemContainerProvider(int inventoryWidth, int inventoryHeight, @Nullable DyeColor dyeColor) {
+        super(dyeColor);
         this.inventoryWidth = inventoryWidth;
         this.inventoryHeight = inventoryHeight;
     }
 
-    public SimpleItemProvider filterContainerItems() {
+    public SimpleItemContainerProvider filterContainerItems() {
         this.filterContainerItems = true;
         return this;
     }
 
-    public SimpleItemProvider equipmentSlot(@Nullable EquipmentSlot equipmentSlot) {
+    public SimpleItemContainerProvider equipmentSlot(@Nullable EquipmentSlot equipmentSlot) {
         this.equipmentSlot = equipmentSlot;
         return this;
     }

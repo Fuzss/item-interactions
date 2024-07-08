@@ -24,6 +24,7 @@ import fuzs.puzzleslib.api.event.v1.level.PlayLevelSoundEvents;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.Connection;
 
 import java.util.Collections;
@@ -49,7 +50,7 @@ public class ItemInteractionsClient implements ClientModConstructor {
         PlayLevelSoundEvents.ENTITY.register(MouseDraggingHandler::onPlaySoundAtPosition);
         PlayLevelSoundEvents.ENTITY.register(ClientInputActionHandler::onPlaySoundAtPosition);
         ClientPlayerNetworkEvents.LOGGED_IN.register((LocalPlayer player, MultiPlayerGameMode multiPlayerGameMode, Connection connection) -> {
-            ItemContainerProviders.INSTANCE.buildProviders(Collections.emptyMap());
+            ItemContainerProviders.INSTANCE.buildProviders(Collections.emptyMap(), RegistryAccess.EMPTY);
             ItemDecorationHelper.clearCache();
         });
     }

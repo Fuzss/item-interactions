@@ -2,8 +2,10 @@ package fuzs.iteminteractions.impl.data;
 
 import fuzs.iteminteractions.api.v1.data.AbstractItemContainerProvider;
 import fuzs.iteminteractions.api.v1.provider.BlockEntityProvider;
+import fuzs.iteminteractions.api.v1.provider.BundleProvider;
 import fuzs.iteminteractions.api.v1.provider.EnderChestProvider;
 import fuzs.puzzleslib.api.data.v2.core.DataProviderContext;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 
@@ -17,5 +19,6 @@ public class DynamicItemContainerProvider extends AbstractItemContainerProvider 
     public void addItemProviders() {
         this.add(Items.ENDER_CHEST, new EnderChestProvider());
         this.add(Items.SHULKER_BOX, BlockEntityProvider.shulkerBoxProvider(BlockEntityType.SHULKER_BOX, 9, 3, null));
+        this.add(Items.BUNDLE, new BundleProvider(1, DyeColor.BROWN));
     }
 }

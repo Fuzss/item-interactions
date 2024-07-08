@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import fuzs.iteminteractions.api.v1.provider.ItemContainerProvider;
 import fuzs.iteminteractions.impl.ItemInteractions;
 import fuzs.puzzleslib.api.core.v1.utility.ResourceLocationHelper;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import org.jetbrains.annotations.Nullable;
@@ -13,7 +14,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 /**
  * main class for managing item provider serializers
@@ -29,7 +30,7 @@ public class ItemContainerProviderSerializers {
      * @param id           provider id as resource location, used to add the provider type to the json file when serializing
      * @param deserializer the deserializer function
      */
-    public static void register(Class<? extends ItemContainerProvider> clazz, ResourceLocation id, Function<JsonElement, ItemContainerProvider> deserializer) {
+    public static void register(Class<? extends ItemContainerProvider> clazz, ResourceLocation id, BiFunction<JsonElement, HolderLookup.Provider, ItemContainerProvider> deserializer) {
         Serializer serializer = new Serializer(clazz, id, deserializer);
         SERIALIZERS_BY_ID.put(id, serializer);
         SERIALIZERS_BY_TYPE.put(clazz, serializer);
@@ -57,20 +58,20 @@ public class ItemContainerProviderSerializers {
      * @return the provider
      */
     @Nullable
-    public static ItemContainerProvider deserialize(JsonObject jsonObject) {
+    public static ItemContainerProvider deserialize(JsonObject jsonObject, HolderLookup.Provider registries) {
         ResourceLocation identifier = ResourceLocationHelper.parse(GsonHelper.getAsString(jsonObject, "type"));
         Serializer serializer = SERIALIZERS_BY_ID.get(identifier);
         Objects.requireNonNull(serializer, "no serializer registered for identifier %s".formatted(identifier));
-        return serializer.deserializer().apply(jsonObject);
+        return serializer.deserializer().apply(jsonObject, registries);
     }
 
     static {
-        Serializer serializer = new Serializer(null, ItemInteractions.id("none"), $ -> null);
+        Serializer serializer = new Serializer(null, ItemInteractions.id("none"), ($1, $2) -> null);
         SERIALIZERS_BY_ID.put(serializer.id(), serializer);
     }
 
     private record Serializer(Class<? extends ItemContainerProvider> clazz, ResourceLocation id,
-                              Function<JsonElement, @Nullable ItemContainerProvider> deserializer) {
+                              BiFunction<JsonElement, HolderLookup.Provider, @Nullable ItemContainerProvider> deserializer) {
 
     }
 }

@@ -1,0 +1,6 @@
+{
+  "type": "iteminteractions:bundle",
+  "background_color": "brown",
+  "capacity_multiplier": 1,
+  "disallowed_items": []
+}
