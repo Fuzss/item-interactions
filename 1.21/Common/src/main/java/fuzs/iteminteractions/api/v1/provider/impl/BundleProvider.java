@@ -1,30 +1,49 @@
-package fuzs.iteminteractions.api.v1.provider;
+package fuzs.iteminteractions.api.v1.provider.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.gson.JsonObject;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import fuzs.iteminteractions.api.v1.DyeBackedColor;
+import fuzs.iteminteractions.api.v1.provider.AbstractProvider;
 import fuzs.iteminteractions.api.v1.tooltip.ModBundleTooltip;
+import fuzs.iteminteractions.impl.init.ModRegistry;
 import fuzs.puzzleslib.api.container.v1.ContainerMenuHelper;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
-import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.BundleContents;
 import org.apache.commons.lang3.math.Fraction;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class BundleProvider extends AbstractItemContainerProvider {
+public class BundleProvider extends AbstractProvider {
+    public static final MapCodec<BundleProvider> CODEC = RecordCodecBuilder.mapCodec(instance -> {
+        return instance.group(backgroundColorCodec(),
+                disallowedItemsCodec(),
+                ExtraCodecs.POSITIVE_INT.fieldOf("capacity_multiplier").forGetter(BundleProvider::getCapacityMultiplier)
+        ).apply(instance, (Optional<DyeBackedColor> dyeColor, HolderSet<Item> disallowedItems, Integer capacityMultiplier) -> {
+            return new BundleProvider(capacityMultiplier, dyeColor.orElse(null)).disallowedItems(disallowedItems);
+        });
+    });
+
     private final int capacityMultiplier;
 
-    public BundleProvider(int capacityMultiplier, @Nullable DyeColor dyeColor) {
+    public BundleProvider(int capacityMultiplier, DyeBackedColor dyeColor) {
         super(dyeColor);
         this.capacityMultiplier = capacityMultiplier;
+    }
+
+    @Override
+    public BundleProvider disallowedItems(HolderSet<Item> disallowedItems) {
+        return (BundleProvider) super.disallowedItems(disallowedItems);
     }
 
     public int getCapacityMultiplier() {
@@ -117,8 +136,7 @@ public class BundleProvider extends AbstractItemContainerProvider {
     }
 
     @Override
-    public void toJson(JsonObject jsonObject) {
-        jsonObject.addProperty("capacity_multiplier", this.getCapacityMultiplier());
-        super.toJson(jsonObject);
+    public Type getType() {
+        return ModRegistry.BUNDLE.value();
     }
 }

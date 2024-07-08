@@ -1,6 +1,8 @@
-package fuzs.iteminteractions.api.v1.provider;
+package fuzs.iteminteractions.api.v1.provider.impl;
 
-import com.google.gson.JsonObject;
+import com.mojang.serialization.MapCodec;
+import fuzs.iteminteractions.api.v1.provider.ItemContentsProvider;
+import fuzs.iteminteractions.impl.init.ModRegistry;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
@@ -9,9 +11,11 @@ import net.minecraft.world.item.ItemStack;
 import java.util.Optional;
 
 /**
- * A bare-bones implementation of {@link ItemContainerProvider}.
+ * A bare-bones implementation of {@link ItemContentsProvider}.
  */
-public class ItemContainerProviderImpl implements ItemContainerProvider {
+public class EmptyProvider implements ItemContentsProvider {
+    public static final ItemContentsProvider INSTANCE = new EmptyProvider();
+    public static final MapCodec<ItemContentsProvider> CODEC = MapCodec.unit(INSTANCE);
 
     @Override
     public boolean allowsPlayerInteractions(ItemStack containerStack, Player player) {
@@ -55,7 +59,7 @@ public class ItemContainerProviderImpl implements ItemContainerProvider {
     }
 
     @Override
-    public void toJson(JsonObject jsonObject) {
-        // NO-OP
+    public Type getType() {
+        return ModRegistry.EMPTY.value();
     }
 }

@@ -2,11 +2,11 @@ package fuzs.iteminteractions.impl.client.handler;
 
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.InputConstants;
+import fuzs.iteminteractions.api.v1.provider.ItemContentsBehavior;
 import fuzs.iteminteractions.impl.ItemInteractions;
 import fuzs.iteminteractions.impl.config.ClientConfig;
 import fuzs.iteminteractions.impl.config.ServerConfig;
-import fuzs.iteminteractions.api.v1.provider.ItemContainerBehavior;
-import fuzs.iteminteractions.impl.world.item.container.ItemContainerProviders;
+import fuzs.iteminteractions.impl.world.item.container.ItemContentsProviders;
 import fuzs.puzzleslib.api.event.v1.core.EventResult;
 import fuzs.puzzleslib.api.event.v1.data.DefaultedFloat;
 import fuzs.puzzleslib.api.event.v1.data.MutableValue;
@@ -37,7 +37,7 @@ public class MouseDraggingHandler {
         if (!ItemInteractions.CONFIG.get(ServerConfig.class).allowMouseDragging) return EventResult.PASS;
         ItemStack carriedStack = screen.getMenu().getCarried();
         if (validMouseButton(button)) {
-            if (ItemContainerProviders.INSTANCE.get(carriedStack).allowsPlayerInteractions(carriedStack, screen.minecraft.player)) {
+            if (ItemContentsProviders.get(carriedStack).allowsPlayerInteractions(carriedStack, screen.minecraft.player)) {
                 Slot slot = screen.findSlot(mouseX, mouseY);
                 if (slot != null) {
                     if (slot.hasItem() && !ClientInputActionHandler.precisionModeAllowedAndActive()) {
@@ -66,7 +66,7 @@ public class MouseDraggingHandler {
             AbstractContainerMenu menu = screen.getMenu();
             if (slot != null && menu.canDragTo(slot) && !CONTAINER_DRAG_SLOTS.contains(slot)) {
                 ItemStack carriedStack = menu.getCarried();
-                ItemContainerBehavior behavior = ItemContainerProviders.INSTANCE.get(carriedStack);
+                ItemContentsBehavior behavior = ItemContentsProviders.get(carriedStack);
                 boolean interact = false;
                 if (containerDragType == ContainerDragType.INSERT && slot.hasItem() &&
                         behavior.canAddItem(carriedStack, slot.getItem(), screen.minecraft.player)) {

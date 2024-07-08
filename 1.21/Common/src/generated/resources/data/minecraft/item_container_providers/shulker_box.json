@@ -1,9 +1,0 @@
-{
-  "type": "iteminteractions:block_entity",
-  "any_game_mode": true,
-  "block_entity_type": "minecraft:shulker_box",
-  "disallowed_items": "#minecraft:arrows",
-  "filter_container_items": true,
-  "inventory_height": 3,
-  "inventory_width": 9
-}

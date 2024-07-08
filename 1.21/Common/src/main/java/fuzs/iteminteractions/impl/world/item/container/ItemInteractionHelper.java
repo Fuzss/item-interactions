@@ -16,7 +16,6 @@ import java.util.OptionalInt;
 import java.util.function.*;
 
 public class ItemInteractionHelper {
-    public static final String TAG_ITEMS = "Items";
 
     public static boolean overrideStackedOnOther(Supplier<SimpleContainer> containerSupplier, Slot slot, ClickAction clickAction, Player player, ToIntFunction<ItemStack> acceptableItemCount, ToIntBiFunction<Container, ItemStack> maxStackSize) {
         ItemStack stackBelowMe = slot.getItem();

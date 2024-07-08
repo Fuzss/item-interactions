@@ -7,7 +7,7 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.Optional;
 
-public interface TooltipItemContainerProvider extends ItemContainerProvider {
+public interface TooltipProvider extends ItemContentsProvider {
 
     @Override
     default boolean canProvideTooltipImage(ItemStack containerStack, Player player) {

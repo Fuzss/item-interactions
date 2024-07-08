@@ -1,7 +1,7 @@
 package fuzs.iteminteractions.mixin;
 
-import fuzs.iteminteractions.api.v1.provider.ItemContainerBehavior;
-import fuzs.iteminteractions.impl.world.item.container.ItemContainerProviders;
+import fuzs.iteminteractions.api.v1.provider.ItemContentsBehavior;
+import fuzs.iteminteractions.impl.world.item.container.ItemContentsProviders;
 import fuzs.iteminteractions.impl.world.item.container.ItemInteractionHelper;
 import fuzs.puzzleslib.api.core.v1.Proxy;
 import net.minecraft.world.entity.SlotAccess;
@@ -23,7 +23,7 @@ abstract class ItemStackMixin {
     @Inject(method = "overrideStackedOnOther", at = @At("HEAD"), cancellable = true)
     public void overrideStackedOnOther(Slot slot, ClickAction clickAction, Player player, CallbackInfoReturnable<Boolean> callback) {
         ItemStack containerStack = ItemStack.class.cast(this);
-        ItemContainerBehavior behavior = ItemContainerProviders.INSTANCE.get(containerStack);
+        ItemContentsBehavior behavior = ItemContentsProviders.get(containerStack);
         if (behavior.allowsPlayerInteractions(containerStack, player)) {
             boolean result = ItemInteractionHelper.overrideStackedOnOther(() -> behavior.getItemContainer(containerStack,
                             player
@@ -42,7 +42,7 @@ abstract class ItemStackMixin {
     @Inject(method = "overrideOtherStackedOnMe", at = @At("HEAD"), cancellable = true)
     public void overrideOtherStackedOnMe(ItemStack stackOnMe, Slot slot, ClickAction clickAction, Player player, SlotAccess slotAccess, CallbackInfoReturnable<Boolean> callback) {
         ItemStack containerStack = ItemStack.class.cast(this);
-        ItemContainerBehavior behavior = ItemContainerProviders.INSTANCE.get(containerStack);
+        ItemContentsBehavior behavior = ItemContentsProviders.get(containerStack);
         if (behavior.allowsPlayerInteractions(containerStack, player)) {
             boolean result = ItemInteractionHelper.overrideOtherStackedOnMe(() -> behavior.getItemContainer(
                             containerStack,
@@ -64,7 +64,7 @@ abstract class ItemStackMixin {
     @Inject(method = "getTooltipImage", at = @At("HEAD"), cancellable = true)
     public void getTooltipImage(CallbackInfoReturnable<Optional<TooltipComponent>> callback) {
         ItemStack containerStack = ItemStack.class.cast(this);
-        ItemContainerBehavior behavior = ItemContainerProviders.INSTANCE.get(containerStack);
+        ItemContentsBehavior behavior = ItemContentsProviders.get(containerStack);
         if (behavior.canProvideTooltipImage(containerStack, Proxy.INSTANCE.getClientPlayer())) {
             callback.setReturnValue(behavior.getTooltipImage(containerStack, Proxy.INSTANCE.getClientPlayer()));
         }

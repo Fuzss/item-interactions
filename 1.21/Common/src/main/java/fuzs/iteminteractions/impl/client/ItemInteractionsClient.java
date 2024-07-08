@@ -1,5 +1,6 @@
 package fuzs.iteminteractions.impl.client;
 
+import com.google.common.collect.ImmutableMap;
 import fuzs.iteminteractions.api.v1.client.tooltip.ClientContainerItemTooltip;
 import fuzs.iteminteractions.api.v1.client.tooltip.ModClientBundleTooltip;
 import fuzs.iteminteractions.api.v1.tooltip.ContainerItemTooltip;
@@ -10,7 +11,7 @@ import fuzs.iteminteractions.impl.client.handler.ClientInputActionHandler;
 import fuzs.iteminteractions.impl.client.handler.KeyBindingTogglesHandler;
 import fuzs.iteminteractions.impl.client.handler.MouseDraggingHandler;
 import fuzs.iteminteractions.impl.client.helper.ItemDecorationHelper;
-import fuzs.iteminteractions.impl.world.item.container.ItemContainerProviders;
+import fuzs.iteminteractions.impl.world.item.container.ItemContentsProviders;
 import fuzs.puzzleslib.api.client.core.v1.ClientModConstructor;
 import fuzs.puzzleslib.api.client.core.v1.context.ClientTooltipComponentsContext;
 import fuzs.puzzleslib.api.client.core.v1.context.KeyMappingsContext;
@@ -24,10 +25,7 @@ import fuzs.puzzleslib.api.event.v1.level.PlayLevelSoundEvents;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.Connection;
-
-import java.util.Collections;
 
 public class ItemInteractionsClient implements ClientModConstructor {
 
@@ -50,7 +48,7 @@ public class ItemInteractionsClient implements ClientModConstructor {
         PlayLevelSoundEvents.ENTITY.register(MouseDraggingHandler::onPlaySoundAtPosition);
         PlayLevelSoundEvents.ENTITY.register(ClientInputActionHandler::onPlaySoundAtPosition);
         ClientPlayerNetworkEvents.LOGGED_IN.register((LocalPlayer player, MultiPlayerGameMode multiPlayerGameMode, Connection connection) -> {
-            ItemContainerProviders.INSTANCE.buildProviders(Collections.emptyMap(), RegistryAccess.EMPTY);
+            ItemContentsProviders.setItemContainerProviders(ImmutableMap.of());
             ItemDecorationHelper.clearCache();
         });
     }

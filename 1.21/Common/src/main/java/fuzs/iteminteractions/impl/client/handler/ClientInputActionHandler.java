@@ -1,13 +1,13 @@
 package fuzs.iteminteractions.impl.client.handler;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import fuzs.iteminteractions.api.v1.provider.ItemContainerBehavior;
+import fuzs.iteminteractions.api.v1.provider.ItemContentsBehavior;
 import fuzs.iteminteractions.impl.ItemInteractions;
 import fuzs.iteminteractions.impl.config.ClientConfig;
 import fuzs.iteminteractions.impl.config.ServerConfig;
 import fuzs.iteminteractions.impl.network.client.C2SContainerClientInputMessage;
 import fuzs.iteminteractions.impl.world.inventory.ContainerSlotHelper;
-import fuzs.iteminteractions.impl.world.item.container.ItemContainerProviders;
+import fuzs.iteminteractions.impl.world.item.container.ItemContentsProviders;
 import fuzs.puzzleslib.api.event.v1.core.EventResult;
 import fuzs.puzzleslib.api.event.v1.data.DefaultedFloat;
 import fuzs.puzzleslib.api.event.v1.data.MutableValue;
@@ -75,7 +75,7 @@ public class ClientInputActionHandler {
         if (precisionModeAllowedAndActive()) {
             Slot hoveredSlot = screen.hoveredSlot;
             if (hoveredSlot != null) {
-                if (!ItemContainerProviders.INSTANCE.get(screen.getMenu().getCarried()).isEmpty() || !ItemContainerProviders.INSTANCE.get(
+                if (!ItemContentsProviders.get(screen.getMenu().getCarried()).isEmpty() || !ItemContentsProviders.get(
                         hoveredSlot.getItem()).isEmpty()) {
                     int mouseButton = (ItemInteractions.CONFIG.get(ClientConfig.class).invertPrecisionModeScrolling ? verticalAmount < 0.0 : verticalAmount > 0.0) ? InputConstants.MOUSE_BUTTON_RIGHT : InputConstants.MOUSE_BUTTON_LEFT;
                     screen.slotClicked(hoveredSlot, hoveredSlot.index, mouseButton, ClickType.PICKUP);
@@ -90,7 +90,7 @@ public class ClientInputActionHandler {
             ItemStack itemStack = getContainerStack(screen, true);
             if (!itemStack.isEmpty()) {
                 int currentContainerSlot = ContainerSlotHelper.getCurrentContainerSlot(screen.minecraft.player);
-                SimpleContainer container = ItemContainerProviders.INSTANCE.get(itemStack)
+                SimpleContainer container = ItemContentsProviders.get(itemStack)
                         .getItemContainerView(itemStack, screen.minecraft.player);
                 currentContainerSlot = ContainerSlotHelper.findClosestSlotWithContent(container, currentContainerSlot, verticalAmount < 0.0);
                 ContainerSlotHelper.setCurrentContainerSlot(screen.minecraft.player, currentContainerSlot);
@@ -103,13 +103,13 @@ public class ClientInputActionHandler {
 
     public static ItemStack getContainerStack(AbstractContainerScreen<?> screen, boolean requireItemContainerData) {
         ItemStack itemStack = screen.getMenu().getCarried();
-        ItemContainerBehavior behavior = ItemContainerProviders.INSTANCE.get(itemStack);
+        ItemContentsBehavior behavior = ItemContentsProviders.get(itemStack);
         if (!behavior.isEmpty() && (!requireItemContainerData || behavior.provider().hasContents(itemStack))) {
             return itemStack;
         }
         if (screen.hoveredSlot != null) {
             itemStack = screen.hoveredSlot.getItem();
-            behavior = ItemContainerProviders.INSTANCE.get(itemStack);
+            behavior = ItemContentsProviders.get(itemStack);
             if (!behavior.isEmpty() && (!requireItemContainerData || behavior.provider().hasContents(itemStack))) {
                 return itemStack;
             }

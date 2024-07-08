@@ -1,6 +1,6 @@
 {
   "type": "iteminteractions:bundle",
-  "background_color": "brown",
+  "background_color": "#FCBA03",
   "capacity_multiplier": 1,
   "disallowed_items": []
 }

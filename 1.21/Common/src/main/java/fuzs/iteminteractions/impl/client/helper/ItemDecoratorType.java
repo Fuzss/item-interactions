@@ -1,6 +1,6 @@
 package fuzs.iteminteractions.impl.client.helper;
 
-import fuzs.iteminteractions.api.v1.provider.ItemContainerBehavior;
+import fuzs.iteminteractions.api.v1.provider.ItemContentsBehavior;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -37,7 +37,7 @@ public enum ItemDecoratorType {
         return this.color;
     }
 
-    public static ItemDecoratorType getItemDecoratorType(ItemContainerBehavior provider, ItemStack containerStack, ItemStack carriedStack, Player player) {
+    public static ItemDecoratorType getItemDecoratorType(ItemContentsBehavior provider, ItemStack containerStack, ItemStack carriedStack, Player player) {
         if (provider.canAddItem(containerStack, carriedStack, player)) {
             if (provider.hasAnyOf(containerStack, carriedStack, player)) {
                 return ItemDecoratorType.PRESENT_AND_SPACE;

@@ -1,4 +1,4 @@
-// 1.21	2024-07-08T01:05:55.190276	Item Container Provider
-8cdbd5672bd67289d783e3899e866c69c3fa971c data/minecraft/item_container_providers/bundle.json
-826d9d9131b5bf500fef8e2cf36382908235d728 data/minecraft/item_container_providers/ender_chest.json
-3bbafcb78279ceb84d97ffae62ce9286ea850c9f data/minecraft/item_container_providers/shulker_box.json
+// 1.21	2024-07-09T00:00:49.225771	Item Container Provider
+fc92a68cf21c3f01e27069959ac0038b2876f0f1 data/minecraft/item_contents_provider/bundle.json
+826d9d9131b5bf500fef8e2cf36382908235d728 data/minecraft/item_contents_provider/ender_chest.json
+2da9d49b6993307a76d882a67fc222a5f825bb5e data/minecraft/item_contents_provider/shulker_box.json

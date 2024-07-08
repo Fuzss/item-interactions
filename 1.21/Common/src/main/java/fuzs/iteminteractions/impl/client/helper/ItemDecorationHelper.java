@@ -2,10 +2,10 @@ package fuzs.iteminteractions.impl.client.helper;
 
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.systems.RenderSystem;
-import fuzs.iteminteractions.api.v1.provider.ItemContainerBehavior;
+import fuzs.iteminteractions.api.v1.provider.ItemContentsBehavior;
 import fuzs.iteminteractions.impl.ItemInteractions;
 import fuzs.iteminteractions.impl.config.ClientConfig;
-import fuzs.iteminteractions.impl.world.item.container.ItemContainerProviders;
+import fuzs.iteminteractions.impl.world.item.container.ItemContentsProviders;
 import fuzs.puzzleslib.api.client.init.v1.DynamicItemDecorator;
 import fuzs.puzzleslib.api.core.v1.ModLoaderEnvironment;
 import net.minecraft.client.Minecraft;
@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.function.BooleanSupplier;
 
 public class ItemDecorationHelper {
-    private static final Map<ItemContainerBehavior, DynamicItemDecorator> DECORATORS_CACHE = Maps.newIdentityHashMap();
+    private static final Map<ItemContentsBehavior, DynamicItemDecorator> DECORATORS_CACHE = Maps.newIdentityHashMap();
 
     @Nullable
     private static Slot slotBeingRendered;
@@ -64,7 +64,7 @@ public class ItemDecorationHelper {
     }
 
     public static void render(GuiGraphics guiGraphics, Font font, ItemStack stack, int itemPosX, int itemPosY) {
-        ItemContainerBehavior behavior = ItemContainerProviders.INSTANCE.get(stack);
+        ItemContentsBehavior behavior = ItemContentsProviders.get(stack);
         if (!behavior.isEmpty()) {
             resetRenderState();
             DynamicItemDecorator itemDecorator = DECORATORS_CACHE.computeIfAbsent(behavior, $ -> ItemDecorationHelper.getDynamicItemDecorator((AbstractContainerScreen<?> screen, ItemStack containerStack, ItemStack carriedStack) -> {

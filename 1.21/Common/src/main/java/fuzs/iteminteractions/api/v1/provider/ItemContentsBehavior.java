@@ -1,28 +1,37 @@
 package fuzs.iteminteractions.api.v1.provider;
 
+import com.mojang.serialization.Codec;
+import fuzs.iteminteractions.api.v1.provider.impl.EmptyProvider;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.Optional;
 
 /**
- * A holder class for individual {@link ItemContainerProvider} instances, mainly to include additional checks when
+ * A holder class for individual {@link ItemContentsProvider} instances, mainly to include additional checks when
  * calling various methods.
  *
- * @param provider the wrapped {@link ItemContainerProvider}
+ * @param provider the wrapped {@link ItemContentsProvider}
  */
-public record ItemContainerBehavior(ItemContainerProvider provider) {
-    private static final ItemContainerBehavior EMPTY = new ItemContainerBehavior(new ItemContainerProviderImpl());
+public record ItemContentsBehavior(ItemContentsProvider provider) {
 
     /**
-     * @return the empty behavior singleton instance
+     * @return new and possibly empty behavior instance
      */
-    public static ItemContainerBehavior empty() {
-        return EMPTY;
+    public static ItemContentsBehavior ofNullable(@Nullable ItemContentsProvider provider) {
+        return provider != null ? new ItemContentsBehavior(provider) : empty();
+    }
+
+    /**
+     * @return new empty behavior instance
+     */
+    public static ItemContentsBehavior empty() {
+        return new ItemContentsBehavior(EmptyProvider.INSTANCE);
     }
 
     /**
@@ -117,7 +126,7 @@ public record ItemContainerBehavior(ItemContainerProvider provider) {
      * How much space is available in the container provided by <code>containerStack</code> to add
      * <code>stackToAdd</code>.
      * <p>
-     * Mainly used by bundles, otherwise {@link ItemContainerProvider#canAddItem} should be enough.
+     * Mainly used by bundles, otherwise {@link ItemContentsProvider#canAddItem} should be enough.
      * <p>
      * Before this is called {@link #allowsPlayerInteractions(ItemStack, Player)} and
      * {@link #isItemAllowedInContainer(ItemStack, ItemStack)} are checked.
@@ -177,9 +186,16 @@ public record ItemContainerBehavior(ItemContainerProvider provider) {
     }
 
     /**
+     * @return the item container provider codec
+     */
+    public Codec<ItemContentsProvider> codec() {
+        return (Codec<ItemContentsProvider>) this.provider.getType().mapCodec().codec();
+    }
+
+    /**
      * @return is this the empty behavior singleton instance
      */
     public boolean isEmpty() {
-        return this == EMPTY;
+        return this.provider == EmptyProvider.INSTANCE;
     }
 }

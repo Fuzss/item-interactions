@@ -1,7 +1,12 @@
 package fuzs.iteminteractions.api.v1.provider;
 
-import com.google.gson.JsonObject;
-import fuzs.iteminteractions.api.v1.ItemContainerProviderSerializers;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import fuzs.iteminteractions.impl.ItemInteractions;
+import fuzs.iteminteractions.impl.world.item.container.ItemContentsProviders;
+import fuzs.puzzleslib.api.init.v3.registry.RegistryFactory;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
@@ -16,13 +21,25 @@ import java.util.Optional;
  * interactions (extracting and adding items via right-clicking on the item) and bundle-like tooltips.
  * <p>
  * A container does not necessarily need to provide both item interactions and tooltips, what is provided is defined by
- * implementing {@link ItemContainerProvider#allowsPlayerInteractions} and
- * {@link ItemContainerProvider#canProvideTooltipImage}.
+ * implementing {@link ItemContentsProvider#allowsPlayerInteractions} and
+ * {@link ItemContentsProvider#canProvideTooltipImage}.
  * <p>
  * This overrides any already implemented behavior (the default providers in Easy Shulker Boxes actually do this for
  * vanilla bundles).
  */
-public interface ItemContainerProvider {
+public interface ItemContentsProvider {
+    /**
+     * The {@link Type} registry key.
+     */
+    ResourceKey<Registry<Type>> REGISTRY_KEY = ResourceKey.createRegistryKey(ItemContentsProviders.ITEM_CONTAINER_PROVIDER_LOCATION);
+    /**
+     * The {@link Type} registry.
+     */
+    Registry<Type> REGISTRY = RegistryFactory.INSTANCE.create(REGISTRY_KEY, ItemInteractions.id("empty"), true);
+    /**
+     * Codec that additionally to the provider itself also includes the provider type.
+     */
+    Codec<ItemContentsProvider> CODEC = REGISTRY.byNameCodec().dispatch(ItemContentsProvider::getType, Type::mapCodec);
 
     /**
      * Does this provider support item inventory interactions (extracting and adding items) on the given
@@ -116,7 +133,7 @@ public interface ItemContainerProvider {
      * How much space is available in the container provided by <code>containerStack</code> to add
      * <code>stackToAdd</code>.
      * <p>
-     * Mainly used by bundles, otherwise {@link ItemContainerProvider#canAddItem} should be enough.
+     * Mainly used by bundles, otherwise {@link ItemContentsProvider#canAddItem} should be enough.
      * <p>
      * Before this is called {@link #allowsPlayerInteractions(ItemStack, Player)} and
      * {@link #isItemAllowedInContainer(ItemStack, ItemStack)} are checked.
@@ -152,11 +169,20 @@ public interface ItemContainerProvider {
     Optional<TooltipComponent> getTooltipImage(ItemStack containerStack, Player player);
 
     /**
-     * Serialize this provider to json for syncing to client (as part of data pack contents).
-     * <p>
-     * A serializer needs to be registered in {@link ItemContainerProviderSerializers#register} additionally.
-     *
-     * @param jsonObject the json object to add data to
+     * @return the item container provider type
      */
-    void toJson(JsonObject jsonObject);
+    Type getType();
+
+    /**
+     * A type for identifying and serializing item container provider implementations.
+     *
+     * @param mapCodec the item container provider codec
+     */
+    record Type(MapCodec<? extends ItemContentsProvider> mapCodec) {
+
+        @SuppressWarnings("unchecked")
+        public Codec<ItemContentsProvider> codec() {
+            return (Codec<ItemContentsProvider>) this.mapCodec.codec();
+        }
+    }
 }

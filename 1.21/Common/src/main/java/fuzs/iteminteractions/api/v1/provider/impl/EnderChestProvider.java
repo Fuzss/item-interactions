@@ -1,9 +1,11 @@
-package fuzs.iteminteractions.api.v1.provider;
+package fuzs.iteminteractions.api.v1.provider.impl;
 
-import com.google.gson.JsonObject;
+import com.mojang.serialization.MapCodec;
+import fuzs.iteminteractions.api.v1.provider.TooltipProvider;
 import fuzs.iteminteractions.api.v1.tooltip.ContainerItemTooltip;
 import fuzs.iteminteractions.impl.client.handler.ClientEnderChestHandler;
 import fuzs.iteminteractions.impl.handler.EnderChestSyncHandler;
+import fuzs.iteminteractions.impl.init.ModRegistry;
 import net.minecraft.core.NonNullList;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleContainer;
@@ -12,12 +14,13 @@ import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
 
-public class EnderChestProvider implements TooltipItemContainerProvider {
+public class EnderChestProvider implements TooltipProvider {
     /**
      * Pretty ender color from <a href="https://www.curseforge.com/minecraft/mc-mods/tinted">Tinted mod</a>.
      */
     private static final float[] DEFAULT_ENDER_CHEST_COLOR = {0.16470589F, 0.38431373F, 0.33333334F};
     private static final int GRID_SIZE_X = 9;
+    public static final MapCodec<EnderChestProvider> CODEC = MapCodec.unit(EnderChestProvider::new);
 
     @Override
     public SimpleContainer getItemContainer(ItemStack containerStack, Player player, boolean allowSaving) {
@@ -62,7 +65,7 @@ public class EnderChestProvider implements TooltipItemContainerProvider {
     }
 
     @Override
-    public void toJson(JsonObject jsonObject) {
-        // NO-OP
+    public Type getType() {
+        return ModRegistry.ENDER_CHEST.value();
     }
 }
