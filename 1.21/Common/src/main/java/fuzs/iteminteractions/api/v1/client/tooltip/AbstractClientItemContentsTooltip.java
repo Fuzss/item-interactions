@@ -23,7 +23,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import java.util.List;
 import java.util.Optional;
 
-public abstract class AbstractClientContainerItemTooltip extends ExpandableClientTooltipComponent {
+public abstract class AbstractClientItemContentsTooltip extends ExpandableClientContentsTooltip {
     private static final ResourceLocation HOTBAR_SELECTION_SPRITE = ResourceLocationHelper.withDefaultNamespace("hud/hotbar_selection");
     public static final ResourceLocation TEXTURE_LOCATION = ItemInteractions.id("textures/gui/container/inventory_tooltip.png");
     private static final int BORDER_SIZE = 7;
@@ -33,7 +33,7 @@ public abstract class AbstractClientContainerItemTooltip extends ExpandableClien
     protected final NonNullList<ItemStack> items;
     private final float[] backgroundColor;
 
-    public AbstractClientContainerItemTooltip(NonNullList<ItemStack> items, float[] backgroundColor) {
+    public AbstractClientItemContentsTooltip(NonNullList<ItemStack> items, float[] backgroundColor) {
         this.items = items;
         this.backgroundColor = backgroundColor;
     }

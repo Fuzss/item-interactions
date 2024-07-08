@@ -2,7 +2,7 @@ package fuzs.iteminteractions.api.v1.provider.impl;
 
 import com.mojang.serialization.MapCodec;
 import fuzs.iteminteractions.api.v1.provider.TooltipProvider;
-import fuzs.iteminteractions.api.v1.tooltip.ContainerItemTooltip;
+import fuzs.iteminteractions.api.v1.tooltip.ItemContentsTooltip;
 import fuzs.iteminteractions.impl.client.handler.ClientEnderChestHandler;
 import fuzs.iteminteractions.impl.handler.EnderChestSyncHandler;
 import fuzs.iteminteractions.impl.init.ModRegistry;
@@ -39,7 +39,7 @@ public class EnderChestProvider implements TooltipProvider {
 
     @Override
     public TooltipComponent createTooltipImageComponent(ItemStack containerStack, Player player, NonNullList<ItemStack> items) {
-        return new ContainerItemTooltip(items, GRID_SIZE_X, this.getGridSizeY(items), DEFAULT_ENDER_CHEST_COLOR);
+        return new ItemContentsTooltip(items, GRID_SIZE_X, this.getGridSizeY(items), DEFAULT_ENDER_CHEST_COLOR);
     }
 
     private int getGridSizeY(NonNullList<ItemStack> items) {

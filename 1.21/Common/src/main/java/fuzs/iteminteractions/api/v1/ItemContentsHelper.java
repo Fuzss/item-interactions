@@ -14,7 +14,7 @@ public final class ItemContentsHelper {
         // NO-OP
     }
 
-    public static ItemContentsBehavior getItemContainerBehavior(ItemStack itemStack) {
+    public static ItemContentsBehavior getItemContentsBehavior(ItemStack itemStack) {
         return ItemContentsProviders.get(itemStack);
     }
 

@@ -2,10 +2,14 @@ package fuzs.iteminteractions.api.v1.provider;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import fuzs.iteminteractions.impl.ItemInteractions;
 import fuzs.iteminteractions.impl.world.item.container.ItemContentsProviders;
 import fuzs.puzzleslib.api.init.v3.registry.RegistryFactory;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryCodecs;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
@@ -14,6 +18,7 @@ import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -39,7 +44,15 @@ public interface ItemContentsProvider {
     /**
      * Codec that additionally to the provider itself also includes the provider type.
      */
-    Codec<ItemContentsProvider> CODEC = REGISTRY.byNameCodec().dispatch(ItemContentsProvider::getType, Type::mapCodec);
+    MapCodec<ItemContentsProvider> CODEC = REGISTRY.byNameCodec().dispatchMap(ItemContentsProvider::getType, Type::mapCodec);
+    /**
+     * Codec that includes a list of supported items.
+     */
+    Codec<Map.Entry<HolderSet<Item>, ItemContentsProvider>> WITH_ITEMS_CODEC = RecordCodecBuilder.create(instance -> {
+        return instance.group(RegistryCodecs.homogeneousList(Registries.ITEM).fieldOf("supported_items").forGetter(Map.Entry::getKey),
+                CODEC.forGetter(Map.Entry::getValue)
+        ).apply(instance, Map::entry);
+    });
 
     /**
      * Does this provider support item inventory interactions (extracting and adding items) on the given

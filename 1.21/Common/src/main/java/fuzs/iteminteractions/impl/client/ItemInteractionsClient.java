@@ -1,10 +1,10 @@
 package fuzs.iteminteractions.impl.client;
 
 import com.google.common.collect.ImmutableMap;
-import fuzs.iteminteractions.api.v1.client.tooltip.ClientContainerItemTooltip;
-import fuzs.iteminteractions.api.v1.client.tooltip.ModClientBundleTooltip;
-import fuzs.iteminteractions.api.v1.tooltip.ContainerItemTooltip;
-import fuzs.iteminteractions.api.v1.tooltip.ModBundleTooltip;
+import fuzs.iteminteractions.api.v1.client.tooltip.ClientItemContentsTooltip;
+import fuzs.iteminteractions.api.v1.client.tooltip.ClientBundleContentsTooltip;
+import fuzs.iteminteractions.api.v1.tooltip.ItemContentsTooltip;
+import fuzs.iteminteractions.api.v1.tooltip.BundleContentsTooltip;
 import fuzs.iteminteractions.impl.client.core.HeldActivationType;
 import fuzs.iteminteractions.impl.client.core.KeyMappingProvider;
 import fuzs.iteminteractions.impl.client.handler.ClientInputActionHandler;
@@ -60,7 +60,7 @@ public class ItemInteractionsClient implements ClientModConstructor {
 
     @Override
     public void onRegisterClientTooltipComponents(ClientTooltipComponentsContext context) {
-        context.registerClientTooltipComponent(ContainerItemTooltip.class, ClientContainerItemTooltip::new);
-        context.registerClientTooltipComponent(ModBundleTooltip.class, ModClientBundleTooltip::new);
+        context.registerClientTooltipComponent(ItemContentsTooltip.class, ClientItemContentsTooltip::new);
+        context.registerClientTooltipComponent(BundleContentsTooltip.class, ClientBundleContentsTooltip::new);
     }
 }

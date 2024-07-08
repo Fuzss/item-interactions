@@ -1,11 +1,11 @@
 package fuzs.iteminteractions.api.v1.client.tooltip;
 
-import fuzs.iteminteractions.api.v1.tooltip.ModBundleTooltip;
+import fuzs.iteminteractions.api.v1.tooltip.BundleContentsTooltip;
 
-public class ModClientBundleTooltip extends AbstractClientContainerItemTooltip {
+public class ClientBundleContentsTooltip extends AbstractClientItemContentsTooltip {
     private final boolean isBundleFull;
 
-    public ModClientBundleTooltip(ModBundleTooltip tooltip) {
+    public ClientBundleContentsTooltip(BundleContentsTooltip tooltip) {
         super(tooltip.items(), tooltip.backgroundColor());
         this.isBundleFull = tooltip.isBundleFull();
     }

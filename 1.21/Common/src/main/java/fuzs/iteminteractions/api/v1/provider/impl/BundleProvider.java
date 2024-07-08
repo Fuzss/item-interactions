@@ -5,7 +5,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import fuzs.iteminteractions.api.v1.DyeBackedColor;
 import fuzs.iteminteractions.api.v1.provider.AbstractProvider;
-import fuzs.iteminteractions.api.v1.tooltip.ModBundleTooltip;
+import fuzs.iteminteractions.api.v1.tooltip.BundleContentsTooltip;
 import fuzs.iteminteractions.impl.init.ModRegistry;
 import fuzs.puzzleslib.api.container.v1.ContainerMenuHelper;
 import net.minecraft.core.HolderSet;
@@ -26,10 +26,10 @@ import java.util.stream.Stream;
 
 public class BundleProvider extends AbstractProvider {
     public static final MapCodec<BundleProvider> CODEC = RecordCodecBuilder.mapCodec(instance -> {
-        return instance.group(backgroundColorCodec(),
-                disallowedItemsCodec(),
-                ExtraCodecs.POSITIVE_INT.fieldOf("capacity_multiplier").forGetter(BundleProvider::getCapacityMultiplier)
-        ).apply(instance, (Optional<DyeBackedColor> dyeColor, HolderSet<Item> disallowedItems, Integer capacityMultiplier) -> {
+        return instance.group(capacityMultiplierCodec(),
+                backgroundColorCodec(),
+                disallowedItemsCodec()
+        ).apply(instance, (Integer capacityMultiplier, Optional<DyeBackedColor> dyeColor, HolderSet<Item> disallowedItems) -> {
             return new BundleProvider(capacityMultiplier, dyeColor.orElse(null)).disallowedItems(disallowedItems);
         });
     });
@@ -39,6 +39,10 @@ public class BundleProvider extends AbstractProvider {
     public BundleProvider(int capacityMultiplier, DyeBackedColor dyeColor) {
         super(dyeColor);
         this.capacityMultiplier = capacityMultiplier;
+    }
+
+    protected static <T extends BundleProvider> RecordCodecBuilder<T, Integer> capacityMultiplierCodec() {
+        return ExtraCodecs.POSITIVE_INT.fieldOf("capacity_multiplier").forGetter(BundleProvider::getCapacityMultiplier);
     }
 
     @Override
@@ -118,7 +122,7 @@ public class BundleProvider extends AbstractProvider {
 
     @Override
     public TooltipComponent createTooltipImageComponent(ItemStack containerStack, Player player, NonNullList<ItemStack> items) {
-        return new ModBundleTooltip(items,
+        return new BundleContentsTooltip(items,
                 this.computeContentWeight(containerStack, player).compareTo(Fraction.ONE) >= 0,
                 this.getBackgroundColor()
         );

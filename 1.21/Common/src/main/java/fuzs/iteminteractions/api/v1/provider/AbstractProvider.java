@@ -27,7 +27,7 @@ public abstract class AbstractProvider implements TooltipProvider {
     }
 
     protected static <T extends AbstractProvider> RecordCodecBuilder<T, HolderSet<Item>> disallowedItemsCodec() {
-        return RegistryCodecs.homogeneousList(Registries.ITEM).fieldOf("disallowed_items")
+        return RegistryCodecs.homogeneousList(Registries.ITEM).fieldOf("disallowed_item_contents")
                 .orElse(HolderSet.empty())
                 .forGetter(provider -> provider.disallowedItems);
     }

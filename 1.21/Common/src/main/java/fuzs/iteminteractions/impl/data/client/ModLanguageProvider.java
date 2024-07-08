@@ -1,6 +1,6 @@
 package fuzs.iteminteractions.impl.data.client;
 
-import fuzs.iteminteractions.api.v1.client.tooltip.ExpandableClientTooltipComponent;
+import fuzs.iteminteractions.api.v1.client.tooltip.ExpandableClientContentsTooltip;
 import fuzs.iteminteractions.impl.ItemInteractions;
 import fuzs.iteminteractions.impl.client.core.HeldActivationType;
 import fuzs.iteminteractions.impl.client.core.KeyBackedActivationType;
@@ -16,7 +16,7 @@ public class ModLanguageProvider extends AbstractLanguageProvider {
 
     @Override
     public void addTranslations(TranslationBuilder builder) {
-        builder.add(ExpandableClientTooltipComponent.REVEAL_CONTENTS_TRANSLATION_KEY, "%s %s to reveal contents");
+        builder.add(ExpandableClientContentsTooltip.REVEAL_CONTENTS_TRANSLATION_KEY, "%s %s to reveal contents");
         builder.add(HeldActivationType.TOOLTIP_HOLD_TRANSLATION_KEY, "Hold");
         builder.add(KeyBackedActivationType.KEY_TOOLTIP_PRESS_TRANSLATION, "Press");
         builder.add(KeyBindingTogglesHandler.VISUAL_ITEM_CONTENTS_KEY.getKeyMapping(), "Toggle Visual Item Contents");

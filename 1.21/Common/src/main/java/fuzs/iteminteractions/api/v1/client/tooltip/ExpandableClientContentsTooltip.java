@@ -10,7 +10,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
 import org.joml.Matrix4f;
 
-public abstract class ExpandableClientTooltipComponent implements ClientTooltipComponent {
+public abstract class ExpandableClientContentsTooltip implements ClientTooltipComponent {
     public static final String REVEAL_CONTENTS_TRANSLATION_KEY = "item.container.tooltip.revealContents";
 
     @Override

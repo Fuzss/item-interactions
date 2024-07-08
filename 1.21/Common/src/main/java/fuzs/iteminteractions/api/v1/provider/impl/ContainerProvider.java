@@ -5,7 +5,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import fuzs.iteminteractions.api.v1.DyeBackedColor;
 import fuzs.iteminteractions.api.v1.provider.AbstractProvider;
-import fuzs.iteminteractions.api.v1.tooltip.ContainerItemTooltip;
+import fuzs.iteminteractions.api.v1.tooltip.ItemContentsTooltip;
 import fuzs.iteminteractions.impl.init.ModRegistry;
 import fuzs.puzzleslib.api.container.v1.ContainerMenuHelper;
 import net.minecraft.core.HolderSet;
@@ -30,16 +30,16 @@ import java.util.Optional;
 
 public class ContainerProvider extends AbstractProvider {
     public static final MapCodec<ContainerProvider> CODEC = RecordCodecBuilder.mapCodec(instance -> {
-        return instance.group(backgroundColorCodec(),
-                        disallowedItemsCodec(),
-                        inventoryWidthCodec(),
+        return instance.group(inventoryWidthCodec(),
                         inventoryHeightCodec(),
+                        backgroundColorCodec(),
+                        disallowedItemsCodec(),
                         filterContainerItemsCodec(),
                         interactionPermissionsCodec(),
                         equipmentSlotsCodec()
                 )
                 .apply(instance,
-                        (Optional<DyeBackedColor> dyeColor, HolderSet<Item> disallowedItems, Integer inventoryWidth, Integer inventoryHeight, Boolean filterContainerItems, InteractionPermissions interactionPermissions, EquipmentSlotGroup equipmentSlots) -> {
+                        (Integer inventoryWidth, Integer inventoryHeight, Optional<DyeBackedColor> dyeColor, HolderSet<Item> disallowedItems, Boolean filterContainerItems, InteractionPermissions interactionPermissions, EquipmentSlotGroup equipmentSlots) -> {
                             return new ContainerProvider(inventoryWidth,
                                     inventoryHeight,
                                     dyeColor.orElse(null)
@@ -69,13 +69,11 @@ public class ContainerProvider extends AbstractProvider {
     }
 
     protected static <T extends ContainerProvider> RecordCodecBuilder<T, Integer> inventoryWidthCodec() {
-        return ExtraCodecs.POSITIVE_INT.fieldOf("inventory_width")
-                .forGetter(ContainerProvider::getInventoryWidth);
+        return ExtraCodecs.POSITIVE_INT.fieldOf("inventory_width").forGetter(ContainerProvider::getInventoryWidth);
     }
 
     protected static <T extends ContainerProvider> RecordCodecBuilder<T, Integer> inventoryHeightCodec() {
-        return ExtraCodecs.POSITIVE_INT.fieldOf("inventory_height")
-                .forGetter(ContainerProvider::getInventoryHeight);
+        return ExtraCodecs.POSITIVE_INT.fieldOf("inventory_height").forGetter(ContainerProvider::getInventoryHeight);
     }
 
     protected static <T extends ContainerProvider> RecordCodecBuilder<T, Boolean> filterContainerItemsCodec() {
@@ -161,7 +159,7 @@ public class ContainerProvider extends AbstractProvider {
 
     @Override
     public TooltipComponent createTooltipImageComponent(ItemStack containerStack, Player player, NonNullList<ItemStack> items) {
-        return new ContainerItemTooltip(items,
+        return new ItemContentsTooltip(items,
                 this.getInventoryWidth(),
                 this.getInventoryHeight(),
                 this.getBackgroundColor()

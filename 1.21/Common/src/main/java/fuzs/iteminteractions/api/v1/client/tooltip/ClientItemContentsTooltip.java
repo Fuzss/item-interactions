@@ -1,12 +1,12 @@
 package fuzs.iteminteractions.api.v1.client.tooltip;
 
-import fuzs.iteminteractions.api.v1.tooltip.ContainerItemTooltip;
+import fuzs.iteminteractions.api.v1.tooltip.ItemContentsTooltip;
 
-public class ClientContainerItemTooltip extends AbstractClientContainerItemTooltip {
+public class ClientItemContentsTooltip extends AbstractClientItemContentsTooltip {
     private final int gridSizeX;
     private final int gridSizeY;
 
-    public ClientContainerItemTooltip(ContainerItemTooltip tooltip) {
+    public ClientItemContentsTooltip(ItemContentsTooltip tooltip) {
         super(tooltip.items(), tooltip.backgroundColor());
         this.gridSizeX = tooltip.gridSizeX();
         this.gridSizeY = tooltip.gridSizeY();

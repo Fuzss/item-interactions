@@ -16,7 +16,6 @@ import fuzs.puzzleslib.api.core.v1.ModConstructor;
 import fuzs.puzzleslib.api.core.v1.ModLoaderEnvironment;
 import fuzs.puzzleslib.api.core.v1.context.PackRepositorySourcesContext;
 import fuzs.puzzleslib.api.core.v1.utility.ResourceLocationHelper;
-import fuzs.puzzleslib.api.event.v1.FinalizeItemComponentsCallback;
 import fuzs.puzzleslib.api.event.v1.entity.player.AfterChangeDimensionCallback;
 import fuzs.puzzleslib.api.event.v1.entity.player.ContainerEvents;
 import fuzs.puzzleslib.api.event.v1.entity.player.PlayerCopyEvents;
@@ -26,19 +25,9 @@ import fuzs.puzzleslib.api.event.v1.server.SyncDataPackContentsCallback;
 import fuzs.puzzleslib.api.network.v3.NetworkHandler;
 import fuzs.puzzleslib.api.resources.v1.DynamicPackResources;
 import fuzs.puzzleslib.api.resources.v1.PackResourcesHelper;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.component.DataComponentMap;
-import net.minecraft.core.component.DataComponentPatch;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.PreparableReloadListener;
-import net.minecraft.util.Unit;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.level.block.ShulkerBoxBlock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.function.BiConsumer;
 
 public class ItemInteractions implements ModConstructor {
     public static final String MOD_ID = "iteminteractions";
@@ -68,20 +57,7 @@ public class ItemInteractions implements ModConstructor {
         PlayerNetworkEvents.LOGGED_IN.register(EnderChestSyncHandler::onLoggedIn);
         AfterChangeDimensionCallback.EVENT.register(EnderChestSyncHandler::onAfterChangeDimension);
         PlayerCopyEvents.RESPAWN.register(EnderChestSyncHandler::onRespawn);
-        AddDataPackReloadListenersCallback.EVENT.register((HolderLookup.Provider registries, BiConsumer<ResourceLocation, PreparableReloadListener> consumer) -> {
-            consumer.accept(ItemContentsProviders.ITEM_CONTAINER_PROVIDER_LOCATION,
-                    new ItemContentsProviders(registries)
-            );
-        });
-        FinalizeItemComponentsCallback.EVENT.register((item, consumer) -> {
-            if (item instanceof BlockItem blockItem && blockItem.getBlock() instanceof ShulkerBoxBlock) {
-                consumer.accept((DataComponentMap dataComponents) -> {
-                    return DataComponentPatch.builder()
-                            .set(DataComponents.HIDE_ADDITIONAL_TOOLTIP, Unit.INSTANCE)
-                            .build();
-                });
-            }
-        });
+        AddDataPackReloadListenersCallback.EVENT.register(ItemContentsProviders::onAddDataPackReloadListeners);
     }
 
     @Override
