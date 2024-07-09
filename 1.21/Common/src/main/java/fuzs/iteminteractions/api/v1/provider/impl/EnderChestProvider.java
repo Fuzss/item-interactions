@@ -66,6 +66,6 @@ public class EnderChestProvider implements TooltipProvider {
 
     @Override
     public Type getType() {
-        return ModRegistry.ENDER_CHEST.value();
+        return ModRegistry.ENDER_CHEST_ITEM_CONTENTS_PROVIDER_TYPE.value();
     }
 }

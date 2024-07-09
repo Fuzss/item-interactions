@@ -168,7 +168,7 @@ public class ContainerProvider extends AbstractProvider {
 
     @Override
     public Type getType() {
-        return ModRegistry.CONTAINER.value();
+        return ModRegistry.CONTAINER_ITEM_CONTENTS_PROVIDER_TYPE.value();
     }
 
     public enum InteractionPermissions implements StringRepresentable {

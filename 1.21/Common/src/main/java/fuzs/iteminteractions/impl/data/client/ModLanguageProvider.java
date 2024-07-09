@@ -1,6 +1,7 @@
 package fuzs.iteminteractions.impl.data.client;
 
 import fuzs.iteminteractions.api.v1.client.tooltip.ExpandableClientContentsTooltip;
+import fuzs.iteminteractions.api.v1.provider.impl.BundleProvider;
 import fuzs.iteminteractions.impl.ItemInteractions;
 import fuzs.iteminteractions.impl.client.core.HeldActivationType;
 import fuzs.iteminteractions.impl.client.core.KeyBackedActivationType;
@@ -23,5 +24,6 @@ public class ModLanguageProvider extends AbstractLanguageProvider {
         builder.add(KeyBindingTogglesHandler.SELECTED_ITEM_TOOLTIPS_KEY.getKeyMapping(), "Toggle Selected Item Tooltips");
         builder.add(KeyBindingTogglesHandler.CARRIED_ITEM_TOOLTIPS_KEY.getKeyMapping(), "Toggle Carried Item Tooltips");
         builder.add(KeyBackedActivationType.KEY_CATEGORY, ItemInteractions.MOD_NAME);
+        builder.add(BundleProvider.KEY_BUNDLE_CAPACITY, "Capacity: %s%%");
     }
 }

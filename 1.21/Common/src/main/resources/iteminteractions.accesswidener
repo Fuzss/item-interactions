@@ -5,3 +5,10 @@ accessible  method  net/minecraft/client/gui/screens/inventory/AbstractContainer
 accessible  class   net/minecraft/client/gui/screens/inventory/CreativeModeInventoryScreen$CustomCreativeSlot
 accessible  method  net/minecraft/world/item/component/BundleContents   getWeight   (Lnet/minecraft/world/item/ItemStack;)Lorg/apache/commons/lang3/math/Fraction;
 accessible  method  net/minecraft/world/entity/animal/Sheep createSheepColor    (Lnet/minecraft/world/item/DyeColor;)I
+accessible  method  net/minecraft/world/item/component/BundleContents   <init>  (Ljava/util/List;Lorg/apache/commons/lang3/math/Fraction;)V
+accessible  method  net/minecraft/world/item/component/BundleContents   computeContentWeight    (Ljava/util/List;)Lorg/apache/commons/lang3/math/Fraction;
+accessible  class   net/minecraft/core/component/DataComponentType$Builder$SimpleType
+accessible  field   net/minecraft/core/component/DataComponentType$Builder$SimpleType   codec   Lcom/mojang/serialization/Codec;
+mutable field   net/minecraft/core/component/DataComponentType$Builder$SimpleType   codec   Lcom/mojang/serialization/Codec;
+accessible  field   net/minecraft/core/component/DataComponentType$Builder$SimpleType   streamCodec Lnet/minecraft/network/codec/StreamCodec;
+mutable field   net/minecraft/core/component/DataComponentType$Builder$SimpleType   streamCodec Lnet/minecraft/network/codec/StreamCodec;

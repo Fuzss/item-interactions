@@ -60,6 +60,6 @@ public class EmptyProvider implements ItemContentsProvider {
 
     @Override
     public Type getType() {
-        return ModRegistry.EMPTY.value();
+        return ModRegistry.EMPTY_ITEM_CONTENTS_PROVIDER_TYPE.value();
     }
 }

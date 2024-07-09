@@ -1,10 +1,13 @@
 package fuzs.iteminteractions.api.v1;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Lifecycle;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.level.material.MapColor;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
@@ -19,8 +22,8 @@ import java.util.stream.Stream;
 public final class DyeBackedColor {
     private static final String CUSTOM_COLOR_PREFIX = "#";
     public static final Codec<DyeBackedColor> CODEC = Codec.STRING.comapFlatMap(DyeBackedColor::parseColor, DyeBackedColor::serialize);
-    private static final Map<DyeColor, DyeBackedColor> LEGACY_FORMAT_TO_COLOR = Stream.of(DyeColor.values())
-            .collect(ImmutableMap.toImmutableMap(Function.identity(), formatting -> new DyeBackedColor(formatting.getTextureDiffuseColor(), formatting.getName())));
+    private static final BiMap<DyeColor, DyeBackedColor> LEGACY_FORMAT_TO_COLOR = Stream.of(DyeColor.values())
+            .collect(ImmutableBiMap.toImmutableBiMap(Function.identity(), formatting -> new DyeBackedColor(formatting.getTextureDiffuseColor(), formatting.getName())));
     private static final Map<String, DyeBackedColor> NAMED_COLORS = LEGACY_FORMAT_TO_COLOR.values()
             .stream()
             .collect(ImmutableMap.toImmutableMap(textColor -> textColor.name, Function.identity()));
@@ -30,12 +33,12 @@ public final class DyeBackedColor {
     private final String name;
 
     private DyeBackedColor(int value, String name) {
-        this.value = value & 16777215;
+        this.value = value & 0XFFFFFF;
         this.name = name;
     }
 
     private DyeBackedColor(int value) {
-        this.value = value & 16777215;
+        this.value = value & 0XFFFFFF;
         this.name = null;
     }
 
@@ -49,6 +52,11 @@ public final class DyeBackedColor {
 
     public String formatValue() {
         return String.format(Locale.ROOT, "%s%06X", CUSTOM_COLOR_PREFIX, this.value);
+    }
+
+    @Nullable
+    public DyeColor unwrap() {
+        return LEGACY_FORMAT_TO_COLOR.inverse().get(this);
     }
 
     @Override
@@ -73,8 +81,12 @@ public final class DyeBackedColor {
         return this.serialize();
     }
 
-    public static DyeBackedColor fromLegacyFormat(DyeColor formatting) {
-        return LEGACY_FORMAT_TO_COLOR.get(formatting);
+    public static DyeBackedColor fromDyeColor(DyeColor dyeColor) {
+        return LEGACY_FORMAT_TO_COLOR.get(dyeColor);
+    }
+
+    public static DyeBackedColor fromMapColor(MapColor mapColor) {
+        return fromRgb(mapColor.col);
     }
 
     public static DyeBackedColor fromRgb(int color) {

@@ -20,6 +20,7 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
@@ -36,7 +37,7 @@ public final class ItemContentsProviders extends SimpleJsonResourceReloadListene
 
     @Override
     protected void apply(Map<ResourceLocation, JsonElement> map, ResourceManager resourceManager, ProfilerFiller profiler) {
-        ImmutableMap.Builder<Item, ItemContentsProvider> builder = ImmutableMap.builder();
+        Map<Item, ItemContentsProvider> providers = new IdentityHashMap<>();
         for (JsonElement jsonElement : map.values()) {
             ItemContentsProvider.WITH_ITEMS_CODEC.parse(this.registries.createSerializationContext(JsonOps.INSTANCE),
                             jsonElement
@@ -47,11 +48,12 @@ public final class ItemContentsProviders extends SimpleJsonResourceReloadListene
                     ))
                     .ifPresent((Map.Entry<HolderSet<Item>, ItemContentsProvider> entry) -> {
                         entry.getKey().forEach((Holder<Item> holder) -> {
-                            builder.put(holder.value(), entry.getValue());
+                            // multiple entries can define a provider for the same item, in that case just let the first one win
+                            providers.putIfAbsent(holder.value(), entry.getValue());
                         });
                     });
         }
-        setItemContainerProviders(builder.build());
+        setItemContainerProviders(providers);
     }
 
     public static ItemContentsBehavior get(ItemStack itemStack) {

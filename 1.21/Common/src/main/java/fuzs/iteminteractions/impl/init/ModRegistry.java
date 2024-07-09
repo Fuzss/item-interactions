@@ -15,22 +15,24 @@ import net.minecraft.core.Holder;
 import net.minecraft.world.entity.player.Player;
 
 public class ModRegistry {
-    static final RegistryManager REGISTRY = RegistryManager.from(ItemInteractions.MOD_ID);
-    public static final Holder.Reference<ItemContentsProvider.Type> EMPTY = REGISTRY.register(ItemContentsProvider.REGISTRY_KEY,
+    static final RegistryManager REGISTRIES = RegistryManager.from(ItemInteractions.MOD_ID);
+    public static final Holder.Reference<ItemContentsProvider.Type> EMPTY_ITEM_CONTENTS_PROVIDER_TYPE = REGISTRIES.register(
+            ItemContentsProvider.REGISTRY_KEY,
             "empty",
             () -> new ItemContentsProvider.Type(EmptyProvider.CODEC)
     );
-    public static final Holder.Reference<ItemContentsProvider.Type> CONTAINER = REGISTRY.register(
+    public static final Holder.Reference<ItemContentsProvider.Type> CONTAINER_ITEM_CONTENTS_PROVIDER_TYPE = REGISTRIES.register(
             ItemContentsProvider.REGISTRY_KEY,
             "container",
             () -> new ItemContentsProvider.Type(ContainerProvider.CODEC)
     );
-    public static final Holder.Reference<ItemContentsProvider.Type> ENDER_CHEST = REGISTRY.register(
+    public static final Holder.Reference<ItemContentsProvider.Type> ENDER_CHEST_ITEM_CONTENTS_PROVIDER_TYPE = REGISTRIES.register(
             ItemContentsProvider.REGISTRY_KEY,
             "ender_chest",
             () -> new ItemContentsProvider.Type(EnderChestProvider.CODEC)
     );
-    public static final Holder.Reference<ItemContentsProvider.Type> BUNDLE = REGISTRY.register(ItemContentsProvider.REGISTRY_KEY,
+    public static final Holder.Reference<ItemContentsProvider.Type> BUNDLE_ITEM_CONTENTS_PROVIDER_TYPE = REGISTRIES.register(
+            ItemContentsProvider.REGISTRY_KEY,
             "bundle",
             () -> new ItemContentsProvider.Type(BundleProvider.CODEC)
     );

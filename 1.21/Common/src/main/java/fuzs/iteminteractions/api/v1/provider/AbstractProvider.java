@@ -1,22 +1,24 @@
 package fuzs.iteminteractions.api.v1.provider;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import fuzs.iteminteractions.api.v1.ItemContentsHelper;
 import fuzs.iteminteractions.api.v1.DyeBackedColor;
+import fuzs.iteminteractions.api.v1.ItemContentsHelper;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.RegistryCodecs;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
 public abstract class AbstractProvider implements TooltipProvider {
+    @Nullable
     final DyeBackedColor dyeColor;
     private final float[] backgroundColor;
     HolderSet<Item> disallowedItems = HolderSet.empty();
 
-    protected AbstractProvider(DyeBackedColor dyeColor) {
+    protected AbstractProvider(@Nullable DyeBackedColor dyeColor) {
         this.dyeColor = dyeColor;
         this.backgroundColor = ItemContentsHelper.getBackgroundColor(dyeColor);
     }

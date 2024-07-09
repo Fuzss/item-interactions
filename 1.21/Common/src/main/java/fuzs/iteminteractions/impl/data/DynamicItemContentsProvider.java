@@ -17,8 +17,8 @@ public class DynamicItemContentsProvider extends AbstractItemContentsProvider {
 
     @Override
     public void addItemProviders() {
-        this.add(ItemInteractions.id("ender_chest"), new EnderChestProvider(), Items.ENDER_CHEST);
-        this.add(ItemInteractions.id("shulker_box"),
+        this.add(new EnderChestProvider(), Items.ENDER_CHEST);
+        this.add("shulker_box",
                 new ContainerProvider(9, 3).filterContainerItems(true),
                 Items.SHULKER_BOX,
                 Items.WHITE_SHULKER_BOX,
@@ -38,6 +38,6 @@ public class DynamicItemContentsProvider extends AbstractItemContentsProvider {
                 Items.RED_SHULKER_BOX,
                 Items.BLACK_SHULKER_BOX
         );
-        this.add(ItemInteractions.id("bundle"), new BundleProvider(1, DyeBackedColor.fromRgb(0XFCBA03)), Items.BUNDLE);
+        this.add("bundle", new BundleProvider(8, DyeBackedColor.fromRgb(0XFCBA03)), Items.BUNDLE, Items.SADDLE);
     }
 }

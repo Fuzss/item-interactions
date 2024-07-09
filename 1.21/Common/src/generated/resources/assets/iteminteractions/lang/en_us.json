@@ -2,6 +2,7 @@
   "item.container.tooltip.hold": "Hold",
   "item.container.tooltip.press": "Press",
   "item.container.tooltip.revealContents": "%s %s to reveal contents",
+  "item.minecraft.bundle.capacity": "Capacity: %s%%",
   "key.categories.iteminteractions": "Item Interactions",
   "key.toggleCarriedItemTooltips": "Toggle Carried Item Tooltips",
   "key.toggleSelectedItemTooltips": "Toggle Selected Item Tooltips",
