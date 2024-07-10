@@ -18,7 +18,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.BundleContents;
 import org.apache.commons.lang3.math.Fraction;
 import org.jetbrains.annotations.Nullable;
@@ -27,7 +26,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 public class BundleProvider extends AbstractProvider {
-    public static final String KEY_BUNDLE_CAPACITY = Items.BUNDLE.getDescriptionId() + ".capacity";
     public static final MapCodec<BundleProvider> CODEC = RecordCodecBuilder.mapCodec(instance -> {
         return instance.group(capacityMultiplierCodec(), backgroundColorCodec(), disallowedItemsCodec())
                 .apply(instance,
