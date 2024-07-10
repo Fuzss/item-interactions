@@ -1,6 +1,5 @@
 package fuzs.iteminteractions.impl;
 
-import fuzs.iteminteractions.api.v1.provider.impl.BundleProvider;
 import fuzs.iteminteractions.impl.config.ClientConfig;
 import fuzs.iteminteractions.impl.config.ServerConfig;
 import fuzs.iteminteractions.impl.data.DynamicItemContentsProvider;
@@ -26,7 +25,6 @@ import fuzs.puzzleslib.api.event.v1.server.SyncDataPackContentsCallback;
 import fuzs.puzzleslib.api.network.v3.NetworkHandler;
 import fuzs.puzzleslib.api.resources.v1.DynamicPackResources;
 import fuzs.puzzleslib.api.resources.v1.PackResourcesHelper;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +49,6 @@ public class ItemInteractions implements ModConstructor {
     public void onConstructMod() {
         ModRegistry.touch();
         registerEventHandlers();
-        BundleProvider.setBundleContentsComponentCodecs(DataComponents.BUNDLE_CONTENTS);
     }
 
     private static void registerEventHandlers() {

@@ -50,7 +50,7 @@ public class EnderChestSyncHandler {
 
     public static void broadcastFullState(ServerPlayer player) {
         ItemInteractions.NETWORK.sendTo(player,
-                new S2CEnderChestContentMessage(player.getEnderChestInventory().items).toClientboundMessage()
+                new S2CEnderChestContentMessage(player.getEnderChestInventory().getItems()).toClientboundMessage()
         );
     }
 

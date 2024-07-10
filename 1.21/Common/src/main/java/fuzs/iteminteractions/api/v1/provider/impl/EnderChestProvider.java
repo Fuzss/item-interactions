@@ -33,11 +33,6 @@ public class EnderChestProvider implements TooltipProvider {
     }
 
     @Override
-    public boolean canProvideTooltipImage(ItemStack containerStack, Player player) {
-        return !this.getItemContainer(containerStack, player, false).isEmpty();
-    }
-
-    @Override
     public TooltipComponent createTooltipImageComponent(ItemStack containerStack, Player player, NonNullList<ItemStack> items) {
         return new ItemContentsTooltip(items, GRID_SIZE_X, this.getGridSizeY(items), DEFAULT_ENDER_CHEST_COLOR);
     }
@@ -56,7 +51,7 @@ public class EnderChestProvider implements TooltipProvider {
         SimpleContainer container = this.getItemContainer(containerStack, player, false);
         if (player.level().isClientSide) {
             // will only actually broadcast when in creative menu as that menu needs manual syncing
-            ClientEnderChestHandler.broadcastFullState(container.items);
+            ClientEnderChestHandler.broadcastFullState(container.getItems());
         } else if (player.containerMenu instanceof ChestMenu menu && menu.getContainer() == container) {
             // sync full state, client ender chest will otherwise likely be messed up when using item interactions
             // for the ender chest inside the ender chest menu due to packet spam and corresponding delays

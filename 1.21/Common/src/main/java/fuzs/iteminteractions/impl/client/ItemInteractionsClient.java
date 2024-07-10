@@ -64,22 +64,35 @@ public class ItemInteractionsClient implements ClientModConstructor {
             ItemDecorationHelper.clearCache();
         });
         ItemTooltipCallback.EVENT.register((ItemStack itemStack, List<Component> lines, Item.TooltipContext tooltipContext, @Nullable Player player, TooltipFlag tooltipFlag) -> {
-            BundleContents bundleContents = itemStack.getOrDefault(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY);
-            if (bundleContents != BundleContents.EMPTY) {
-                String s = new DecimalFormat("0").format(bundleContents.weight().floatValue() * 100.0F);
-                Component component = Component.translatable(BundleProvider.KEY_BUNDLE_CAPACITY, s)
-                        .withStyle(ChatFormatting.GRAY);
+            BundleContents bundleContents = itemStack.get(DataComponents.BUNDLE_CONTENTS);
+            if (bundleContents != null) {
+                Component component;
+                if (bundleContents != BundleContents.EMPTY) {
+                    String s = new DecimalFormat("0").format(bundleContents.weight().floatValue() * 100.0F);
+                    component = Component.translatable(BundleProvider.KEY_BUNDLE_CAPACITY, s)
+                            .withStyle(ChatFormatting.GRAY);
+                } else {
+                    component = null;
+                }
                 if (lines.isEmpty()) {
-                    lines.add(component);
+                    if (component != null) {
+                        lines.add(component);
+                    }
                 } else {
                     ListIterator<Component> iterator = lines.listIterator(1);
                     while (iterator.hasNext()) {
                         if (iterator.next().getContents() instanceof TranslatableContents contents && contents.getKey().equals("item.minecraft.bundle.fullness")) {
-                            iterator.set(component);
+                            if (bundleContents == BundleContents.EMPTY) {
+                                iterator.remove();
+                            } else {
+                                iterator.set(component);
+                            }
                             return;
                         }
                     }
-                    lines.add(1, component);
+                    if (component != null) {
+                        lines.add(1, component);
+                    }
                 }
             }
         });

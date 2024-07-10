@@ -1,6 +1,5 @@
 package fuzs.iteminteractions.api.v1.provider;
 
-import com.mojang.serialization.Codec;
 import fuzs.iteminteractions.api.v1.provider.impl.EmptyProvider;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
@@ -186,10 +185,10 @@ public record ItemContentsBehavior(ItemContentsProvider provider) {
     }
 
     /**
-     * @return the item container provider codec
+     * @return the item container provider type
      */
-    public Codec<ItemContentsProvider> codec() {
-        return (Codec<ItemContentsProvider>) this.provider.getType().mapCodec().codec();
+    public ItemContentsProvider.Type getType() {
+        return this.provider.getType();
     }
 
     /**
