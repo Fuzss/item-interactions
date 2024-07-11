@@ -28,7 +28,7 @@ public class EmptyProvider implements ItemContentsProvider {
     }
 
     @Override
-    public boolean isItemAllowedInContainer(ItemStack containerStack, ItemStack stackToAdd) {
+    public boolean isItemAllowedInContainer(ItemStack stackToAdd) {
         return false;
     }
 

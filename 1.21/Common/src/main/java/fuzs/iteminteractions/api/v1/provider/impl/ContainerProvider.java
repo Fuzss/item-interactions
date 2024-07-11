@@ -135,11 +135,12 @@ public class ContainerProvider extends AbstractProvider {
     @Override
     public boolean allowsPlayerInteractions(ItemStack containerStack, Player player) {
         return super.allowsPlayerInteractions(containerStack, player) &&
-                this.interactionPermissions.allowsPlayerInteractions(player) && (player.getAbilities().instabuild ||
-                Arrays.stream(EQUIPMENT_SLOTS)
-                        .filter(this.equipmentSlots::test)
-                        .map(player::getItemBySlot)
-                        .anyMatch((ItemStack itemStack) -> itemStack == containerStack));
+                this.interactionPermissions.allowsPlayerInteractions(player) &&
+                (player.getAbilities().instabuild || this.equipmentSlots == EquipmentSlotGroup.ANY ||
+                        Arrays.stream(EQUIPMENT_SLOTS)
+                                .filter(this.equipmentSlots::test)
+                                .map(player::getItemBySlot)
+                                .anyMatch((ItemStack itemStack) -> itemStack == containerStack));
     }
 
     @Override
@@ -152,8 +153,8 @@ public class ContainerProvider extends AbstractProvider {
     }
 
     @Override
-    public boolean isItemAllowedInContainer(ItemStack containerStack, ItemStack stackToAdd) {
-        return super.isItemAllowedInContainer(containerStack, stackToAdd) &&
+    public boolean isItemAllowedInContainer(ItemStack stackToAdd) {
+        return super.isItemAllowedInContainer(stackToAdd) &&
                 (!this.filterContainerItems || stackToAdd.getItem().canFitInsideContainerItems());
     }
 

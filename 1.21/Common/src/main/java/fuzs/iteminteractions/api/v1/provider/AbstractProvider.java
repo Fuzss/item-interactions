@@ -44,7 +44,7 @@ public abstract class AbstractProvider implements TooltipProvider {
     }
 
     @Override
-    public boolean isItemAllowedInContainer(ItemStack containerStack, ItemStack stackToAdd) {
+    public boolean isItemAllowedInContainer(ItemStack stackToAdd) {
         return !stackToAdd.is(this.disallowedItems);
     }
 }

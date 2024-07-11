@@ -106,14 +106,11 @@ public interface ItemContentsProvider {
      * Is <code>stackToAdd</code> allowed to be added to the container supplied by <code>containerStack</code>.
      * <p>
      * This should be the same behavior as vanilla's {@link Item#canFitInsideContainerItems()}.
-     * <p>
-     * TODO remove unused containerStack parameter
      *
-     * @param containerStack the item stack providing the container to add <code>stackToAdd</code> to
-     * @param stackToAdd     the stack to be added to the container
+     * @param stackToAdd the stack to be added to the container
      * @return is <code>stack</code> allowed to be added to the container
      */
-    default boolean isItemAllowedInContainer(ItemStack containerStack, ItemStack stackToAdd) {
+    default boolean isItemAllowedInContainer(ItemStack stackToAdd) {
         return true;
     }
 
@@ -122,7 +119,7 @@ public interface ItemContentsProvider {
      * necessarily the full stack).
      * <p>
      * Before this is called {@link #allowsPlayerInteractions(ItemStack, Player)} and
-     * {@link #isItemAllowedInContainer(ItemStack, ItemStack)} are checked.
+     * {@link #isItemAllowedInContainer(ItemStack)} are checked.
      *
      * @param containerStack the item stack providing the container to add <code>stack</code> to
      * @param stackToAdd     the stack to be added to the container
@@ -152,7 +149,7 @@ public interface ItemContentsProvider {
      * Mainly used by bundles, otherwise {@link ItemContentsProvider#canAddItem} should be enough.
      * <p>
      * Before this is called {@link #allowsPlayerInteractions(ItemStack, Player)} and
-     * {@link #isItemAllowedInContainer(ItemStack, ItemStack)} are checked.
+     * {@link #isItemAllowedInContainer(ItemStack)} are checked.
      *
      * @param containerStack the item stack providing the container to add <code>stackToAdd</code> to
      * @param stackToAdd     the stack to be added to the container

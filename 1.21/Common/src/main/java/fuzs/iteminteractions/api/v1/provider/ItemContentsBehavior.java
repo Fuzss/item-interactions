@@ -50,12 +50,11 @@ public record ItemContentsBehavior(ItemContentsProvider provider) {
      * <p>
      * This should be the same behavior as vanilla's {@link Item#canFitInsideContainerItems()}.
      *
-     * @param containerStack the item stack providing the container to add <code>stackToAdd</code> to
-     * @param stackToAdd     the stack to be added to the container
+     * @param stackToAdd the stack to be added to the container
      * @return is <code>stack</code> allowed to be added to the container
      */
-    public boolean isItemAllowedInContainer(ItemStack containerStack, ItemStack stackToAdd) {
-        return this.provider.isItemAllowedInContainer(containerStack, stackToAdd);
+    public boolean isItemAllowedInContainer(ItemStack stackToAdd) {
+        return this.provider.isItemAllowedInContainer(stackToAdd);
     }
 
     /**
@@ -63,7 +62,7 @@ public record ItemContentsBehavior(ItemContentsProvider provider) {
      * necessarily the full stack).
      * <p>
      * Before this is called {@link #allowsPlayerInteractions(ItemStack, Player)} and
-     * {@link #isItemAllowedInContainer(ItemStack, ItemStack)} are checked.
+     * {@link #isItemAllowedInContainer(ItemStack)} are checked.
      *
      * @param containerStack the item stack providing the container to add <code>stack</code> to
      * @param stackToAdd     the stack to be added to the container
@@ -108,7 +107,7 @@ public record ItemContentsBehavior(ItemContentsProvider provider) {
      * <code>containerStack</code>.
      * <p>
      * Before this is called {@link #allowsPlayerInteractions(ItemStack, Player)} and
-     * {@link #isItemAllowedInContainer(ItemStack, ItemStack)} are checked.
+     * {@link #isItemAllowedInContainer(ItemStack)} are checked.
      *
      * @param containerStack the item stack providing the container to add <code>stack</code> to
      * @param stackToAdd     the stack to be searched for in the container
@@ -128,7 +127,7 @@ public record ItemContentsBehavior(ItemContentsProvider provider) {
      * Mainly used by bundles, otherwise {@link ItemContentsProvider#canAddItem} should be enough.
      * <p>
      * Before this is called {@link #allowsPlayerInteractions(ItemStack, Player)} and
-     * {@link #isItemAllowedInContainer(ItemStack, ItemStack)} are checked.
+     * {@link #isItemAllowedInContainer(ItemStack)} are checked.
      *
      * @param containerStack the item stack providing the container to add <code>stackToAdd</code> to
      * @param stackToAdd     the stack to be added to the container
@@ -154,7 +153,7 @@ public record ItemContentsBehavior(ItemContentsProvider provider) {
      */
     public boolean canAcceptItem(ItemStack containerStack, ItemStack stackToAdd, Player player) {
         return !stackToAdd.isEmpty() && this.allowsPlayerInteractions(containerStack, player) &&
-                this.isItemAllowedInContainer(containerStack, stackToAdd);
+                this.isItemAllowedInContainer(stackToAdd);
     }
 
     /**

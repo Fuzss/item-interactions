@@ -90,8 +90,8 @@ public class BundleProvider extends AbstractProvider {
     }
 
     @Override
-    public boolean isItemAllowedInContainer(ItemStack containerStack, ItemStack stackToAdd) {
-        return super.isItemAllowedInContainer(containerStack, stackToAdd) &&
+    public boolean isItemAllowedInContainer(ItemStack stackToAdd) {
+        return super.isItemAllowedInContainer(stackToAdd) &&
                 stackToAdd.getItem().canFitInsideContainerItems();
     }
 
