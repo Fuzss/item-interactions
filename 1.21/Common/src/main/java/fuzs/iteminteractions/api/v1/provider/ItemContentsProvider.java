@@ -44,14 +44,15 @@ public interface ItemContentsProvider {
     /**
      * Codec that additionally to the provider itself also includes the provider type.
      */
-    MapCodec<ItemContentsProvider> CODEC = REGISTRY.byNameCodec().dispatchMap(ItemContentsProvider::getType, Type::mapCodec);
+    MapCodec<ItemContentsProvider> CODEC = REGISTRY.byNameCodec()
+            .dispatchMap(ItemContentsProvider::getType, Type::mapCodec);
     /**
      * Codec that includes a list of supported items.
      */
     Codec<Map.Entry<HolderSet<Item>, ItemContentsProvider>> WITH_ITEMS_CODEC = RecordCodecBuilder.create(instance -> {
-        return instance.group(RegistryCodecs.homogeneousList(Registries.ITEM).fieldOf("supported_items").forGetter(Map.Entry::getKey),
-                CODEC.forGetter(Map.Entry::getValue)
-        ).apply(instance, Map::entry);
+        return instance.group(RegistryCodecs.homogeneousList(Registries.ITEM)
+                .fieldOf("supported_items")
+                .forGetter(Map.Entry::getKey), CODEC.forGetter(Map.Entry::getValue)).apply(instance, Map::entry);
     });
 
     /**
@@ -105,6 +106,8 @@ public interface ItemContentsProvider {
      * Is <code>stackToAdd</code> allowed to be added to the container supplied by <code>containerStack</code>.
      * <p>
      * This should be the same behavior as vanilla's {@link Item#canFitInsideContainerItems()}.
+     * <p>
+     * TODO remove unused containerStack parameter
      *
      * @param containerStack the item stack providing the container to add <code>stackToAdd</code> to
      * @param stackToAdd     the stack to be added to the container
