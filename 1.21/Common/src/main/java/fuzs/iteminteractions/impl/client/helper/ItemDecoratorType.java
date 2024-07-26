@@ -3,7 +3,6 @@ package fuzs.iteminteractions.impl.client.helper;
 import fuzs.iteminteractions.api.v1.provider.ItemContentsBehavior;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
@@ -13,45 +12,45 @@ public enum ItemDecoratorType {
     PRESENT_AND_SPACE("+", ChatFormatting.GREEN),
     PRESENT_NO_SPACE("+", ChatFormatting.RED);
 
-    private final String text;
+    private final String string;
     private final int color;
 
-    ItemDecoratorType(String text, ChatFormatting color) {
-        this(text, color.getColor());
+    ItemDecoratorType(String string, ChatFormatting chatFormatting) {
+        this(string, chatFormatting.getColor());
     }
 
-    ItemDecoratorType(String text, int color) {
-        this.text = text;
+    ItemDecoratorType(String string, int color) {
+        this.string = string;
         this.color = color;
     }
 
-    public String getText() {
-        return this.text;
+    public String getString() {
+        return this.string;
     }
 
     public int getWidth(Font font) {
-        return font.width(this.text);
+        return font.width(this.string);
     }
 
     public int getColor() {
         return this.color;
     }
 
-    public static ItemDecoratorType getItemDecoratorType(ItemContentsBehavior provider, ItemStack containerStack, ItemStack carriedStack, Player player) {
-        if (provider.canAddItem(containerStack, carriedStack, player)) {
-            if (provider.hasAnyOf(containerStack, carriedStack, player)) {
-                return ItemDecoratorType.PRESENT_AND_SPACE;
-            }
-            return ItemDecoratorType.SPACE;
-        } else if (provider.hasAnyOf(containerStack, carriedStack, player)) {
-            return ItemDecoratorType.PRESENT_NO_SPACE;
-        }
-        return ItemDecoratorType.NONE;
+    public boolean mayRender() {
+        return this != NONE;
     }
 
-    @FunctionalInterface
-    public interface Provider {
-
-        ItemDecoratorType get(AbstractContainerScreen<?> screen, ItemStack stack, ItemStack carriedStack);
+    public static ItemDecoratorType getItemDecoratorType(ItemContentsBehavior behavior, ItemStack containerStack, ItemStack carriedStack, Player player) {
+        if (behavior.canAddItem(containerStack, carriedStack, player)) {
+            if (behavior.hasAnyOf(containerStack, carriedStack, player)) {
+                return ItemDecoratorType.PRESENT_AND_SPACE;
+            } else {
+                return ItemDecoratorType.SPACE;
+            }
+        } else if (behavior.hasAnyOf(containerStack, carriedStack, player)) {
+            return ItemDecoratorType.PRESENT_NO_SPACE;
+        } else {
+            return ItemDecoratorType.NONE;
+        }
     }
 }

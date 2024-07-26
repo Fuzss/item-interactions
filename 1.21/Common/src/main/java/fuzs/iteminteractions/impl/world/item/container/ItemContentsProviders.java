@@ -23,9 +23,11 @@ import net.minecraft.world.item.ItemStack;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 public final class ItemContentsProviders extends SimpleJsonResourceReloadListener {
-    public static final ResourceLocation ITEM_CONTAINER_PROVIDER_LOCATION = ItemInteractions.id("item_contents_provider");
+    public static final ResourceLocation ITEM_CONTAINER_PROVIDER_LOCATION = ItemInteractions.id(
+            "item_contents_provider");
     private static Map<Item, ItemContentsProvider> providers = ImmutableMap.of();
 
     private final HolderLookup.Provider registries;
@@ -42,10 +44,10 @@ public final class ItemContentsProviders extends SimpleJsonResourceReloadListene
             ItemContentsProvider.WITH_ITEMS_CODEC.parse(this.registries.createSerializationContext(JsonOps.INSTANCE),
                             jsonElement
                     )
-                    .resultOrPartial(string -> ItemInteractions.LOGGER.error(
-                            "Failed to parse item container provider: {}",
-                            string
-                    ))
+                    .resultOrPartial(
+                            string -> ItemInteractions.LOGGER.error("Failed to parse item container provider: {}",
+                                    string
+                            ))
                     .ifPresent((Map.Entry<HolderSet<Item>, ItemContentsProvider> entry) -> {
                         entry.getKey().forEach((Holder<Item> holder) -> {
                             // multiple entries can define a provider for the same item, in that case just let the first one win
@@ -68,8 +70,8 @@ public final class ItemContentsProviders extends SimpleJsonResourceReloadListene
         ItemContentsProviders.providers = ImmutableMap.copyOf(providers);
     }
 
-    public static void onAddDataPackReloadListeners(HolderLookup.Provider registries, BiConsumer<ResourceLocation, PreparableReloadListener> consumer) {
-        consumer.accept(ITEM_CONTAINER_PROVIDER_LOCATION, new ItemContentsProviders(registries));
+    public static void onAddDataPackReloadListeners(BiConsumer<ResourceLocation, Function<HolderLookup.Provider, PreparableReloadListener>> consumer) {
+        consumer.accept(ITEM_CONTAINER_PROVIDER_LOCATION, ItemContentsProviders::new);
     }
 
     public static void onSyncDataPackContents(ServerPlayer player, boolean joined) {

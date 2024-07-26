@@ -10,7 +10,6 @@ import fuzs.iteminteractions.impl.client.core.KeyMappingProvider;
 import fuzs.iteminteractions.impl.client.handler.ClientInputActionHandler;
 import fuzs.iteminteractions.impl.client.handler.KeyBindingTogglesHandler;
 import fuzs.iteminteractions.impl.client.handler.MouseDraggingHandler;
-import fuzs.iteminteractions.impl.client.helper.ItemDecorationHelper;
 import fuzs.iteminteractions.impl.world.item.container.ItemContentsProviders;
 import fuzs.puzzleslib.api.client.core.v1.ClientModConstructor;
 import fuzs.puzzleslib.api.client.core.v1.context.ClientTooltipComponentsContext;
@@ -49,7 +48,6 @@ public class ItemInteractionsClient implements ClientModConstructor {
         PlayLevelSoundEvents.ENTITY.register(ClientInputActionHandler::onPlaySoundAtPosition);
         ClientPlayerNetworkEvents.LOGGED_IN.register((LocalPlayer player, MultiPlayerGameMode multiPlayerGameMode, Connection connection) -> {
             ItemContentsProviders.setItemContainerProviders(ImmutableMap.of());
-            ItemDecorationHelper.clearCache();
         });
     }
 
