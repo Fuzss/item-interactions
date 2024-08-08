@@ -12,7 +12,7 @@ public class C2SContainerClientInputMessage implements MessageV2<C2SContainerCli
     private boolean extractSingleItem;
 
     public C2SContainerClientInputMessage() {
-
+        // NO-OP
     }
 
     public C2SContainerClientInputMessage(int currentSlot, boolean extractSingleItem) {

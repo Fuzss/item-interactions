@@ -52,7 +52,7 @@ public class EnderChestProvider implements TooltipProvider {
         if (player.level().isClientSide) {
             // will only actually broadcast when in creative menu as that menu needs manual syncing
             ClientEnderChestHandler.broadcastFullState(container.getItems());
-        } else if (player.containerMenu instanceof ChestMenu menu && menu.getContainer() == container) {
+        } else {
             // sync full state, client ender chest will otherwise likely be messed up when using item interactions
             // for the ender chest inside the ender chest menu due to packet spam and corresponding delays
             EnderChestSyncHandler.broadcastFullState((ServerPlayer) player);
