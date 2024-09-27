@@ -8,6 +8,7 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickAction;
+import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.tuple.Pair;
@@ -18,49 +19,58 @@ import java.util.function.*;
 public class ItemInteractionHelper {
 
     public static boolean overrideStackedOnOther(Supplier<SimpleContainer> containerSupplier, Slot slot, ClickAction clickAction, Player player, ToIntFunction<ItemStack> acceptableItemCount, ToIntBiFunction<Container, ItemStack> maxStackSize) {
-        ItemStack stackBelowMe = slot.getItem();
-        boolean extractSingleItemOnly = ContainerSlotHelper.extractSingleItemOnly(player);
-        if (clickAction == ClickAction.SECONDARY && (stackBelowMe.isEmpty() || extractSingleItemOnly)) {
-            BiConsumer<ItemStack, Integer> addToSlot = (stackToAdd, index) -> {
-                addStack(containerSupplier,
-                        player,
-                        slot.safeInsert(stackToAdd),
-                        acceptableItemCount,
-                        index,
-                        maxStackSize
-                );
-            };
-            handleRemoveItem(containerSupplier, stackBelowMe, player, extractSingleItemOnly, addToSlot, maxStackSize);
-            return true;
-        } else if (clickAction == ClickAction.SECONDARY || extractSingleItemOnly) {
-            ItemStack stackInSlot = slot.safeTake(stackBelowMe.getCount(), stackBelowMe.getCount(), player);
-            handleAddItem(containerSupplier, clickAction, player, acceptableItemCount, stackInSlot, maxStackSize);
-            slot.safeInsert(stackInSlot);
-            return true;
+        if (slot.container instanceof CraftingContainer) {
+            return false;
+        } else {
+            ItemStack stackBelowMe = slot.getItem();
+            boolean extractSingleItemOnly = ContainerSlotHelper.extractSingleItemOnly(player);
+            if (clickAction == ClickAction.SECONDARY && (stackBelowMe.isEmpty() || extractSingleItemOnly)) {
+                BiConsumer<ItemStack, Integer> addToSlot = (stackToAdd, index) -> {
+                    addStack(containerSupplier,
+                            player,
+                            slot.safeInsert(stackToAdd),
+                            acceptableItemCount,
+                            index,
+                            maxStackSize
+                    );
+                };
+                handleRemoveItem(containerSupplier, stackBelowMe, player, extractSingleItemOnly, addToSlot, maxStackSize);
+                return true;
+            } else if (clickAction == ClickAction.SECONDARY || extractSingleItemOnly) {
+                ItemStack stackInSlot = slot.safeTake(stackBelowMe.getCount(), stackBelowMe.getCount(), player);
+                handleAddItem(containerSupplier, clickAction, player, acceptableItemCount, stackInSlot, maxStackSize);
+                slot.safeInsert(stackInSlot);
+                return true;
+            } else {
+                return false;
+            }
         }
-        return false;
     }
 
     public static boolean overrideOtherStackedOnMe(Supplier<SimpleContainer> containerSupplier, ItemStack stackOnMe, Slot slot, ClickAction clickAction, Player player, SlotAccess slotAccess, ToIntFunction<ItemStack> acceptableItemCount, ToIntBiFunction<Container, ItemStack> maxStackSize) {
-        if (!slot.allowModification(player)) return false;
-        boolean extractSingleItemOnly = ContainerSlotHelper.extractSingleItemOnly(player);
-        if (clickAction == ClickAction.SECONDARY && (stackOnMe.isEmpty() || extractSingleItemOnly)) {
-            BiConsumer<ItemStack, Integer> addToSlot = (stackToAdd, index) -> {
-                ItemStack stackInSlot = slotAccess.get();
-                if (stackInSlot.isEmpty()) {
-                    slotAccess.set(stackToAdd);
-                } else {
-                    stackInSlot.grow(stackToAdd.getCount());
-                    slotAccess.set(stackInSlot);
-                }
-            };
-            handleRemoveItem(containerSupplier, stackOnMe, player, extractSingleItemOnly, addToSlot, maxStackSize);
-            return true;
-        } else if (clickAction == ClickAction.SECONDARY || extractSingleItemOnly) {
-            handleAddItem(containerSupplier, clickAction, player, acceptableItemCount, stackOnMe, maxStackSize);
-            return true;
+        if (!slot.allowModification(player) || slot.container instanceof CraftingContainer) {
+            return false;
+        } else {
+            boolean extractSingleItemOnly = ContainerSlotHelper.extractSingleItemOnly(player);
+            if (clickAction == ClickAction.SECONDARY && (stackOnMe.isEmpty() || extractSingleItemOnly)) {
+                BiConsumer<ItemStack, Integer> addToSlot = (stackToAdd, index) -> {
+                    ItemStack stackInSlot = slotAccess.get();
+                    if (stackInSlot.isEmpty()) {
+                        slotAccess.set(stackToAdd);
+                    } else {
+                        stackInSlot.grow(stackToAdd.getCount());
+                        slotAccess.set(stackInSlot);
+                    }
+                };
+                handleRemoveItem(containerSupplier, stackOnMe, player, extractSingleItemOnly, addToSlot, maxStackSize);
+                return true;
+            } else if (clickAction == ClickAction.SECONDARY || extractSingleItemOnly) {
+                handleAddItem(containerSupplier, clickAction, player, acceptableItemCount, stackOnMe, maxStackSize);
+                return true;
+            } else {
+                return false;
+            }
         }
-        return false;
     }
 
     private static void handleRemoveItem(Supplier<SimpleContainer> containerSupplier, ItemStack stackOnMe, Player player, boolean extractSingleItemOnly, BiConsumer<ItemStack, Integer> addToSlot, ToIntBiFunction<Container, ItemStack> maxStackSize) {
