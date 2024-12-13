@@ -8,15 +8,15 @@ import fuzs.iteminteractions.impl.world.item.container.ItemContentsProviders;
 import fuzs.puzzleslib.api.init.v3.registry.RegistryFactory;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryCodecs;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
 
 import java.util.Map;
 import java.util.Optional;
@@ -50,7 +50,7 @@ public interface ItemContentsProvider {
      * Codec that includes a list of supported items.
      */
     Codec<Map.Entry<HolderSet<Item>, ItemContentsProvider>> WITH_ITEMS_CODEC = RecordCodecBuilder.create(instance -> {
-        return instance.group(RegistryCodecs.homogeneousList(Registries.ITEM)
+        return instance.group(ExtraCodecs.nonEmptyHolderSet(Ingredient.NON_AIR_HOLDER_SET_CODEC)
                 .fieldOf("supported_items")
                 .forGetter(Map.Entry::getKey), CODEC.forGetter(Map.Entry::getValue)).apply(instance, Map::entry);
     });
@@ -180,6 +180,15 @@ public interface ItemContentsProvider {
      * @return the image tooltip provided by the item stack.
      */
     Optional<TooltipComponent> getTooltipImage(ItemStack containerStack, Player player);
+
+    /**
+     * @param containerStack
+     * @param oldSelectedItem
+     * @param newSelectedItem
+     */
+    default void onToggleSelectedItem(ItemStack containerStack, int oldSelectedItem, int newSelectedItem) {
+        // NO-OP
+    }
 
     /**
      * @return the item container provider type

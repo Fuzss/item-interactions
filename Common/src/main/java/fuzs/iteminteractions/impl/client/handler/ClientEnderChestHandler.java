@@ -13,8 +13,9 @@ public class ClientEnderChestHandler {
         // this is only required for the creative mode inventory, as it doesn't sync contents using default menu packets,
         // instead it uses custom packets which do not work for item interactions in a menu
         Minecraft minecraft = Minecraft.getInstance();
-        if (minecraft.gameMode.hasInfiniteItems() && minecraft.player.containerMenu instanceof CreativeModeInventoryScreen.ItemPickerMenu) {
-            ItemInteractions.NETWORK.sendToServer(new C2SEnderChestContentMessage(items).toServerboundMessage());
+        if (minecraft.gameMode.hasInfiniteItems() &&
+                minecraft.player.containerMenu instanceof CreativeModeInventoryScreen.ItemPickerMenu) {
+            ItemInteractions.NETWORK.sendMessage(new C2SEnderChestContentMessage(items).toServerboundMessage());
         }
     }
 }

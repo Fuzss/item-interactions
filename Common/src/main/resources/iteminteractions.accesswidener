@@ -1,8 +1,10 @@
 accessWidener   v2  named
 accessible  field   net/minecraft/client/gui/screens/inventory/AbstractContainerScreen  doubleclick Z
 accessible  method  net/minecraft/client/gui/screens/inventory/AbstractContainerScreen  slotClicked (Lnet/minecraft/world/inventory/Slot;IILnet/minecraft/world/inventory/ClickType;)V
-accessible  method  net/minecraft/client/gui/screens/inventory/AbstractContainerScreen  findSlot    (DD)Lnet/minecraft/world/inventory/Slot;
 accessible  class   net/minecraft/client/gui/screens/inventory/CreativeModeInventoryScreen$CustomCreativeSlot
 accessible  method  net/minecraft/world/item/component/BundleContents   getWeight   (Lnet/minecraft/world/item/ItemStack;)Lorg/apache/commons/lang3/math/Fraction;
 accessible  method  net/minecraft/world/entity/animal/Sheep createSheepColor    (Lnet/minecraft/world/item/DyeColor;)I
 accessible  method  net/minecraft/world/item/component/BundleContents   computeContentWeight    (Ljava/util/List;)Lorg/apache/commons/lang3/math/Fraction;
+accessible  field   net/minecraft/server/packs/resources/SimpleJsonResourceReloadListener   ops Lcom/mojang/serialization/DynamicOps;
+accessible  field   net/minecraft/server/packs/resources/SimpleJsonResourceReloadListener   codec   Lcom/mojang/serialization/Codec;
+accessible  field   net/minecraft/server/packs/resources/SimpleJsonResourceReloadListener   directory   Ljava/lang/String;

@@ -10,6 +10,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -28,7 +29,10 @@ public class ItemDecorationHelper {
         if (!behavior.isEmpty() && isValidSlot(slotBeingRendered, itemStack, minecraft.player)) {
             ItemStack carriedStack = screen.getMenu().getCarried();
             if (itemStack != carriedStack) {
-                ItemDecoratorType type = ItemDecoratorType.getItemDecoratorType(behavior, itemStack, carriedStack, minecraft.player);
+                ItemDecoratorType type = ItemDecoratorType.getItemDecoratorType(behavior,
+                        itemStack,
+                        carriedStack,
+                        minecraft.player);
                 if (type.mayRender()) {
                     resetRenderState();
                     renderItemDecoratorType(type, guiGraphics, font, itemPosX, itemPosY);
@@ -48,10 +52,18 @@ public class ItemDecorationHelper {
     private static void renderItemDecoratorType(ItemDecoratorType type, GuiGraphics guiGraphics, Font font, int itemPosX, int itemPosY) {
         guiGraphics.pose().pushPose();
         guiGraphics.pose().translate(0.0, 0.0, 200.0);
-        font.drawInBatch(type.getString(), (float) (itemPosX + 19 - 2 - type.getWidth(font)),
-                (float) (itemPosY + 6 + 3), type.getColor(), true, guiGraphics.pose().last().pose(),
-                guiGraphics.bufferSource(), Font.DisplayMode.NORMAL, 0, 0xF000F0
-        );
+        guiGraphics.drawSpecial((MultiBufferSource bufferSource) -> {
+            font.drawInBatch(type.getString(),
+                    (float) (itemPosX + 19 - 2 - type.getWidth(font)),
+                    (float) (itemPosY + 6 + 3),
+                    type.getColor(),
+                    true,
+                    guiGraphics.pose().last().pose(),
+                    bufferSource,
+                    Font.DisplayMode.NORMAL,
+                    0,
+                    0xF000F0);
+        });
         guiGraphics.pose().popPose();
     }
 

@@ -18,30 +18,28 @@ public class ModRegistry {
     public static final Holder.Reference<ItemContentsProvider.Type> EMPTY_ITEM_CONTENTS_PROVIDER_TYPE = REGISTRIES.register(
             ItemContentsProvider.REGISTRY_KEY,
             "empty",
-            () -> new ItemContentsProvider.Type(EmptyProvider.CODEC)
-    );
+            () -> new ItemContentsProvider.Type(EmptyProvider.CODEC));
     public static final Holder.Reference<ItemContentsProvider.Type> CONTAINER_ITEM_CONTENTS_PROVIDER_TYPE = REGISTRIES.register(
             ItemContentsProvider.REGISTRY_KEY,
             "container",
-            () -> new ItemContentsProvider.Type(ContainerProvider.CODEC)
-    );
+            () -> new ItemContentsProvider.Type(ContainerProvider.CODEC));
     public static final Holder.Reference<ItemContentsProvider.Type> ENDER_CHEST_ITEM_CONTENTS_PROVIDER_TYPE = REGISTRIES.register(
             ItemContentsProvider.REGISTRY_KEY,
             "ender_chest",
-            () -> new ItemContentsProvider.Type(EnderChestProvider.CODEC)
-    );
+            () -> new ItemContentsProvider.Type(EnderChestProvider.CODEC));
     public static final Holder.Reference<ItemContentsProvider.Type> BUNDLE_ITEM_CONTENTS_PROVIDER_TYPE = REGISTRIES.register(
             ItemContentsProvider.REGISTRY_KEY,
             "bundle",
-            () -> new ItemContentsProvider.Type(BundleProvider.CODEC)
-    );
+            () -> new ItemContentsProvider.Type(BundleProvider.CODEC));
 
-    public static final DataAttachmentType<Entity, Integer> CURRENT_CONTAINER_SLOT_ATTACHMENT_TYPE = DataAttachmentRegistry.<Integer>entityBuilder().defaultValue(
-            EntityType.PLAYER, -1).build(ItemInteractions.id("current_container_slot"));
-    public static final DataAttachmentType<Entity, Boolean> SINGLE_ITEM_MODIFIER_ATTACHMENT_TYPE = DataAttachmentRegistry.<Boolean>entityBuilder().defaultValue(
-            EntityType.PLAYER, false).build(ItemInteractions.id("single_item_modifier"));
+    public static final DataAttachmentType<Entity, Integer> CURRENT_CONTAINER_SLOT_ATTACHMENT_TYPE = DataAttachmentRegistry.<Integer>entityBuilder()
+            .defaultValue(EntityType.PLAYER, -1)
+            .build(ItemInteractions.id("current_container_slot"));
+    public static final DataAttachmentType<Entity, Boolean> SINGLE_ITEM_MODIFIER_ATTACHMENT_TYPE = DataAttachmentRegistry.<Boolean>entityBuilder()
+            .defaultValue(EntityType.PLAYER, false)
+            .build(ItemInteractions.id("single_item_modifier"));
 
-    public static void touch() {
+    public static void bootstrap() {
         // NO-OP
     }
 }

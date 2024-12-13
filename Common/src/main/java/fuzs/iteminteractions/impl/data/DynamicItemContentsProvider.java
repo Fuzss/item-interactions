@@ -6,6 +6,10 @@ import fuzs.iteminteractions.api.v1.provider.impl.BundleProvider;
 import fuzs.iteminteractions.api.v1.provider.impl.ContainerProvider;
 import fuzs.iteminteractions.api.v1.provider.impl.EnderChestProvider;
 import fuzs.puzzleslib.api.data.v2.core.DataProviderContext;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 
 public class DynamicItemContentsProvider extends AbstractItemContentsProvider {
@@ -15,9 +19,10 @@ public class DynamicItemContentsProvider extends AbstractItemContentsProvider {
     }
 
     @Override
-    public void addItemProviders() {
-        this.add(new EnderChestProvider(), Items.ENDER_CHEST);
-        this.add(new ContainerProvider(9, 3).filterContainerItems(true), Items.SHULKER_BOX);
-        this.add("bundle", new BundleProvider(DyeBackedColor.fromRgb(0XFC7703)), Items.BUNDLE, Items.SADDLE);
+    public void addItemProviders(HolderLookup.Provider registries) {
+        HolderLookup.RegistryLookup<Item> items = registries.lookupOrThrow(Registries.ITEM);
+        this.add(items, new EnderChestProvider(), Items.ENDER_CHEST);
+        this.add(items, new ContainerProvider(9, 3).filterContainerItems(true), ItemTags.SHULKER_BOXES);
+        this.add(items, "bundle", new BundleProvider(DyeBackedColor.fromRgb(0XFC7703)), Items.BUNDLE, Items.SADDLE);
     }
 }

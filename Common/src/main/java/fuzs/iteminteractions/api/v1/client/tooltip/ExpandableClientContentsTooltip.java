@@ -14,14 +14,15 @@ public abstract class ExpandableClientContentsTooltip implements ClientTooltipCo
     public static final String REVEAL_CONTENTS_TRANSLATION_KEY = "item.container.tooltip.revealContents";
 
     @Override
-    public final int getHeight() {
+    public final int getHeight(Font font) {
         if (!ItemInteractions.CONFIG.get(ClientConfig.class).revealContents.isActive()) {
             return 10;
+        } else {
+            return this.getExpandedHeight(font);
         }
-        return this.getExpandedHeight();
     }
 
-    public abstract int getExpandedHeight();
+    public abstract int getExpandedHeight(Font font);
 
     @Override
     public final int getWidth(Font font) {
@@ -36,19 +37,19 @@ public abstract class ExpandableClientContentsTooltip implements ClientTooltipCo
     public abstract int getExpandedWidth(Font font);
 
     @Override
-    public final void renderText(Font font, int mouseX, int mouseY, Matrix4f matrix4f, MultiBufferSource.BufferSource bufferSource) {
+    public final void renderText(Font font, int x, int y, Matrix4f matrix4f, MultiBufferSource.BufferSource bufferSource) {
         HeldActivationType activation = ItemInteractions.CONFIG.get(ClientConfig.class).revealContents;
         if (!activation.isActive()) {
             Component component = activation.getComponent(REVEAL_CONTENTS_TRANSLATION_KEY);
-            font.drawInBatch(component, (float) mouseX, (float) mouseY, -1, true, matrix4f, bufferSource, Font.DisplayMode.NORMAL, 0, 15728880);
+            font.drawInBatch(component, x, y, -1, true, matrix4f, bufferSource, Font.DisplayMode.NORMAL, 0, 0xF000F0);
         }
     }
 
     @Override
-    public final void renderImage(Font font, int mouseX, int mouseY, GuiGraphics guiGraphics) {
+    public final void renderImage(Font font, int x, int y, int width, int height, GuiGraphics guiGraphics) {
         if (!ItemInteractions.CONFIG.get(ClientConfig.class).revealContents.isActive()) return;
-        this.renderExpandedImage(font, mouseX, mouseY, guiGraphics);
+        this.renderExpandedImage(font, x, y, guiGraphics);
     }
 
-    public abstract void renderExpandedImage(Font font, int mouseX, int mouseY, GuiGraphics guiGraphics);
+    public abstract void renderExpandedImage(Font font, int x, int y, GuiGraphics guiGraphics);
 }

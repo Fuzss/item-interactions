@@ -37,8 +37,9 @@ public class MouseDraggingHandler {
         if (!ItemInteractions.CONFIG.get(ServerConfig.class).allowMouseDragging) return EventResult.PASS;
         ItemStack carriedStack = screen.getMenu().getCarried();
         if (validMouseButton(button)) {
-            if (ItemContentsProviders.get(carriedStack).allowsPlayerInteractions(carriedStack, screen.minecraft.player)) {
-                Slot slot = screen.findSlot(mouseX, mouseY);
+            if (ItemContentsProviders.get(carriedStack)
+                    .allowsPlayerInteractions(carriedStack, screen.minecraft.player)) {
+                Slot slot = screen.getHoveredSlot(mouseX, mouseY);
                 if (slot != null) {
                     if (slot.hasItem() && !ClientInputActionHandler.precisionModeAllowedAndActive()) {
                         containerDragType = ContainerDragType.INSERT;
@@ -62,7 +63,7 @@ public class MouseDraggingHandler {
                 CONTAINER_DRAG_SLOTS.clear();
                 return EventResult.PASS;
             }
-            Slot slot = screen.findSlot(mouseX, mouseY);
+            Slot slot = screen.getHoveredSlot(mouseX, mouseY);
             AbstractContainerMenu menu = screen.getMenu();
             if (slot != null && menu.canDragTo(slot) && !CONTAINER_DRAG_SLOTS.contains(slot)) {
                 ItemStack carriedStack = menu.getCarried();
@@ -97,8 +98,7 @@ public class MouseDraggingHandler {
                     // play this manually at the end, we suppress all interaction sounds played while dragging
                     SimpleSoundInstance sound = SimpleSoundInstance.forUI(containerDragType.sound,
                             0.8F,
-                            0.8F + SoundInstance.createUnseededRandom().nextFloat() * 0.4F
-                    );
+                            0.8F + SoundInstance.createUnseededRandom().nextFloat() * 0.4F);
                     screen.minecraft.getSoundManager().play(sound);
                 }
                 containerDragType = null;

@@ -2,11 +2,12 @@ package fuzs.iteminteractions.api.v1;
 
 import fuzs.iteminteractions.api.v1.provider.ItemContentsBehavior;
 import fuzs.iteminteractions.impl.world.item.container.ItemContentsProviders;
-import net.minecraft.util.FastColor;
+import net.minecraft.util.ARGB;
 import net.minecraft.world.entity.animal.Sheep;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3f;
 
 public final class ItemContentsHelper {
 
@@ -29,7 +30,8 @@ public final class ItemContentsHelper {
             } else {
                 value = color.getValue();
             }
-            return new float[]{FastColor.ARGB32.red(value) / 255.0F, FastColor.ARGB32.green(value) / 255.0F, FastColor.ARGB32.blue(value) / 255.0F};
+            Vector3f vector3f = ARGB.vector3fFromRGB24(value);
+            return new float[]{vector3f.x(), vector3f.y(), vector3f.z()};
         }
     }
 }

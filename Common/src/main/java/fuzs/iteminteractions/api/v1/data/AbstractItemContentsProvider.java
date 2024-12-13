@@ -1,6 +1,5 @@
 package fuzs.iteminteractions.api.v1.data;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import fuzs.iteminteractions.api.v1.provider.ItemContentsProvider;
 import fuzs.iteminteractions.impl.world.item.container.ItemContentsProviders;
@@ -17,6 +16,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -34,8 +34,7 @@ public abstract class AbstractItemContentsProvider implements DataProvider {
     public AbstractItemContentsProvider(String modId, PackOutput packOutput, CompletableFuture<HolderLookup.Provider> registries) {
         this.modId = modId;
         this.pathProvider = packOutput.createPathProvider(PackOutput.Target.DATA_PACK,
-                ItemContentsProviders.ITEM_CONTAINER_PROVIDER_LOCATION.getPath()
-        );
+                ItemContentsProviders.ITEM_CONTAINER_PROVIDER_LOCATION.getPath());
         this.registries = registries;
     }
 
@@ -47,36 +46,45 @@ public abstract class AbstractItemContentsProvider implements DataProvider {
     }
 
     public CompletableFuture<?> run(CachedOutput output, HolderLookup.Provider registries) {
-        this.addItemProviders();
-        List<CompletableFuture<?>> completableFutures = Lists.newArrayList();
+        this.addItemProviders(registries);
+        List<CompletableFuture<?>> completableFutures = new ArrayList<>();
         for (Map.Entry<ResourceLocation, Map.Entry<HolderSet<Item>, ItemContentsProvider>> entry : this.providers.entrySet()) {
             Path path = this.pathProvider.json(entry.getKey());
             completableFutures.add(DataProvider.saveStable(output,
                     registries,
                     ItemContentsProvider.WITH_ITEMS_CODEC,
                     entry.getValue(),
-                    path
-            ));
+                    path));
         }
         return CompletableFuture.allOf(completableFutures.toArray(CompletableFuture[]::new));
     }
 
-    public abstract void addItemProviders();
+    public abstract void addItemProviders(HolderLookup.Provider registries);
 
-    public void add(ResourceLocation resourceLocation, ItemContentsProvider provider, TagKey<Item> tagKey) {
-        this.providers.put(resourceLocation, Map.entry(BuiltInRegistries.ITEM.getOrCreateTag(tagKey), provider));
+    public void add(HolderLookup.RegistryLookup<Item> items, ItemContentsProvider provider, TagKey<Item> tagKey) {
+        this.add(items, tagKey.location().getPath(), provider, tagKey);
     }
 
-    public void add(ItemContentsProvider provider, Item item) {
-        this.add(ResourceLocationHelper.fromNamespaceAndPath(this.modId, BuiltInRegistries.ITEM.getKey(item).getPath()), provider, item);
+    public void add(HolderLookup.RegistryLookup<Item> items, String id, ItemContentsProvider provider, TagKey<Item> tagKey) {
+        ResourceLocation resourceLocation = ResourceLocationHelper.fromNamespaceAndPath(this.modId, id);
+        this.add(items, resourceLocation, provider, tagKey);
     }
 
-    public void add(String id, ItemContentsProvider provider, Item... items) {
-        this.add(ResourceLocationHelper.fromNamespaceAndPath(this.modId, id), provider, items);
+    public void add(HolderLookup.RegistryLookup<Item> items, ResourceLocation resourceLocation, ItemContentsProvider provider, TagKey<Item> tagKey) {
+        this.providers.put(resourceLocation, Map.entry(items.getOrThrow(tagKey), provider));
     }
 
-    public void add(ResourceLocation resourceLocation, ItemContentsProvider provider, Item... items) {
-        this.providers.put(resourceLocation, Map.entry(HolderSet.direct(Item::builtInRegistryHolder, items), provider));
+    public void add(HolderLookup.RegistryLookup<Item> items, ItemContentsProvider provider, Item item) {
+        this.add(items, BuiltInRegistries.ITEM.getKey(item).getPath(), provider, item);
+    }
+
+    public void add(HolderLookup.RegistryLookup<Item> items, String id, ItemContentsProvider provider, Item... item) {
+        ResourceLocation resourceLocation = ResourceLocationHelper.fromNamespaceAndPath(this.modId, id);
+        this.add(items, resourceLocation, provider, item);
+    }
+
+    public void add(HolderLookup.RegistryLookup<Item> items, ResourceLocation resourceLocation, ItemContentsProvider provider, Item... item) {
+        this.providers.put(resourceLocation, Map.entry(HolderSet.direct(Item::builtInRegistryHolder, item), provider));
     }
 
     @Override

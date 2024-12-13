@@ -3,6 +3,7 @@ package fuzs.iteminteractions.impl.handler;
 import fuzs.iteminteractions.impl.ItemInteractions;
 import fuzs.iteminteractions.impl.network.S2CEnderChestContentMessage;
 import fuzs.iteminteractions.impl.network.S2CEnderChestSlotMessage;
+import fuzs.puzzleslib.api.network.v3.PlayerSet;
 import net.minecraft.core.NonNullList;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -24,19 +25,20 @@ public class EnderChestSyncHandler {
         broadcastFullState(player);
     }
 
-    public static void onContainerOpen(ServerPlayer player, AbstractContainerMenu container) {
-        if (container instanceof ChestMenu chestMenu && chestMenu.getContainer() == player.getEnderChestInventory()) {
-            broadcastFullState(player);
+    public static void onContainerOpen(ServerPlayer serverPlayer, AbstractContainerMenu container) {
+        if (container instanceof ChestMenu chestMenu &&
+                chestMenu.getContainer() == serverPlayer.getEnderChestInventory()) {
+            broadcastFullState(serverPlayer);
             chestMenu.addSlotListener(new ContainerListener() {
                 @Override
                 public void slotChanged(AbstractContainerMenu menu, int slotIndex, ItemStack itemStack) {
                     // vanilla only syncs ender chest contents to open ender chest menu, but not to Player::getEnderChestInventory
                     // but since this is what we use for item interactions make sure to sync it
                     Slot slot = menu.getSlot(slotIndex);
-                    if (slot.container == player.getEnderChestInventory()) {
-                        ItemInteractions.NETWORK.sendTo(player,
-                                new S2CEnderChestSlotMessage(slot.getContainerSlot(), itemStack).toClientboundMessage()
-                        );
+                    if (slot.container == serverPlayer.getEnderChestInventory()) {
+                        ItemInteractions.NETWORK.sendMessage(PlayerSet.ofPlayer(serverPlayer),
+                                new S2CEnderChestSlotMessage(slot.getContainerSlot(),
+                                        itemStack).toClientboundMessage());
                     }
                 }
 
@@ -48,10 +50,10 @@ public class EnderChestSyncHandler {
         }
     }
 
-    public static void broadcastFullState(ServerPlayer player) {
-        ItemInteractions.NETWORK.sendTo(player,
-                new S2CEnderChestContentMessage(player.getEnderChestInventory().getItems()).toClientboundMessage()
-        );
+    public static void broadcastFullState(ServerPlayer serverPlayer) {
+        ItemInteractions.NETWORK.sendMessage(PlayerSet.ofPlayer(serverPlayer),
+                new S2CEnderChestContentMessage(serverPlayer.getEnderChestInventory()
+                        .getItems()).toClientboundMessage());
     }
 
     public static void setEnderChestContent(Player player, NonNullList<ItemStack> items) {

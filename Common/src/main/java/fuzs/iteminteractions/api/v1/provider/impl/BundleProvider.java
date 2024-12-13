@@ -16,6 +16,7 @@ import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
+import net.minecraft.world.item.BundleItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.BundleContents;
@@ -32,8 +33,7 @@ public class BundleProvider extends AbstractProvider {
                         (Integer capacityMultiplier, Optional<DyeBackedColor> dyeColor, HolderSet<Item> disallowedItems) -> {
                             return new BundleProvider(capacityMultiplier, dyeColor.orElse(null)).disallowedItems(
                                     disallowedItems);
-                        }
-                );
+                        });
     });
 
     final int capacityMultiplier;
@@ -91,8 +91,7 @@ public class BundleProvider extends AbstractProvider {
 
     @Override
     public boolean isItemAllowedInContainer(ItemStack stackToAdd) {
-        return super.isItemAllowedInContainer(stackToAdd) &&
-                stackToAdd.getItem().canFitInsideContainerItems();
+        return super.isItemAllowedInContainer(stackToAdd) && stackToAdd.getItem().canFitInsideContainerItems();
     }
 
     @Override
@@ -103,8 +102,7 @@ public class BundleProvider extends AbstractProvider {
     @Override
     public int getAcceptableItemCount(ItemStack containerStack, ItemStack stackToAdd, Player player) {
         return Math.min(this.getMaxAmountToAdd(containerStack, stackToAdd, player),
-                super.getAcceptableItemCount(containerStack, stackToAdd, player)
-        );
+                super.getAcceptableItemCount(containerStack, stackToAdd, player));
     }
 
     @Override
@@ -113,21 +111,17 @@ public class BundleProvider extends AbstractProvider {
     }
 
     @Override
-    public Optional<TooltipComponent> getTooltipImage(ItemStack containerStack, Player player) {
-        // make sure to always override bundle tooltip, as otherwise vanilla tooltip would show for empty bundles
-        if (this.hasContents(containerStack)) {
-            return super.getTooltipImage(containerStack, player);
-        } else {
-            return Optional.empty();
+    public void onToggleSelectedItem(ItemStack containerStack, int oldSelectedItem, int newSelectedItem) {
+        if (oldSelectedItem != newSelectedItem) {
+            BundleItem.toggleSelectedItem(containerStack, newSelectedItem);
         }
     }
 
     @Override
     public TooltipComponent createTooltipImageComponent(ItemStack containerStack, Player player, NonNullList<ItemStack> items) {
         return new BundleContentsTooltip(items,
-                this.computeContentWeight(containerStack, player).compareTo(this.getCapacityMultiplier()) >= 0,
-                this.getBackgroundColor()
-        );
+                this.computeContentWeight(containerStack, player).divideBy(this.getCapacityMultiplier()),
+                this.getBackgroundColor());
     }
 
     public int getMaxAmountToAdd(ItemStack containerStack, ItemStack stackToAdd, Player player) {
