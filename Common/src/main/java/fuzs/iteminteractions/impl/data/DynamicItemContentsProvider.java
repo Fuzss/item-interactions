@@ -17,7 +17,10 @@ public class DynamicItemContentsProvider extends AbstractItemContentsProvider {
     @Override
     public void addItemProviders() {
         this.add(new EnderChestProvider(), Items.ENDER_CHEST);
-        this.add(new ContainerProvider(9, 3).filterContainerItems(true), Items.SHULKER_BOX);
+        this.add("shulker_box",
+                new ContainerProvider(9, 3).filterContainerItems(true),
+                Items.SHULKER_BOX,
+                Items.ORANGE_SHULKER_BOX);
         this.add("bundle", new BundleProvider(DyeBackedColor.fromRgb(0XFC7703)), Items.BUNDLE, Items.SADDLE);
     }
 }

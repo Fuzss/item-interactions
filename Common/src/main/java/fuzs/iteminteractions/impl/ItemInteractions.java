@@ -22,6 +22,7 @@ import fuzs.puzzleslib.api.event.v1.entity.player.PlayerCopyEvents;
 import fuzs.puzzleslib.api.event.v1.entity.player.PlayerNetworkEvents;
 import fuzs.puzzleslib.api.event.v1.server.AddDataPackReloadListenersCallback;
 import fuzs.puzzleslib.api.event.v1.server.SyncDataPackContentsCallback;
+import fuzs.puzzleslib.api.event.v1.server.TagsUpdatedCallback;
 import fuzs.puzzleslib.api.network.v3.NetworkHandler;
 import fuzs.puzzleslib.api.resources.v1.DynamicPackResources;
 import fuzs.puzzleslib.api.resources.v1.PackResourcesHelper;
@@ -58,6 +59,7 @@ public class ItemInteractions implements ModConstructor {
         AfterChangeDimensionCallback.EVENT.register(EnderChestSyncHandler::onAfterChangeDimension);
         PlayerCopyEvents.RESPAWN.register(EnderChestSyncHandler::onRespawn);
         AddDataPackReloadListenersCallback.EVENT.register(ItemContentsProviders::onAddDataPackReloadListeners);
+        TagsUpdatedCallback.EVENT.register(ItemContentsProviders::onTagsUpdated);
     }
 
     @Override
@@ -65,8 +67,7 @@ public class ItemInteractions implements ModConstructor {
         if (ModLoaderEnvironment.INSTANCE.isDevelopmentEnvironment()) {
             context.addRepositorySource(PackResourcesHelper.buildServerPack(id("test_item_interactions"),
                     DynamicPackResources.create(DynamicItemContentsProvider::new),
-                    false
-            ));
+                    false));
         }
     }
 
