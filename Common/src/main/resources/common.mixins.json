@@ -8,8 +8,7 @@
   ],
   "client": [
     "client.AbstractContainerScreenMixin",
-    "client.GuiGraphicsMixin",
-    "client.MultiPlayerGameModeMixin"
+    "client.GuiGraphicsMixin"
   ],
   "injectors": {
     "defaultRequire": 1

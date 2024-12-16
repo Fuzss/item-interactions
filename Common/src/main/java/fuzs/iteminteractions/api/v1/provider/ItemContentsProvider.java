@@ -182,9 +182,11 @@ public interface ItemContentsProvider {
     Optional<TooltipComponent> getTooltipImage(ItemStack containerStack, Player player);
 
     /**
-     * @param containerStack
-     * @param oldSelectedItem
-     * @param newSelectedItem
+     * Called when the selected item index for a container item changes from the player scrolling through the tooltip.
+     *
+     * @param containerStack  the item stack providing the container
+     * @param oldSelectedItem the previous selected slot inside the container item
+     * @param newSelectedItem the next selected slot inside the container item
      */
     default void onToggleSelectedItem(ItemStack containerStack, int oldSelectedItem, int newSelectedItem) {
         // NO-OP

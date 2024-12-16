@@ -45,8 +45,6 @@ public class ItemInteractionsClient implements ClientModConstructor {
 
     private static void registerEventHandlers() {
         ScreenMouseEvents.beforeMouseClick(AbstractContainerScreen.class)
-                .register(EventPhase.BEFORE, ClientInputActionHandler::onBeforeMousePressed);
-        ScreenMouseEvents.beforeMouseClick(AbstractContainerScreen.class)
                 .register(EventPhase.BEFORE, MouseDraggingHandler::onBeforeMousePressed);
         ScreenMouseEvents.beforeMouseRelease(AbstractContainerScreen.class)
                 .register(EventPhase.BEFORE, MouseDraggingHandler::onBeforeMouseRelease);
@@ -56,8 +54,6 @@ public class ItemInteractionsClient implements ClientModConstructor {
                 .register(EventPhase.BEFORE, ClientInputActionHandler::onBeforeMouseScroll);
         ScreenMouseEvents.beforeMouseDrag(AbstractContainerScreen.class)
                 .register(EventPhase.BEFORE, MouseDraggingHandler::onBeforeMouseDragged);
-        ScreenKeyboardEvents.beforeKeyPress(AbstractContainerScreen.class)
-                .register(EventPhase.BEFORE, ClientInputActionHandler::onBeforeKeyPressed);
         ScreenKeyboardEvents.beforeKeyPress(AbstractContainerScreen.class)
                 .register(KeyBindingTogglesHandler::onBeforeKeyPressed);
         ScreenEvents.afterRender(AbstractContainerScreen.class).register(ClientInputActionHandler::onAfterRender);
