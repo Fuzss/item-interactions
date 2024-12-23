@@ -13,6 +13,7 @@ import fuzs.puzzleslib.api.event.v1.core.EventResult;
 import fuzs.puzzleslib.api.event.v1.data.DefaultedFloat;
 import fuzs.puzzleslib.api.event.v1.data.MutableValue;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.core.Holder;
 import net.minecraft.sounds.SoundEvent;
@@ -25,8 +26,11 @@ import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.Nullable;
 
 public class ClientInputActionHandler {
+    private static int lastSentContainerSlot = -1;
+    private static boolean lastSentExtractSingleItem;
 
     public static EventResult onBeforeMouseRelease(AbstractContainerScreen<?> screen, double mouseX, double mouseY, int button) {
         // prevent vanilla double click feature from interfering with our precision mode, adding an unnecessary delay when quickly inserting items via left-click
@@ -62,7 +66,7 @@ public class ClientInputActionHandler {
                     int mouseButton = (ItemInteractions.CONFIG.get(ClientConfig.class).invertPrecisionModeScrolling ?
                             verticalAmount < 0.0 : verticalAmount > 0.0) ? InputConstants.MOUSE_BUTTON_RIGHT :
                             InputConstants.MOUSE_BUTTON_LEFT;
-                    syncContainerClientInput(screen.minecraft.player);
+                    ensureHasSentContainerClientInput(screen, screen.minecraft.player, true);
                     screen.slotClicked(hoveredSlot, hoveredSlot.index, mouseButton, ClickType.PICKUP);
                     return EventResult.INTERRUPT;
                 }
@@ -86,7 +90,7 @@ public class ClientInputActionHandler {
                 if (oldContainerSlot != -1) {
                     pair.getSecond().provider().onToggleSelectedItem(itemStack, oldContainerSlot, newContainerSlot);
                 }
-                syncContainerClientInput(screen.minecraft.player);
+                ensureHasSentContainerClientInput(screen, screen.minecraft.player, true);
                 return EventResult.INTERRUPT;
             }
         }
@@ -129,12 +133,24 @@ public class ClientInputActionHandler {
                 ItemInteractions.CONFIG.get(ClientConfig.class).precisionMode.isActive();
     }
 
-    private static void syncContainerClientInput(Player player) {
+    public static void ensureHasSentContainerClientInput(Screen screen, Player player) {
+        ensureHasSentContainerClientInput(screen, player, false);
+    }
+
+    private static void ensureHasSentContainerClientInput(@Nullable Screen screen, Player player, boolean alwaysSendMessage) {
+        if (!(screen instanceof AbstractContainerScreen<?>)) return;
         int currentContainerSlot = ContainerSlotHelper.getCurrentContainerSlot(player);
         boolean extractSingleItem = precisionModeAllowedAndActive();
-        // this is where the client sets this value, so it's important to call before click actions even when syncing isn't so important (applies mostly to creative menu)
-        ContainerSlotHelper.extractSingleItem(player, extractSingleItem);
-        ItemInteractions.NETWORK.sendMessage(new C2SContainerClientInputMessage(currentContainerSlot,
-                extractSingleItem).toServerboundMessage());
+        if (alwaysSendMessage || currentContainerSlot != lastSentContainerSlot ||
+                extractSingleItem != lastSentExtractSingleItem) {
+            lastSentContainerSlot = currentContainerSlot;
+            lastSentExtractSingleItem = extractSingleItem;
+            // this is where the client sets this value,
+            // so it's important to call before click actions even when syncing isn't so important
+            // (applies mostly to creative menu)
+            ContainerSlotHelper.extractSingleItem(player, extractSingleItem);
+            ItemInteractions.NETWORK.sendMessage(new C2SContainerClientInputMessage(currentContainerSlot,
+                    extractSingleItem).toServerboundMessage());
+        }
     }
 }
