@@ -32,6 +32,22 @@ public class ClientInputActionHandler {
     private static int lastSentContainerSlot = -1;
     private static boolean lastSentExtractSingleItem;
 
+    public static EventResult onBeforeKeyPressed(AbstractContainerScreen<?> screen, int keyCode, int scanCode, int modifiers) {
+        // this must be sent before any slot click action is performed server side, by vanilla this can be caused by either mouse clicks (normal menu interactions)
+        // or key presses (hotbar keys for swapping items to those slots)
+        // this is already added via mixin to where vanilla sends the click packet, but creative screen doesn't use it, and you never know with other mods...
+        ensureHasSentContainerClientInput(screen, screen.minecraft.player, false);
+        return EventResult.PASS;
+    }
+
+    public static EventResult onBeforeMousePressed(AbstractContainerScreen<?> screen, double mouseX, double mouseY, int button) {
+        // this must be sent before any slot click action is performed server side, by vanilla this can be caused by either mouse clicks (normal menu interactions)
+        // or key presses (hotbar keys for swapping items to those slots)
+        // this is already added via mixin to where vanilla sends the click packet, but creative screen doesn't use it, and you never know with other mods...
+        ensureHasSentContainerClientInput(screen, screen.minecraft.player, false);
+        return EventResult.PASS;
+    }
+
     public static EventResult onBeforeMouseRelease(AbstractContainerScreen<?> screen, double mouseX, double mouseY, int button) {
         // prevent vanilla double click feature from interfering with our precision mode, adding an unnecessary delay when quickly inserting items via left-click
         // it wouldn't work anyway, and right-click is fine, leading to inconsistent behavior

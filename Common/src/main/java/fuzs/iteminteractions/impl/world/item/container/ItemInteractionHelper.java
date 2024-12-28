@@ -31,10 +31,14 @@ public class ItemInteractionHelper {
                             slot.safeInsert(stackToAdd),
                             acceptableItemCount,
                             index,
-                            maxStackSize
-                    );
+                            maxStackSize);
                 };
-                handleRemoveItem(containerSupplier, stackBelowMe, player, extractSingleItemOnly, addToSlot, maxStackSize);
+                handleRemoveItem(containerSupplier,
+                        stackBelowMe,
+                        player,
+                        extractSingleItemOnly,
+                        addToSlot,
+                        maxStackSize);
                 return true;
             } else if (clickAction == ClickAction.SECONDARY || extractSingleItemOnly) {
                 ItemStack stackInSlot = slot.safeTake(stackBelowMe.getCount(), stackBelowMe.getCount(), player);
@@ -47,7 +51,7 @@ public class ItemInteractionHelper {
         }
     }
 
-    public static boolean overrideOtherStackedOnMe(Supplier<SimpleContainer> containerSupplier, ItemStack stackOnMe, Slot slot, ClickAction clickAction, Player player, SlotAccess slotAccess, ToIntFunction<ItemStack> acceptableItemCount, ToIntBiFunction<Container, ItemStack> maxStackSize) {
+    public static boolean overrideOtherStackedOnMe(Supplier<SimpleContainer> containerSupplier, ItemStack stackOnMe, Slot slot, ClickAction clickAction, Player player, SlotAccess slotAccess, ToIntFunction<ItemStack> acceptableItemCount, ToIntBiFunction<Container, ItemStack> maxStackSize, Runnable onToggleSelectedItem) {
         if (!slot.allowModification(player) || slot.container instanceof CraftingContainer) {
             return false;
         } else {
@@ -68,6 +72,7 @@ public class ItemInteractionHelper {
                 handleAddItem(containerSupplier, clickAction, player, acceptableItemCount, stackOnMe, maxStackSize);
                 return true;
             } else {
+                if (clickAction == ClickAction.PRIMARY && stackOnMe.isEmpty()) onToggleSelectedItem.run();
                 return false;
             }
         }
@@ -95,8 +100,7 @@ public class ItemInteractionHelper {
                     player,
                     stackInSlot,
                     stack -> Math.min(1, acceptableItemCount.applyAsInt(stack)),
-                    maxStackSize
-            );
+                    maxStackSize);
         } else {
             transferredCount = addStack(containerSupplier, player, stackInSlot, acceptableItemCount, maxStackSize);
         }
@@ -112,8 +116,7 @@ public class ItemInteractionHelper {
                 newStack,
                 acceptableItemCount,
                 ContainerSlotHelper.getCurrentContainerSlot(player),
-                maxStackSize
-        );
+                maxStackSize);
     }
 
     private static int addStack(Supplier<SimpleContainer> containerSupplier, Player player, ItemStack newStack, ToIntFunction<ItemStack> acceptableItemCount, int prioritizedSlot, ToIntBiFunction<Container, ItemStack> maxStackSize) {

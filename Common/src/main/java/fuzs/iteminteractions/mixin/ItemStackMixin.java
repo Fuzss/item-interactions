@@ -26,14 +26,12 @@ abstract class ItemStackMixin {
         ItemContentsBehavior behavior = ItemContentsProviders.get(containerStack);
         if (behavior.allowsPlayerInteractions(containerStack, player)) {
             boolean result = ItemInteractionHelper.overrideStackedOnOther(() -> behavior.getItemContainer(containerStack,
-                            player
-                    ),
+                            player),
                     slot,
                     clickAction,
                     player,
                     stack -> behavior.getAcceptableItemCount(containerStack, stack, player),
-                    behavior.provider()::getMaxStackSize
-            );
+                    behavior.provider()::getMaxStackSize);
             if (result) behavior.provider().broadcastContainerChanges(containerStack, player);
             callback.setReturnValue(result);
         }
@@ -46,16 +44,15 @@ abstract class ItemStackMixin {
         if (behavior.allowsPlayerInteractions(containerStack, player)) {
             boolean result = ItemInteractionHelper.overrideOtherStackedOnMe(() -> behavior.getItemContainer(
                             containerStack,
-                            player
-                    ),
+                            player),
                     stackOnMe,
                     slot,
                     clickAction,
                     player,
                     slotAccess,
                     stack -> behavior.getAcceptableItemCount(containerStack, stack, player),
-                    behavior.provider()::getMaxStackSize
-            );
+                    behavior.provider()::getMaxStackSize,
+                    () -> behavior.provider().onToggleSelectedItem(containerStack, 0, -1));
             if (result) behavior.provider().broadcastContainerChanges(containerStack, player);
             callback.setReturnValue(result);
         }

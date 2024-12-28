@@ -45,6 +45,10 @@ public class ItemInteractionsClient implements ClientModConstructor {
 
     private static void registerEventHandlers() {
         ScreenMouseEvents.beforeMouseClick(AbstractContainerScreen.class)
+                .register(EventPhase.BEFORE, ClientInputActionHandler::onBeforeMousePressed);
+        ScreenKeyboardEvents.beforeKeyPress(AbstractContainerScreen.class)
+                .register(EventPhase.BEFORE, ClientInputActionHandler::onBeforeKeyPressed);
+        ScreenMouseEvents.beforeMouseClick(AbstractContainerScreen.class)
                 .register(EventPhase.BEFORE, MouseDraggingHandler::onBeforeMousePressed);
         ScreenMouseEvents.beforeMouseRelease(AbstractContainerScreen.class)
                 .register(EventPhase.BEFORE, MouseDraggingHandler::onBeforeMouseRelease);
