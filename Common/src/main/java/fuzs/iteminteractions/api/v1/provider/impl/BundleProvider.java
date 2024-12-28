@@ -57,7 +57,7 @@ public class BundleProvider extends AbstractProvider {
         return (BundleProvider) super.disallowedItems(disallowedItems);
     }
 
-    public Fraction getCapacityMultiplier() {
+    public Fraction getCapacityMultiplier(ItemStack containerStack) {
         return Fraction.getFraction(this.capacityMultiplier, 1);
     }
 
@@ -120,12 +120,13 @@ public class BundleProvider extends AbstractProvider {
     @Override
     public TooltipComponent createTooltipImageComponent(ItemStack containerStack, Player player, NonNullList<ItemStack> items) {
         return new BundleContentsTooltip(items,
-                this.computeContentWeight(containerStack, player).divideBy(this.getCapacityMultiplier()),
+                this.computeContentWeight(containerStack, player).divideBy(this.getCapacityMultiplier(containerStack)),
                 this.getBackgroundColor());
     }
 
     public int getMaxAmountToAdd(ItemStack containerStack, ItemStack stackToAdd, Player player) {
-        Fraction fraction = this.getCapacityMultiplier().subtract(this.computeContentWeight(containerStack, player));
+        Fraction fraction = this.getCapacityMultiplier(containerStack)
+                .subtract(this.computeContentWeight(containerStack, player));
         return Math.max(fraction.divideBy(BundleContents.getWeight(stackToAdd)).intValue(), 0);
     }
 
