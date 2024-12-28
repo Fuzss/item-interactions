@@ -72,7 +72,7 @@ public class ItemInteractionHelper {
                 handleAddItem(containerSupplier, clickAction, player, acceptableItemCount, stackOnMe, maxStackSize);
                 return true;
             } else {
-                if (clickAction == ClickAction.PRIMARY && stackOnMe.isEmpty()) onToggleSelectedItem.run();
+                if (clickAction == ClickAction.PRIMARY) onToggleSelectedItem.run();
                 return false;
             }
         }
