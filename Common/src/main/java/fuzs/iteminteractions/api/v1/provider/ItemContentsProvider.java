@@ -36,11 +36,11 @@ public interface ItemContentsProvider {
     /**
      * The {@link Type} registry key.
      */
-    ResourceKey<Registry<Type>> REGISTRY_KEY = ResourceKey.createRegistryKey(ItemContentsProviders.ITEM_CONTAINER_PROVIDER_LOCATION);
+    ResourceKey<Registry<Type>> REGISTRY_KEY = ResourceKey.createRegistryKey(ItemContentsProviders.REGISTRY_KEY.location());
     /**
      * The {@link Type} registry.
      */
-    Registry<Type> REGISTRY = RegistryFactory.INSTANCE.create(REGISTRY_KEY, ItemInteractions.id("empty"), true);
+    Registry<Type> REGISTRY = RegistryFactory.INSTANCE.createSynced(REGISTRY_KEY, ItemInteractions.id("empty"));
     /**
      * Codec that additionally to the provider itself also includes the provider type.
      */

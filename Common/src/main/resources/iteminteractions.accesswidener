@@ -7,4 +7,4 @@ accessible  method  net/minecraft/world/entity/animal/Sheep createSheepColor    
 accessible  method  net/minecraft/world/item/component/BundleContents   computeContentWeight    (Ljava/util/List;)Lorg/apache/commons/lang3/math/Fraction;
 accessible  field   net/minecraft/server/packs/resources/SimpleJsonResourceReloadListener   ops Lcom/mojang/serialization/DynamicOps;
 accessible  field   net/minecraft/server/packs/resources/SimpleJsonResourceReloadListener   codec   Lcom/mojang/serialization/Codec;
-accessible  field   net/minecraft/server/packs/resources/SimpleJsonResourceReloadListener   directory   Ljava/lang/String;
+accessible  field   net/minecraft/server/packs/resources/SimpleJsonResourceReloadListener   lister  Lnet/minecraft/resources/FileToIdConverter;

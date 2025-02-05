@@ -2,6 +2,9 @@ package fuzs.iteminteractions.impl.world.item.container;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.FileToIdConverter;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
@@ -17,18 +20,18 @@ import java.util.Map;
  */
 public abstract class UnconditionalSimpleJsonResourceReloadListener<T> extends SimpleJsonResourceReloadListener<T> {
 
-    protected UnconditionalSimpleJsonResourceReloadListener(HolderLookup.Provider registries, Codec<T> codec, String directory) {
-        super(registries, codec, directory);
+    protected UnconditionalSimpleJsonResourceReloadListener(HolderLookup.Provider registries, Codec<T> codec, ResourceKey<? extends Registry<T>> registryKey) {
+        super(registries, codec, registryKey);
     }
 
-    protected UnconditionalSimpleJsonResourceReloadListener(Codec<T> codec, String directory) {
-        super(codec, directory);
+    protected UnconditionalSimpleJsonResourceReloadListener(Codec<T> codec, FileToIdConverter lister) {
+        super(codec, lister);
     }
 
     @Override
     protected Map<ResourceLocation, T> prepare(ResourceManager resourceManager, ProfilerFiller profiler) {
         Map<ResourceLocation, T> map = new HashMap<>();
-        scanDirectory(resourceManager, this.directory, this.ops, this.codec, map);
+        scanDirectory(resourceManager, this.lister, this.ops, this.codec, map);
         return map;
     }
 }

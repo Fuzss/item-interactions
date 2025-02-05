@@ -7,10 +7,8 @@ import fuzs.iteminteractions.impl.ItemInteractions;
 import fuzs.iteminteractions.impl.network.S2CSyncItemContentsProviders;
 import fuzs.puzzleslib.api.network.v3.PlayerSet;
 import net.minecraft.Util;
-import net.minecraft.core.Holder;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.HolderSet;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.*;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
@@ -25,14 +23,15 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 
 public final class ItemContentsProviders extends UnconditionalSimpleJsonResourceReloadListener<Map.Entry<HolderSet<Item>, ItemContentsProvider>> {
-    public static final ResourceLocation ITEM_CONTAINER_PROVIDER_LOCATION = ItemInteractions.id("item_contents_provider");
+    public static final ResourceKey<Registry<Map.Entry<HolderSet<Item>, ItemContentsProvider>>> REGISTRY_KEY = ResourceKey.createRegistryKey(
+            ItemInteractions.id("item_contents_provider"));
 
     @Nullable
     private static Map<HolderSet<Item>, ItemContentsProvider> unresolvedProviders;
     private static Map<Item, ItemContentsProvider> resolvedProviders = ImmutableMap.of();
 
     public ItemContentsProviders(HolderLookup.Provider registries) {
-        super(registries, ItemContentsProvider.WITH_ITEMS_CODEC, ITEM_CONTAINER_PROVIDER_LOCATION.getPath());
+        super(registries, ItemContentsProvider.WITH_ITEMS_CODEC, REGISTRY_KEY);
     }
 
     @Override
@@ -54,7 +53,7 @@ public final class ItemContentsProviders extends UnconditionalSimpleJsonResource
     }
 
     public static void onAddDataPackReloadListeners(RegistryAccess fullRegistries, HolderLookup.Provider lookupWithUpdatedTags, BiConsumer<ResourceLocation, PreparableReloadListener> consumer) {
-        consumer.accept(ITEM_CONTAINER_PROVIDER_LOCATION, new ItemContentsProviders(lookupWithUpdatedTags));
+        consumer.accept(REGISTRY_KEY.location(), new ItemContentsProviders(lookupWithUpdatedTags));
     }
 
     public static void onTagsUpdated(HolderLookup.Provider registries, boolean client) {

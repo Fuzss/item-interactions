@@ -33,8 +33,7 @@ public abstract class AbstractItemContentsProvider implements DataProvider {
 
     public AbstractItemContentsProvider(String modId, PackOutput packOutput, CompletableFuture<HolderLookup.Provider> registries) {
         this.modId = modId;
-        this.pathProvider = packOutput.createPathProvider(PackOutput.Target.DATA_PACK,
-                ItemContentsProviders.ITEM_CONTAINER_PROVIDER_LOCATION.getPath());
+        this.pathProvider = packOutput.createRegistryElementsPathProvider(ItemContentsProviders.REGISTRY_KEY);
         this.registries = registries;
     }
 

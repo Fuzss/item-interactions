@@ -1,5 +1,6 @@
 package fuzs.iteminteractions.impl;
 
+import fuzs.iteminteractions.api.v1.provider.ItemContentsProvider;
 import fuzs.iteminteractions.impl.config.ClientConfig;
 import fuzs.iteminteractions.impl.config.ServerConfig;
 import fuzs.iteminteractions.impl.data.DynamicItemContentsProvider;
@@ -14,6 +15,7 @@ import fuzs.iteminteractions.impl.world.item.container.ItemContentsProviders;
 import fuzs.puzzleslib.api.config.v3.ConfigHolder;
 import fuzs.puzzleslib.api.core.v1.ModConstructor;
 import fuzs.puzzleslib.api.core.v1.ModLoaderEnvironment;
+import fuzs.puzzleslib.api.core.v1.context.GameRegistriesContext;
 import fuzs.puzzleslib.api.core.v1.context.PackRepositorySourcesContext;
 import fuzs.puzzleslib.api.core.v1.utility.ResourceLocationHelper;
 import fuzs.puzzleslib.api.event.v1.entity.player.AfterChangeDimensionCallback;
@@ -60,6 +62,11 @@ public class ItemInteractions implements ModConstructor {
         PlayerCopyEvents.RESPAWN.register(EnderChestSyncHandler::onRespawn);
         AddDataPackReloadListenersCallback.EVENT.register(ItemContentsProviders::onAddDataPackReloadListeners);
         TagsUpdatedCallback.EVENT.register(ItemContentsProviders::onTagsUpdated);
+    }
+
+    @Override
+    public void onGameRegistriesContext(GameRegistriesContext context) {
+        context.registerRegistry(ItemContentsProvider.REGISTRY);
     }
 
     @Override
