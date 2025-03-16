@@ -37,7 +37,8 @@ public class MouseDraggingHandler {
         if (!ItemInteractions.CONFIG.get(ServerConfig.class).allowMouseDragging) return EventResult.PASS;
         ItemStack carriedStack = screen.getMenu().getCarried();
         if (validMouseButton(button)) {
-            if (ItemContentsProviders.get(carriedStack).allowsPlayerInteractions(carriedStack, screen.minecraft.player)) {
+            if (ItemContentsProviders.get(carriedStack)
+                    .allowsPlayerInteractions(carriedStack, screen.minecraft.player)) {
                 Slot slot = screen.findSlot(mouseX, mouseY);
                 if (slot != null) {
                     if (slot.hasItem() && !ClientInputActionHandler.precisionModeAllowedAndActive()) {
@@ -57,16 +58,16 @@ public class MouseDraggingHandler {
     public static EventResult onBeforeMouseDragged(AbstractContainerScreen<?> screen, double mouseX, double mouseY, int button, double dragX, double dragY) {
         if (!ItemInteractions.CONFIG.get(ServerConfig.class).allowMouseDragging) return EventResult.PASS;
         if (containerDragType != null) {
-            if (!validMouseButton(button)) {
+            AbstractContainerMenu menu = screen.getMenu();
+            ItemStack carriedStack = menu.getCarried();
+            ItemContentsBehavior behavior = ItemContentsProviders.get(carriedStack);
+            if (!validMouseButton(button) || behavior.allowsPlayerInteractions(carriedStack, screen.minecraft.player)) {
                 containerDragType = null;
                 CONTAINER_DRAG_SLOTS.clear();
                 return EventResult.PASS;
             }
             Slot slot = screen.findSlot(mouseX, mouseY);
-            AbstractContainerMenu menu = screen.getMenu();
             if (slot != null && menu.canDragTo(slot) && !CONTAINER_DRAG_SLOTS.contains(slot)) {
-                ItemStack carriedStack = menu.getCarried();
-                ItemContentsBehavior behavior = ItemContentsProviders.get(carriedStack);
                 boolean interact = false;
                 if (containerDragType == ContainerDragType.INSERT && slot.hasItem() &&
                         behavior.canAddItem(carriedStack, slot.getItem(), screen.minecraft.player)) {
@@ -97,8 +98,7 @@ public class MouseDraggingHandler {
                     // play this manually at the end, we suppress all interaction sounds played while dragging
                     SimpleSoundInstance sound = SimpleSoundInstance.forUI(containerDragType.sound,
                             0.8F,
-                            0.8F + SoundInstance.createUnseededRandom().nextFloat() * 0.4F
-                    );
+                            0.8F + SoundInstance.createUnseededRandom().nextFloat() * 0.4F);
                     screen.minecraft.getSoundManager().play(sound);
                 }
                 containerDragType = null;
