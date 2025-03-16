@@ -58,16 +58,16 @@ public class MouseDraggingHandler {
     public static EventResult onBeforeMouseDragged(AbstractContainerScreen<?> screen, double mouseX, double mouseY, int button, double dragX, double dragY) {
         if (!ItemInteractions.CONFIG.get(ServerConfig.class).allowMouseDragging) return EventResult.PASS;
         if (containerDragType != null) {
-            if (!validMouseButton(button)) {
+            AbstractContainerMenu menu = screen.getMenu();
+            ItemStack carriedStack = menu.getCarried();
+            ItemContentsBehavior behavior = ItemContentsProviders.get(carriedStack);
+            if (!validMouseButton(button) || behavior.allowsPlayerInteractions(carriedStack, screen.minecraft.player)) {
                 containerDragType = null;
                 CONTAINER_DRAG_SLOTS.clear();
                 return EventResult.PASS;
             }
             Slot slot = screen.getHoveredSlot(mouseX, mouseY);
-            AbstractContainerMenu menu = screen.getMenu();
             if (slot != null && menu.canDragTo(slot) && !CONTAINER_DRAG_SLOTS.contains(slot)) {
-                ItemStack carriedStack = menu.getCarried();
-                ItemContentsBehavior behavior = ItemContentsProviders.get(carriedStack);
                 boolean interact = false;
                 if (containerDragType == ContainerDragType.INSERT && slot.hasItem() &&
                         behavior.canAddItem(carriedStack, slot.getItem(), screen.minecraft.player)) {
@@ -114,8 +114,9 @@ public class MouseDraggingHandler {
     private static boolean validMouseButton(int button) {
         if (button == InputConstants.MOUSE_BUTTON_LEFT) {
             return ClientInputActionHandler.precisionModeAllowedAndActive();
+        } else {
+            return button == InputConstants.MOUSE_BUTTON_RIGHT;
         }
-        return button == InputConstants.MOUSE_BUTTON_RIGHT;
     }
 
     public static void onDrawForeground(AbstractContainerScreen<?> screen, GuiGraphics guiGraphics, int mouseX, int mouseY) {
