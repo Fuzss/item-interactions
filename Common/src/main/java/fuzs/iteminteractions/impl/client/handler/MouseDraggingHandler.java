@@ -61,7 +61,8 @@ public class MouseDraggingHandler {
             AbstractContainerMenu menu = screen.getMenu();
             ItemStack carriedStack = menu.getCarried();
             ItemContentsBehavior behavior = ItemContentsProviders.get(carriedStack);
-            if (!validMouseButton(button) || behavior.allowsPlayerInteractions(carriedStack, screen.minecraft.player)) {
+            if (!validMouseButton(button) ||
+                    !behavior.allowsPlayerInteractions(carriedStack, screen.minecraft.player)) {
                 containerDragType = null;
                 CONTAINER_DRAG_SLOTS.clear();
                 return EventResult.PASS;
