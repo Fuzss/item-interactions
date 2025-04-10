@@ -4,8 +4,8 @@ import fuzs.iteminteractions.impl.ItemInteractions;
 import fuzs.iteminteractions.impl.client.handler.ClientInputActionHandler;
 import fuzs.iteminteractions.impl.config.ClientConfig;
 import fuzs.iteminteractions.impl.world.inventory.ContainerSlotHelper;
-import fuzs.puzzleslib.api.client.gui.v2.components.GuiGraphicsHelper;
-import fuzs.puzzleslib.api.client.gui.v2.components.TooltipRenderHelper;
+import fuzs.puzzleslib.api.client.gui.v2.GuiGraphicsHelper;
+import fuzs.puzzleslib.api.client.gui.v2.tooltip.TooltipRenderHelper;
 import fuzs.puzzleslib.api.core.v1.utility.ResourceLocationHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -171,7 +171,10 @@ public abstract class AbstractClientItemContentsTooltip extends ExpandableClient
     private void drawBorder(int mouseX, int mouseY, int gridSizeX, int gridSizeY, GuiGraphics guiGraphics) {
         int color = this.getBackgroundColor();
         ContainerTexture.BORDER_TOP_LEFT.blit(guiGraphics, mouseX, mouseY, color);
-        ContainerTexture.BORDER_TOP_RIGHT.blit(guiGraphics, mouseX + gridSizeX * GRID_SIZE + BORDER_SIZE, mouseY, color);
+        ContainerTexture.BORDER_TOP_RIGHT.blit(guiGraphics,
+                mouseX + gridSizeX * GRID_SIZE + BORDER_SIZE,
+                mouseY,
+                color);
 
         for (int i = 0; i < gridSizeX; ++i) {
             ContainerTexture.BORDER_TOP.blit(guiGraphics, mouseX + BORDER_SIZE + i * GRID_SIZE, mouseY, color);
@@ -189,7 +192,10 @@ public abstract class AbstractClientItemContentsTooltip extends ExpandableClient
                     color);
         }
 
-        ContainerTexture.BORDER_BOTTOM_LEFT.blit(guiGraphics, mouseX, mouseY + gridSizeY * GRID_SIZE + BORDER_SIZE, color);
+        ContainerTexture.BORDER_BOTTOM_LEFT.blit(guiGraphics,
+                mouseX,
+                mouseY + gridSizeY * GRID_SIZE + BORDER_SIZE,
+                color);
         ContainerTexture.BORDER_BOTTOM_RIGHT.blit(guiGraphics,
                 mouseX + gridSizeX * GRID_SIZE + BORDER_SIZE,
                 mouseY + gridSizeY * GRID_SIZE + BORDER_SIZE,

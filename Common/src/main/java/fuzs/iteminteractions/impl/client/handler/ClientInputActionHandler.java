@@ -6,12 +6,13 @@ import fuzs.iteminteractions.api.v1.provider.ItemContentsBehavior;
 import fuzs.iteminteractions.impl.ItemInteractions;
 import fuzs.iteminteractions.impl.config.ClientConfig;
 import fuzs.iteminteractions.impl.config.ServerConfig;
-import fuzs.iteminteractions.impl.network.client.C2SContainerClientInputMessage;
+import fuzs.iteminteractions.impl.network.client.ServerboundContainerClientInputMessage;
 import fuzs.iteminteractions.impl.world.inventory.ContainerSlotHelper;
 import fuzs.iteminteractions.impl.world.item.container.ItemContentsProviders;
 import fuzs.puzzleslib.api.event.v1.core.EventResult;
-import fuzs.puzzleslib.api.event.v1.data.DefaultedFloat;
+import fuzs.puzzleslib.api.event.v1.data.MutableFloat;
 import fuzs.puzzleslib.api.event.v1.data.MutableValue;
+import fuzs.puzzleslib.api.network.v4.MessageSender;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -134,14 +135,14 @@ public class ClientInputActionHandler {
         return Pair.of(ItemStack.EMPTY, ItemContentsBehavior.empty());
     }
 
-    public static EventResult onPlaySoundAtPosition(Level level, Entity entity, MutableValue<Holder<SoundEvent>> sound, MutableValue<SoundSource> source, DefaultedFloat volume, DefaultedFloat pitch) {
+    public static EventResult onPlaySoundAtEntity(Level level, Entity entity, MutableValue<Holder<SoundEvent>> soundEvent, MutableValue<SoundSource> soundSource, MutableFloat soundVolume, MutableFloat soundPitch) {
         if (!ItemInteractions.CONFIG.get(ClientConfig.class).disableInteractionSounds) return EventResult.PASS;
-        if (source.get() == SoundSource.PLAYERS && (sound.get().value() == SoundEvents.BUNDLE_INSERT ||
-                sound.get().value() == SoundEvents.BUNDLE_REMOVE_ONE)) {
+        if (soundSource.get() == SoundSource.PLAYERS && (soundEvent.get().value() == SoundEvents.BUNDLE_INSERT ||
+                soundEvent.get().value() == SoundEvents.BUNDLE_REMOVE_ONE)) {
             return EventResult.INTERRUPT;
+        } else {
+            return EventResult.PASS;
         }
-
-        return EventResult.PASS;
     }
 
     public static boolean precisionModeAllowedAndActive() {
@@ -165,8 +166,8 @@ public class ClientInputActionHandler {
             // so it's important to call before click actions even when syncing isn't so important
             // (applies mostly to creative menu)
             ContainerSlotHelper.extractSingleItem(player, extractSingleItem);
-            ItemInteractions.NETWORK.sendMessage(new C2SContainerClientInputMessage(currentContainerSlot,
-                    extractSingleItem).toServerboundMessage());
+            MessageSender.broadcast(new ServerboundContainerClientInputMessage(currentContainerSlot,
+                    extractSingleItem));
         }
     }
 }

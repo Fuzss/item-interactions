@@ -1,15 +1,16 @@
 package fuzs.iteminteractions.impl.handler;
 
-import fuzs.iteminteractions.impl.ItemInteractions;
-import fuzs.iteminteractions.impl.network.S2CEnderChestContentMessage;
-import fuzs.iteminteractions.impl.network.S2CEnderChestSlotMessage;
-import fuzs.puzzleslib.api.network.v3.PlayerSet;
-import net.minecraft.core.NonNullList;
+import fuzs.iteminteractions.impl.network.ClientboundEnderChestContentMessage;
+import fuzs.iteminteractions.impl.network.ClientboundEnderChestSlotMessage;
+import fuzs.puzzleslib.api.network.v4.MessageSender;
+import fuzs.puzzleslib.api.network.v4.PlayerSet;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.ItemStack;
+
+import java.util.List;
 
 public class EnderChestSyncHandler {
 
@@ -36,9 +37,8 @@ public class EnderChestSyncHandler {
                     // but since this is what we use for item interactions make sure to sync it
                     Slot slot = menu.getSlot(slotIndex);
                     if (slot.container == serverPlayer.getEnderChestInventory()) {
-                        ItemInteractions.NETWORK.sendMessage(PlayerSet.ofPlayer(serverPlayer),
-                                new S2CEnderChestSlotMessage(slot.getContainerSlot(),
-                                        itemStack).toClientboundMessage());
+                        MessageSender.broadcast(PlayerSet.ofPlayer(serverPlayer),
+                                new ClientboundEnderChestSlotMessage(slot.getContainerSlot(), itemStack));
                     }
                 }
 
@@ -51,12 +51,11 @@ public class EnderChestSyncHandler {
     }
 
     public static void broadcastFullState(ServerPlayer serverPlayer) {
-        ItemInteractions.NETWORK.sendMessage(PlayerSet.ofPlayer(serverPlayer),
-                new S2CEnderChestContentMessage(serverPlayer.getEnderChestInventory()
-                        .getItems()).toClientboundMessage());
+        MessageSender.broadcast(PlayerSet.ofPlayer(serverPlayer),
+                new ClientboundEnderChestContentMessage(serverPlayer.getEnderChestInventory().getItems()));
     }
 
-    public static void setEnderChestContent(Player player, NonNullList<ItemStack> items) {
+    public static void setEnderChestContent(Player player, List<ItemStack> items) {
         PlayerEnderChestContainer enderChestInventory = player.getEnderChestInventory();
         // safeguard against mods only changing ender chest size on one side
         int size = Math.min(items.size(), enderChestInventory.getContainerSize());

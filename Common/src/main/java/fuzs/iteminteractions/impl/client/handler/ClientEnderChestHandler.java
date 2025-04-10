@@ -1,7 +1,7 @@
 package fuzs.iteminteractions.impl.client.handler;
 
-import fuzs.iteminteractions.impl.ItemInteractions;
-import fuzs.iteminteractions.impl.network.client.C2SEnderChestContentMessage;
+import fuzs.iteminteractions.impl.network.client.ServerboundEnderChestContentMessage;
+import fuzs.puzzleslib.api.network.v4.MessageSender;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.core.NonNullList;
@@ -13,9 +13,9 @@ public class ClientEnderChestHandler {
         // this is only required for the creative mode inventory, as it doesn't sync contents using default menu packets,
         // instead it uses custom packets which do not work for item interactions in a menu
         Minecraft minecraft = Minecraft.getInstance();
-        if (minecraft.gameMode.hasInfiniteItems() &&
+        if (minecraft.player.hasInfiniteMaterials() &&
                 minecraft.player.containerMenu instanceof CreativeModeInventoryScreen.ItemPickerMenu) {
-            ItemInteractions.NETWORK.sendMessage(new C2SEnderChestContentMessage(items).toServerboundMessage());
+            MessageSender.broadcast(new ServerboundEnderChestContentMessage(items));
         }
     }
 }

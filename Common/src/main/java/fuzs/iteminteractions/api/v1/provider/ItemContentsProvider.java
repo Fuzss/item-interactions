@@ -8,6 +8,9 @@ import fuzs.iteminteractions.impl.world.item.container.ItemContentsProviders;
 import fuzs.puzzleslib.api.init.v3.registry.RegistryFactory;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.Container;
@@ -36,16 +39,16 @@ public interface ItemContentsProvider {
     /**
      * The {@link Type} registry key.
      */
-    ResourceKey<Registry<Type>> REGISTRY_KEY = ResourceKey.createRegistryKey(ItemContentsProviders.REGISTRY_KEY.location());
+    ResourceKey<Registry<Type<?>>> REGISTRY_KEY = ResourceKey.createRegistryKey(ItemContentsProviders.REGISTRY_KEY.location());
     /**
      * The {@link Type} registry.
      */
-    Registry<Type> REGISTRY = RegistryFactory.INSTANCE.createSynced(REGISTRY_KEY, ItemInteractions.id("empty"));
+    Registry<Type<?>> REGISTRY = RegistryFactory.INSTANCE.createSynced(REGISTRY_KEY, ItemInteractions.id("empty"));
     /**
      * Codec that additionally to the provider itself also includes the provider type.
      */
     MapCodec<ItemContentsProvider> CODEC = REGISTRY.byNameCodec()
-            .dispatchMap(ItemContentsProvider::getType, Type::mapCodec);
+            .dispatchMap(ItemContentsProvider::getType, Type::codec);
     /**
      * Codec that includes a list of supported items.
      */
@@ -54,6 +57,12 @@ public interface ItemContentsProvider {
                 .fieldOf("supported_items")
                 .forGetter(Map.Entry::getKey), CODEC.forGetter(Map.Entry::getValue)).apply(instance, Map::entry);
     });
+    /**
+     * Stream codec that additionally to the provider itself also includes the provider type.
+     */
+    StreamCodec<RegistryFriendlyByteBuf, ItemContentsProvider> STREAM_CODEC = ByteBufCodecs.registry(
+                    ItemContentsProvider.REGISTRY_KEY)
+            .dispatch(ItemContentsProvider::getType, ItemContentsProvider.Type::streamCodec);
 
     /**
      * Does this provider support item inventory interactions (extracting and adding items) on the given
@@ -195,18 +204,18 @@ public interface ItemContentsProvider {
     /**
      * @return the item container provider type
      */
-    Type getType();
+    Type<?> getType();
 
     /**
      * A type for identifying and serializing item container provider implementations.
      *
-     * @param mapCodec the item container provider codec
+     * @param codec the item container provider codec
      */
-    record Type(MapCodec<? extends ItemContentsProvider> mapCodec) {
+    record Type<T extends ItemContentsProvider>(MapCodec<T> codec,
+                                                StreamCodec<? super RegistryFriendlyByteBuf, T> streamCodec) {
 
-        @SuppressWarnings("unchecked")
-        public Codec<ItemContentsProvider> codec() {
-            return (Codec<ItemContentsProvider>) this.mapCodec.codec();
+        public Type(MapCodec<T> codec) {
+            this(codec, ByteBufCodecs.fromCodecWithRegistries(codec.codec()));
         }
     }
 }

@@ -62,8 +62,8 @@ public class ItemInteractionsClient implements ClientModConstructor {
                 .register(KeyBindingTogglesHandler::onBeforeKeyPressed);
         ScreenEvents.afterRender(AbstractContainerScreen.class).register(ClientInputActionHandler::onAfterRender);
         ContainerScreenEvents.FOREGROUND.register(MouseDraggingHandler::onDrawForeground);
-        PlayLevelSoundEvents.ENTITY.register(MouseDraggingHandler::onPlaySoundAtPosition);
-        PlayLevelSoundEvents.ENTITY.register(ClientInputActionHandler::onPlaySoundAtPosition);
+        PlayLevelSoundEvents.ENTITY.register(MouseDraggingHandler::onPlaySoundAtEntity);
+        PlayLevelSoundEvents.ENTITY.register(ClientInputActionHandler::onPlaySoundAtEntity);
         ClientPlayerNetworkEvents.LOGGED_IN.register((LocalPlayer player, MultiPlayerGameMode multiPlayerGameMode, Connection connection) -> {
             ItemContentsProviders.setItemContainerProviders(ImmutableMap.of());
         });

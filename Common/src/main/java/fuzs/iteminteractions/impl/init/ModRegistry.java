@@ -15,22 +15,22 @@ import net.minecraft.world.entity.EntityType;
 
 public class ModRegistry {
     static final RegistryManager REGISTRIES = RegistryManager.from(ItemInteractions.MOD_ID);
-    public static final Holder.Reference<ItemContentsProvider.Type> EMPTY_ITEM_CONTENTS_PROVIDER_TYPE = REGISTRIES.register(
+    public static final Holder.Reference<ItemContentsProvider.Type<?>> EMPTY_ITEM_CONTENTS_PROVIDER_TYPE = REGISTRIES.register(
             ItemContentsProvider.REGISTRY_KEY,
             "empty",
-            () -> new ItemContentsProvider.Type(EmptyProvider.CODEC));
-    public static final Holder.Reference<ItemContentsProvider.Type> CONTAINER_ITEM_CONTENTS_PROVIDER_TYPE = REGISTRIES.register(
+            () -> new ItemContentsProvider.Type<>(EmptyProvider.CODEC));
+    public static final Holder.Reference<ItemContentsProvider.Type<?>> CONTAINER_ITEM_CONTENTS_PROVIDER_TYPE = REGISTRIES.register(
             ItemContentsProvider.REGISTRY_KEY,
             "container",
-            () -> new ItemContentsProvider.Type(ContainerProvider.CODEC));
-    public static final Holder.Reference<ItemContentsProvider.Type> ENDER_CHEST_ITEM_CONTENTS_PROVIDER_TYPE = REGISTRIES.register(
+            () -> new ItemContentsProvider.Type<>(ContainerProvider.CODEC));
+    public static final Holder.Reference<ItemContentsProvider.Type<?>> ENDER_CHEST_ITEM_CONTENTS_PROVIDER_TYPE = REGISTRIES.register(
             ItemContentsProvider.REGISTRY_KEY,
             "ender_chest",
-            () -> new ItemContentsProvider.Type(EnderChestProvider.CODEC));
-    public static final Holder.Reference<ItemContentsProvider.Type> BUNDLE_ITEM_CONTENTS_PROVIDER_TYPE = REGISTRIES.register(
+            () -> new ItemContentsProvider.Type<>(EnderChestProvider.CODEC));
+    public static final Holder.Reference<ItemContentsProvider.Type<?>> BUNDLE_ITEM_CONTENTS_PROVIDER_TYPE = REGISTRIES.register(
             ItemContentsProvider.REGISTRY_KEY,
             "bundle",
-            () -> new ItemContentsProvider.Type(BundleProvider.CODEC));
+            () -> new ItemContentsProvider.Type<>(BundleProvider.CODEC));
 
     public static final DataAttachmentType<Entity, Integer> CURRENT_CONTAINER_SLOT_ATTACHMENT_TYPE = DataAttachmentRegistry.<Integer>entityBuilder()
             .defaultValue(EntityType.PLAYER, -1)

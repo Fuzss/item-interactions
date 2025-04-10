@@ -8,7 +8,7 @@ import fuzs.iteminteractions.impl.config.ClientConfig;
 import fuzs.iteminteractions.impl.config.ServerConfig;
 import fuzs.iteminteractions.impl.world.item.container.ItemContentsProviders;
 import fuzs.puzzleslib.api.event.v1.core.EventResult;
-import fuzs.puzzleslib.api.event.v1.data.DefaultedFloat;
+import fuzs.puzzleslib.api.event.v1.data.MutableFloat;
 import fuzs.puzzleslib.api.event.v1.data.MutableValue;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -131,14 +131,14 @@ public class MouseDraggingHandler {
         }
     }
 
-    public static EventResult onPlaySoundAtPosition(Level level, Entity entity, MutableValue<Holder<SoundEvent>> sound, MutableValue<SoundSource> source, DefaultedFloat volume, DefaultedFloat pitch) {
+    public static EventResult onPlaySoundAtEntity(Level level, Entity entity, MutableValue<Holder<SoundEvent>> soundEvent, MutableValue<SoundSource> soundSource, MutableFloat soundVolume, MutableFloat soundPitch) {
         // prevent the bundle sounds from being spammed when dragging, not a nice solution, but it works
-        if (containerDragType != null && source.get() == SoundSource.PLAYERS) {
-            if (sound.get().value() == containerDragType.sound) {
-                return EventResult.INTERRUPT;
-            }
+        if (containerDragType != null && soundSource.get() == SoundSource.PLAYERS &&
+                soundEvent.get().value() == containerDragType.sound) {
+            return EventResult.INTERRUPT;
+        } else {
+            return EventResult.PASS;
         }
-        return EventResult.PASS;
     }
 
     private enum ContainerDragType {

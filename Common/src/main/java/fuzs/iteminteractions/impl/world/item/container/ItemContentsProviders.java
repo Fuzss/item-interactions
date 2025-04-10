@@ -4,8 +4,9 @@ import com.google.common.collect.ImmutableMap;
 import fuzs.iteminteractions.api.v1.provider.ItemContentsBehavior;
 import fuzs.iteminteractions.api.v1.provider.ItemContentsProvider;
 import fuzs.iteminteractions.impl.ItemInteractions;
-import fuzs.iteminteractions.impl.network.S2CSyncItemContentsProviders;
-import fuzs.puzzleslib.api.network.v3.PlayerSet;
+import fuzs.iteminteractions.impl.network.ClientboundSyncItemContentsProviders;
+import fuzs.puzzleslib.api.network.v4.MessageSender;
+import fuzs.puzzleslib.api.network.v4.PlayerSet;
 import net.minecraft.Util;
 import net.minecraft.core.*;
 import net.minecraft.resources.ResourceKey;
@@ -72,7 +73,6 @@ public final class ItemContentsProviders extends UnconditionalSimpleJsonResource
     }
 
     public static void onSyncDataPackContents(ServerPlayer serverPlayer, boolean joined) {
-        ItemInteractions.NETWORK.sendMessage(PlayerSet.ofPlayer(serverPlayer),
-                new S2CSyncItemContentsProviders(resolvedProviders).toClientboundMessage());
+        MessageSender.broadcast(PlayerSet.ofPlayer(serverPlayer), new ClientboundSyncItemContentsProviders(resolvedProviders));
     }
 }

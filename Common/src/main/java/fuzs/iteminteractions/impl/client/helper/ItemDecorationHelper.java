@@ -1,6 +1,5 @@
 package fuzs.iteminteractions.impl.client.helper;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import fuzs.iteminteractions.api.v1.provider.ItemContentsBehavior;
 import fuzs.iteminteractions.impl.ItemInteractions;
 import fuzs.iteminteractions.impl.config.ClientConfig;
@@ -35,9 +34,7 @@ public class ItemDecorationHelper {
                         carriedStack,
                         minecraft.player);
                 if (type.mayRender()) {
-                    resetRenderState();
                     renderItemDecoratorType(type, guiGraphics, font, itemPosX, itemPosY);
-                    resetRenderState();
                 }
             }
         }
@@ -77,12 +74,6 @@ public class ItemDecorationHelper {
                     0xF000F0);
         });
         guiGraphics.pose().popPose();
-    }
-
-    private static void resetRenderState() {
-        RenderSystem.enableDepthTest();
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
     }
 
     public static void setSlotBeingRendered(@Nullable Slot slotBeingRendered) {

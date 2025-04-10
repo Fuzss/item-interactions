@@ -186,7 +186,7 @@ public record ItemContentsBehavior(ItemContentsProvider provider) {
     /**
      * @return the item container provider type
      */
-    public ItemContentsProvider.Type getType() {
+    public ItemContentsProvider.Type<?> getType() {
         return this.provider.getType();
     }
 

@@ -2,7 +2,7 @@ package fuzs.iteminteractions.impl.client.core;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import fuzs.iteminteractions.impl.ItemInteractions;
-import fuzs.puzzleslib.api.client.core.v1.ClientAbstractions;
+import fuzs.puzzleslib.api.client.key.v1.KeyMappingHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.network.chat.Component;
@@ -27,7 +27,9 @@ public class KeyBackedActivationType extends HeldActivationType implements KeyMa
     @Override
     public Component getComponent(String translationId) {
         Component keyName = this.keyMapping.getTranslatedKeyMessage();
-        return Component.translatable(translationId, Component.translatable(KEY_TOOLTIP_PRESS_TRANSLATION), Component.empty().append(keyName).withStyle(ChatFormatting.YELLOW)).withStyle(ChatFormatting.GRAY);
+        return Component.translatable(translationId,
+                Component.translatable(KEY_TOOLTIP_PRESS_TRANSLATION),
+                Component.empty().append(keyName).withStyle(ChatFormatting.YELLOW)).withStyle(ChatFormatting.GRAY);
     }
 
     @Override
@@ -37,7 +39,7 @@ public class KeyBackedActivationType extends HeldActivationType implements KeyMa
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode) {
-        if (ClientAbstractions.INSTANCE.isKeyActiveAndMatches(this.keyMapping, keyCode, scanCode)) {
+        if (KeyMappingHelper.isKeyActiveAndMatches(this.keyMapping, keyCode, scanCode)) {
             this.active = !this.active;
             return true;
         }
