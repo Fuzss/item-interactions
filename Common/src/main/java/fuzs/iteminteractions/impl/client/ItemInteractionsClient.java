@@ -50,6 +50,7 @@ public class ItemInteractionsClient implements ClientModConstructor {
                 .register(EventPhase.BEFORE, MouseDraggingHandler::onBeforeMouseDragged);
         ScreenKeyboardEvents.beforeKeyPress(AbstractContainerScreen.class)
                 .register(KeyBindingTogglesHandler::onBeforeKeyPressed);
+        ScreenEvents.afterInit(AbstractContainerScreen.class).register(ClientInputActionHandler::onAfterInit);
         ScreenEvents.afterRender(AbstractContainerScreen.class).register(ClientInputActionHandler::onAfterRender);
         ContainerScreenEvents.FOREGROUND.register(MouseDraggingHandler::onDrawForeground);
         PlayLevelSoundEvents.ENTITY.register(MouseDraggingHandler::onPlaySoundAtEntity);

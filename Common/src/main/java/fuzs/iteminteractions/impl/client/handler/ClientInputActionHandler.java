@@ -13,7 +13,10 @@ import fuzs.puzzleslib.api.event.v1.core.EventResult;
 import fuzs.puzzleslib.api.event.v1.data.MutableFloat;
 import fuzs.puzzleslib.api.event.v1.data.MutableValue;
 import fuzs.puzzleslib.api.network.v4.MessageSender;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.ScrollWheelHandler;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.core.Holder;
@@ -28,8 +31,14 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector2i;
+
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
 
 public class ClientInputActionHandler {
+    private static ScrollWheelHandler scrollWheelHandler = new ScrollWheelHandler();
     private static int lastSentContainerSlot = -1;
     private static boolean lastSentExtractSingleItem;
 
@@ -71,20 +80,30 @@ public class ClientInputActionHandler {
         }
     }
 
+    public static void onAfterInit(Minecraft minecraft, AbstractContainerScreen<?> screen, int screenWidth, int screenHeight, List<AbstractWidget> widgets, UnaryOperator<AbstractWidget> addWidget, Consumer<AbstractWidget> removeWidget) {
+        // no way to reset internal values other than to create a new instance
+        scrollWheelHandler = new ScrollWheelHandler();
+    }
+
     public static EventResult onBeforeMouseScroll(AbstractContainerScreen<?> screen, double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-        // allows to scroll between filled slots on a container items tooltip to select the slot to be interacted with next
-        if (verticalAmount == 0.0) return EventResult.PASS;
+        // allows scrolling between filled slots on a container items tooltip to select the slot to be interacted with next
+        if (horizontalAmount == 0.0 && verticalAmount == 0.0) return EventResult.PASS;
         if (!ItemInteractions.CONFIG.get(ClientConfig.class).revealContents.isActive()) return EventResult.PASS;
         if (precisionModeAllowedAndActive()) {
             Slot hoveredSlot = screen.hoveredSlot;
             if (hoveredSlot != null) {
                 if (!ItemContentsProviders.get(screen.getMenu().getCarried()).isEmpty() ||
                         !ItemContentsProviders.get(hoveredSlot.getItem()).isEmpty()) {
-                    int mouseButton = (ItemInteractions.CONFIG.get(ClientConfig.class).invertPrecisionModeScrolling ?
-                            verticalAmount < 0.0 : verticalAmount > 0.0) ? InputConstants.MOUSE_BUTTON_RIGHT :
-                            InputConstants.MOUSE_BUTTON_LEFT;
-                    ensureHasSentContainerClientInput(screen, screen.minecraft.player, true);
-                    screen.slotClicked(hoveredSlot, hoveredSlot.index, mouseButton, ClickType.PICKUP);
+                    Vector2i vector2i = scrollWheelHandler.onMouseScroll(horizontalAmount, verticalAmount);
+                    int scrollAmount = vector2i.y == 0 ? -vector2i.x : vector2i.y;
+                    if (scrollAmount != 0) {
+                        int mouseButton =
+                                (ItemInteractions.CONFIG.get(ClientConfig.class).invertPrecisionModeScrolling ?
+                                        scrollAmount < 0 : scrollAmount > 0) ? InputConstants.MOUSE_BUTTON_RIGHT :
+                                        InputConstants.MOUSE_BUTTON_LEFT;
+                        ensureHasSentContainerClientInput(screen, screen.minecraft.player, true);
+                        screen.slotClicked(hoveredSlot, hoveredSlot.index, mouseButton, ClickType.PICKUP);
+                    }
                     return EventResult.INTERRUPT;
                 }
             }
@@ -97,17 +116,21 @@ public class ClientInputActionHandler {
             Pair<ItemStack, ItemContentsBehavior> pair = getContainerPair(screen, true);
             ItemStack itemStack = pair.getFirst();
             if (!itemStack.isEmpty()) {
-                int oldContainerSlot = ContainerSlotHelper.getCurrentContainerSlot(screen.minecraft.player);
-                SimpleContainer container = ItemContentsProviders.get(itemStack)
-                        .getItemContainerView(itemStack, screen.minecraft.player);
-                int newContainerSlot = ContainerSlotHelper.findClosestSlotWithContent(container,
-                        oldContainerSlot,
-                        verticalAmount < 0.0);
-                ContainerSlotHelper.setCurrentContainerSlot(screen.minecraft.player, newContainerSlot);
-                if (oldContainerSlot != -1) {
-                    pair.getSecond().provider().onToggleSelectedItem(itemStack, oldContainerSlot, newContainerSlot);
+                Vector2i vector2i = scrollWheelHandler.onMouseScroll(horizontalAmount, verticalAmount);
+                int scrollAmount = vector2i.y == 0 ? -vector2i.x : vector2i.y;
+                if (scrollAmount != 0) {
+                    int oldContainerSlot = ContainerSlotHelper.getCurrentContainerSlot(screen.minecraft.player);
+                    SimpleContainer container = ItemContentsProviders.get(itemStack)
+                            .getItemContainerView(itemStack, screen.minecraft.player);
+                    int newContainerSlot = ContainerSlotHelper.findClosestSlotWithContent(container,
+                            oldContainerSlot,
+                            scrollAmount < 0.0);
+                    ContainerSlotHelper.setCurrentContainerSlot(screen.minecraft.player, newContainerSlot);
+                    if (oldContainerSlot != -1) {
+                        pair.getSecond().provider().onToggleSelectedItem(itemStack, oldContainerSlot, newContainerSlot);
+                    }
+                    ensureHasSentContainerClientInput(screen, screen.minecraft.player, true);
                 }
-                ensureHasSentContainerClientInput(screen, screen.minecraft.player, true);
                 return EventResult.INTERRUPT;
             }
         }
