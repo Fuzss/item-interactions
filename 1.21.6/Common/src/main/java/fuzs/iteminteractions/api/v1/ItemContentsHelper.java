@@ -2,8 +2,8 @@ package fuzs.iteminteractions.api.v1;
 
 import fuzs.iteminteractions.api.v1.provider.ItemContentsBehavior;
 import fuzs.iteminteractions.impl.world.item.container.ItemContentsProviders;
+import net.minecraft.client.color.ColorLerper;
 import net.minecraft.util.ARGB;
-import net.minecraft.world.entity.animal.sheep.Sheep;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -26,7 +26,7 @@ public final class ItemContentsHelper {
             DyeColor dyeColor = DyeColor.byName(color.serialize(), null);
             int value;
             if (dyeColor != null) {
-                value = Sheep.createSheepColor(dyeColor);
+                value = ColorLerper.Type.SHEEP.getColor(dyeColor);
             } else {
                 value = color.getValue();
             }

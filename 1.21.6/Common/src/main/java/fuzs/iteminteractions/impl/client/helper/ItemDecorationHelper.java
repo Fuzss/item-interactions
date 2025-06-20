@@ -9,7 +9,6 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.inventory.Slot;
@@ -49,7 +48,7 @@ public class ItemDecorationHelper {
             // filter out creative mode inventory slots on the client
             return false;
         } else if (slot.container instanceof CraftingContainer) {
-            // do not allow interactions in the crafting grid, the crafting result will not update
+            // do not allow interactions in the crafting grid, the crafting result will not update,
             // so players can remove items and get them back from the crafted item
             return false;
         } else {
@@ -59,21 +58,14 @@ public class ItemDecorationHelper {
 
     @SuppressWarnings("ConstantConditions")
     private static void renderItemDecoratorType(ItemDecoratorType type, GuiGraphics guiGraphics, Font font, int itemPosX, int itemPosY) {
-        guiGraphics.pose().pushPose();
-        guiGraphics.pose().translate(0.0, 0.0, 200.0);
-        guiGraphics.drawSpecial((MultiBufferSource bufferSource) -> {
-            font.drawInBatch(type.getString(),
-                    (float) (itemPosX + 19 - 2 - type.getWidth(font)),
-                    (float) (itemPosY + 6 + 3),
-                    type.getColor(),
-                    true,
-                    guiGraphics.pose().last().pose(),
-                    bufferSource,
-                    Font.DisplayMode.NORMAL,
-                    0,
-                    0xF000F0);
-        });
-        guiGraphics.pose().popPose();
+        guiGraphics.pose().pushMatrix();
+        guiGraphics.drawString(font,
+                type.getString(),
+                itemPosX + 19 - 2 - type.getWidth(font),
+                itemPosY + 6 + 3,
+                type.getColor(),
+                true);
+        guiGraphics.pose().popMatrix();
     }
 
     public static void setSlotBeingRendered(@Nullable Slot slotBeingRendered) {

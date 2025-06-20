@@ -13,7 +13,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -21,6 +21,7 @@ import net.minecraft.util.ARGB;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
@@ -78,11 +79,11 @@ public abstract class AbstractClientItemContentsTooltip extends ExpandableClient
             this.drawBorder(x, y, this.getGridSizeX(), this.getGridSizeY(), guiGraphics);
         }
         int itemIndex = 0;
-        int lastFilledSlot = this.getLastFilledSlot();
-        for (int l = 0; l < this.getGridSizeY(); ++l) {
-            for (int i1 = 0; i1 < this.getGridSizeX(); ++i1) {
-                int posX = x + i1 * GRID_SIZE + BORDER_SIZE;
-                int posY = y + l * GRID_SIZE + BORDER_SIZE;
+        int highlightSlot = this.getLastFilledSlot();
+        for (int gridY = 0; gridY < this.getGridSizeY(); ++gridY) {
+            for (int gridX = 0; gridX < this.getGridSizeX(); ++gridX) {
+                int posX = x + gridX * GRID_SIZE + BORDER_SIZE;
+                int posY = y + gridY * GRID_SIZE + BORDER_SIZE;
                 if (!this.defaultSize()) {
                     if (this.isSlotBlocked(itemIndex)) {
                         ContainerTexture.BLOCKED_SLOT.blit(guiGraphics, posX, posY, color);
@@ -90,27 +91,27 @@ public abstract class AbstractClientItemContentsTooltip extends ExpandableClient
                         ContainerTexture.SLOT.blit(guiGraphics, posX, posY, color);
                     }
                 }
-                if (itemIndex == lastFilledSlot) {
+                if (itemIndex == highlightSlot) {
                     this.drawSlotHighlightBack(guiGraphics, posX, posY);
                 }
                 this.drawSlot(guiGraphics, posX, posY, itemIndex, font);
-                if (itemIndex == lastFilledSlot) {
+                if (itemIndex == highlightSlot) {
                     this.drawSlotHighlightFront(guiGraphics, posX, posY);
                 }
                 itemIndex++;
             }
         }
-        this.drawSelectedSlotTooltip(font, x, y, guiGraphics, lastFilledSlot);
+        this.drawSelectedSlotTooltip(font, x, y, guiGraphics, highlightSlot);
         ACTIVE_CONTAINER_ITEM_TOOLTIPS.decrement();
     }
 
-    private void drawSelectedSlotTooltip(Font font, int mouseX, int mouseY, GuiGraphics guiGraphics, int lastFilledSlot) {
+    private void drawSelectedSlotTooltip(Font font, int mouseX, int mouseY, GuiGraphics guiGraphics, int highlightSlot) {
         if (!ItemInteractions.CONFIG.get(ClientConfig.class).selectedItemTooltips.isActive()) return;
         if (ACTIVE_CONTAINER_ITEM_TOOLTIPS.intValue() > 1) return;
         Minecraft minecraft = Minecraft.getInstance();
-        if (minecraft.screen != null && !willTooltipBeMoved(minecraft, font, mouseX, mouseY) && lastFilledSlot >= 0 &&
-                lastFilledSlot < this.items.size()) {
-            ItemStack itemStack = this.items.get(lastFilledSlot);
+        if (minecraft.screen != null && !willTooltipBeMoved(minecraft, font, mouseX, mouseY) && highlightSlot >= 0
+                && highlightSlot < this.items.size()) {
+            ItemStack itemStack = this.items.get(highlightSlot);
             List<Component> itemTooltip = Screen.getTooltipFromItem(minecraft, itemStack);
             Optional<TooltipComponent> itemTooltipImage = itemStack.getTooltipImage();
             List<ClientTooltipComponent> tooltipComponents = TooltipRenderHelper.getTooltip(itemStack);
@@ -118,9 +119,11 @@ public abstract class AbstractClientItemContentsTooltip extends ExpandableClient
                     .mapToInt(tooltipComponent -> tooltipComponent.getWidth(font))
                     .max()
                     .orElse(0);
-            guiGraphics.pose().pushPose();
-            guiGraphics.renderTooltip(font, itemTooltip, itemTooltipImage, mouseX - maxWidth - 2 * GRID_SIZE, mouseY);
-            guiGraphics.pose().popPose();
+            guiGraphics.setTooltipForNextFrame(font,
+                    itemTooltip,
+                    itemTooltipImage,
+                    mouseX - maxWidth - 2 * GRID_SIZE,
+                    mouseY);
         }
     }
 
@@ -134,8 +137,8 @@ public abstract class AbstractClientItemContentsTooltip extends ExpandableClient
                 .max()
                 .orElse(0);
         // actual mouseX, tooltip components are passed the adjusted position where the tooltip should be rendered
-        mouseX = (int) (minecraft.mouseHandler.xpos() * (double) minecraft.getWindow().getGuiScaledWidth() /
-                (double) minecraft.getWindow().getScreenWidth());
+        mouseX = (int) (minecraft.mouseHandler.xpos() * (double) minecraft.getWindow().getGuiScaledWidth()
+                / (double) minecraft.getWindow().getScreenWidth());
         return mouseX + 12 + maxWidth > containerScreen.width;
     }
 
@@ -211,40 +214,40 @@ public abstract class AbstractClientItemContentsTooltip extends ExpandableClient
     }
 
     private void drawSlotHighlightBack(GuiGraphics guiGraphics, int posX, int posY) {
-        if (ACTIVE_CONTAINER_ITEM_TOOLTIPS.intValue() > 1) return;
-        ClientConfig.SlotOverlay slotOverlay = ItemInteractions.CONFIG.get(ClientConfig.class).slotOverlay;
-        if (slotOverlay == ClientConfig.SlotOverlay.HOVER) {
-            guiGraphics.blitSprite(RenderType::guiTextured, SLOT_HIGHLIGHT_BACK_SPRITE, posX - 3, posY - 3, 24, 24);
-        }
+        this.drawSlotHighlight(guiGraphics, posX, posY, HOTBAR_SELECTION_SPRITE, SLOT_HIGHLIGHT_BACK_SPRITE);
     }
 
     private void drawSlotHighlightFront(GuiGraphics guiGraphics, int posX, int posY) {
+        this.drawSlotHighlight(guiGraphics, posX, posY, null, SLOT_HIGHLIGHT_FRONT_SPRITE);
+    }
+
+    private void drawSlotHighlight(GuiGraphics guiGraphics, int posX, int posY, @Nullable ResourceLocation hotbarSelectionSprite, @Nullable ResourceLocation slotHighlightSprite) {
         if (ACTIVE_CONTAINER_ITEM_TOOLTIPS.intValue() > 1) return;
         ClientConfig.SlotOverlay slotOverlay = ItemInteractions.CONFIG.get(ClientConfig.class).slotOverlay;
         switch (slotOverlay) {
             case HOTBAR -> {
-                // items render at 150 (or 160 for some 3d models in the recipe book)
-                // item decorations (such as item stack count) render at 200
-                // we want to slip in-between
-                guiGraphics.pose().pushPose();
-                guiGraphics.pose().translate(0.0F, 0.0F, 180.0F);
-                GuiGraphicsHelper.blitTiledSprite(guiGraphics,
-                        RenderType::guiTextured,
-                        HOTBAR_SELECTION_SPRITE,
-                        posX - 3,
-                        posY - 3,
-                        24,
-                        24,
-                        24,
-                        23);
-                guiGraphics.pose().popPose();
+                if (hotbarSelectionSprite != null) {
+                    GuiGraphicsHelper.blitTiledSprite(guiGraphics,
+                            RenderPipelines.GUI_TEXTURED,
+                            hotbarSelectionSprite,
+                            posX - 3,
+                            posY - 3,
+                            24,
+                            24,
+                            24,
+                            23);
+                }
             }
-            case HOVER -> guiGraphics.blitSprite(RenderType::guiTexturedOverlay,
-                    SLOT_HIGHLIGHT_FRONT_SPRITE,
-                    posX - 3,
-                    posY - 3,
-                    24,
-                    24);
+            case HOVER -> {
+                if (slotHighlightSprite != null) {
+                    guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED,
+                            slotHighlightSprite,
+                            posX - 3,
+                            posY - 3,
+                            24,
+                            24);
+                }
+            }
         }
     }
 
@@ -274,7 +277,7 @@ public abstract class AbstractClientItemContentsTooltip extends ExpandableClient
         }
 
         public void blit(GuiGraphics guiGraphics, int posX, int posY, int color) {
-            guiGraphics.blit(RenderType::guiTextured,
+            guiGraphics.blit(RenderPipelines.GUI_TEXTURED,
                     TEXTURE_LOCATION,
                     posX,
                     posY,

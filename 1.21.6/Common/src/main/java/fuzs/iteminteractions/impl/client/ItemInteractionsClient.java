@@ -20,7 +20,7 @@ import fuzs.puzzleslib.api.client.event.v1.gui.ScreenEvents;
 import fuzs.puzzleslib.api.client.event.v1.gui.ScreenKeyboardEvents;
 import fuzs.puzzleslib.api.client.event.v1.gui.ScreenMouseEvents;
 import fuzs.puzzleslib.api.event.v1.core.EventPhase;
-import fuzs.puzzleslib.api.event.v1.level.PlayLevelSoundEvents;
+import fuzs.puzzleslib.api.event.v1.level.PlaySoundEvents;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
@@ -53,8 +53,8 @@ public class ItemInteractionsClient implements ClientModConstructor {
         ScreenEvents.afterInit(AbstractContainerScreen.class).register(ClientInputActionHandler::onAfterInit);
         ScreenEvents.afterRender(AbstractContainerScreen.class).register(ClientInputActionHandler::onAfterRender);
         ContainerScreenEvents.FOREGROUND.register(MouseDraggingHandler::onDrawForeground);
-        PlayLevelSoundEvents.ENTITY.register(MouseDraggingHandler::onPlaySoundAtEntity);
-        PlayLevelSoundEvents.ENTITY.register(ClientInputActionHandler::onPlaySoundAtEntity);
+        PlaySoundEvents.AT_ENTITY.register(MouseDraggingHandler::onPlaySoundAtEntity);
+        PlaySoundEvents.AT_ENTITY.register(ClientInputActionHandler::onPlaySoundAtEntity);
         ClientPlayerNetworkEvents.LOGGED_IN.register((LocalPlayer player, MultiPlayerGameMode multiPlayerGameMode, Connection connection) -> {
             ItemContentsProviders.setItemContainerProviders(ImmutableMap.of());
         });

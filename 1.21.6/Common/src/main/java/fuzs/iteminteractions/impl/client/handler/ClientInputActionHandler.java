@@ -68,14 +68,14 @@ public class ClientInputActionHandler {
         return EventResult.PASS;
     }
 
-    public static void onAfterRender(AbstractContainerScreen<?> screen, GuiGraphics guiGraphics, int mouseX, int mouseY, float tickDelta) {
+    public static void onAfterRender(AbstractContainerScreen<?> screen, GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         // renders vanilla item tooltips when a stack is carried and the cursor hovers over a container item
         // intended to be used with single item extraction/insertion feature to be able to continuously see what's going on in the container item
         if (!ItemInteractions.CONFIG.get(ClientConfig.class).carriedItemTooltips.isActive()) return;
         if (!screen.getMenu().getCarried().isEmpty()) {
-            ItemStack stack = getContainerItemStack(screen, false);
-            if (!stack.isEmpty()) {
-                guiGraphics.renderTooltip(screen.font, stack, mouseX, mouseY);
+            ItemStack itemStack = getContainerItemStack(screen, false);
+            if (!itemStack.isEmpty()) {
+                guiGraphics.setTooltipForNextFrame(screen.font, itemStack, mouseX, mouseY);
             }
         }
     }
@@ -92,8 +92,8 @@ public class ClientInputActionHandler {
         if (precisionModeAllowedAndActive()) {
             Slot hoveredSlot = screen.hoveredSlot;
             if (hoveredSlot != null) {
-                if (!ItemContentsProviders.get(screen.getMenu().getCarried()).isEmpty() ||
-                        !ItemContentsProviders.get(hoveredSlot.getItem()).isEmpty()) {
+                if (!ItemContentsProviders.get(screen.getMenu().getCarried()).isEmpty() || !ItemContentsProviders.get(
+                        hoveredSlot.getItem()).isEmpty()) {
                     Vector2i vector2i = scrollWheelHandler.onMouseScroll(horizontalAmount, verticalAmount);
                     int scrollAmount = vector2i.y == 0 ? -vector2i.x : vector2i.y;
                     if (scrollAmount != 0) {
@@ -109,8 +109,8 @@ public class ClientInputActionHandler {
             }
         } else if (ItemInteractions.CONFIG.get(ServerConfig.class).allowSlotCycling) {
             ItemStack carriedStack = screen.getMenu().getCarried();
-            if (!carriedStack.isEmpty() &&
-                    !ItemInteractions.CONFIG.get(ClientConfig.class).carriedItemTooltips.isActive()) {
+            if (!carriedStack.isEmpty()
+                    && !ItemInteractions.CONFIG.get(ClientConfig.class).carriedItemTooltips.isActive()) {
                 return EventResult.PASS;
             }
             Pair<ItemStack, ItemContentsBehavior> pair = getContainerPair(screen, true);
@@ -160,8 +160,8 @@ public class ClientInputActionHandler {
 
     public static EventResult onPlaySoundAtEntity(Level level, Entity entity, MutableValue<Holder<SoundEvent>> soundEvent, MutableValue<SoundSource> soundSource, MutableFloat soundVolume, MutableFloat soundPitch) {
         if (!ItemInteractions.CONFIG.get(ClientConfig.class).disableInteractionSounds) return EventResult.PASS;
-        if (soundSource.get() == SoundSource.PLAYERS && (soundEvent.get().value() == SoundEvents.BUNDLE_INSERT ||
-                soundEvent.get().value() == SoundEvents.BUNDLE_REMOVE_ONE)) {
+        if (soundSource.get() == SoundSource.PLAYERS && (soundEvent.get().value() == SoundEvents.BUNDLE_INSERT
+                || soundEvent.get().value() == SoundEvents.BUNDLE_REMOVE_ONE)) {
             return EventResult.INTERRUPT;
         } else {
             return EventResult.PASS;
@@ -169,8 +169,8 @@ public class ClientInputActionHandler {
     }
 
     public static boolean precisionModeAllowedAndActive() {
-        return ItemInteractions.CONFIG.get(ServerConfig.class).allowPrecisionMode &&
-                ItemInteractions.CONFIG.get(ClientConfig.class).precisionMode.isActive();
+        return ItemInteractions.CONFIG.get(ServerConfig.class).allowPrecisionMode && ItemInteractions.CONFIG.get(
+                ClientConfig.class).precisionMode.isActive();
     }
 
     public static void ensureHasSentContainerClientInput(Screen screen, Player player) {
@@ -181,8 +181,8 @@ public class ClientInputActionHandler {
         if (!(screen instanceof AbstractContainerScreen<?>)) return;
         int currentContainerSlot = ContainerSlotHelper.getCurrentContainerSlot(player);
         boolean extractSingleItem = precisionModeAllowedAndActive();
-        if (alwaysSendMessage || currentContainerSlot != lastSentContainerSlot ||
-                extractSingleItem != lastSentExtractSingleItem) {
+        if (alwaysSendMessage || currentContainerSlot != lastSentContainerSlot
+                || extractSingleItem != lastSentExtractSingleItem) {
             lastSentContainerSlot = currentContainerSlot;
             lastSentExtractSingleItem = extractSingleItem;
             // this is where the client sets this value,

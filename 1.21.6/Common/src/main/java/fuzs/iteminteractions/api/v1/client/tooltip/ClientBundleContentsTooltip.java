@@ -3,7 +3,7 @@ package fuzs.iteminteractions.api.v1.client.tooltip;
 import fuzs.iteminteractions.api.v1.tooltip.BundleContentsTooltip;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -58,7 +58,8 @@ public class ClientBundleContentsTooltip extends AbstractClientItemContentsToolt
 
     @Override
     public int getExpandedHeight(Font font) {
-        return this.isBundleEmpty() ? this.getEmptyBundleBackgroundHeight(font) : super.getExpandedHeight(font) + 13 + 8;
+        return this.isBundleEmpty() ? this.getEmptyBundleBackgroundHeight(font) :
+                super.getExpandedHeight(font) + 13 + 8;
     }
 
     @Override
@@ -86,13 +87,18 @@ public class ClientBundleContentsTooltip extends AbstractClientItemContentsToolt
     }
 
     private void drawProgressbar(int x, int y, Font font, GuiGraphics guiGraphics) {
-        guiGraphics.blitSprite(RenderType::guiTextured,
+        guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED,
                 this.getProgressBarTexture(),
                 x + PROGRESSBAR_BORDER_SIZE,
                 y,
                 this.getProgressBarFill(font),
                 13);
-        guiGraphics.blitSprite(RenderType::guiTextured, PROGRESSBAR_BORDER_SPRITE, x, y, this.getExpandedWidth(font), 13);
+        guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED,
+                PROGRESSBAR_BORDER_SPRITE,
+                x,
+                y,
+                this.getExpandedWidth(font),
+                13);
         Component component = this.getProgressBarFillText();
         if (component != null) {
             guiGraphics.drawCenteredString(font, component, x + this.getExpandedWidth(font) / 2, y + 3, -1);
