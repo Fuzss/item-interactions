@@ -8,7 +8,6 @@ import fuzs.iteminteractions.api.v1.provider.AbstractProvider;
 import fuzs.iteminteractions.api.v1.tooltip.ItemContentsTooltip;
 import fuzs.iteminteractions.impl.init.ModRegistry;
 import fuzs.puzzleslib.api.container.v1.ContainerMenuHelper;
-import net.minecraft.core.HolderSet;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.util.ExtraCodecs;
@@ -19,7 +18,6 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemContainerContents;
 import org.jetbrains.annotations.Nullable;
@@ -33,22 +31,19 @@ public class ContainerProvider extends AbstractProvider {
         return instance.group(inventoryWidthCodec(),
                         inventoryHeightCodec(),
                         backgroundColorCodec(),
-                        disallowedItemsCodec(),
+                        itemContentsCodec(),
                         filterContainerItemsCodec(),
                         interactionPermissionsCodec(),
-                        equipmentSlotsCodec()
-                )
+                        equipmentSlotsCodec())
                 .apply(instance,
-                        (Integer inventoryWidth, Integer inventoryHeight, Optional<DyeBackedColor> dyeColor, HolderSet<Item> disallowedItems, Boolean filterContainerItems, InteractionPermissions interactionPermissions, EquipmentSlotGroup equipmentSlots) -> {
+                        (Integer inventoryWidth, Integer inventoryHeight, Optional<DyeBackedColor> dyeColor, ItemContents itemContents, Boolean filterContainerItems, InteractionPermissions interactionPermissions, EquipmentSlotGroup equipmentSlots) -> {
                             return new ContainerProvider(inventoryWidth,
                                     inventoryHeight,
-                                    dyeColor.orElse(null)
-                            ).disallowedItems(disallowedItems)
+                                    dyeColor.orElse(null)).itemContents(itemContents)
                                     .filterContainerItems(filterContainerItems)
                                     .interactionPermissions(interactionPermissions)
                                     .equipmentSlots(equipmentSlots);
-                        }
-                );
+                        });
     });
     private static final EquipmentSlot[] EQUIPMENT_SLOTS = EquipmentSlot.values();
 
@@ -95,8 +90,8 @@ public class ContainerProvider extends AbstractProvider {
     }
 
     @Override
-    public ContainerProvider disallowedItems(HolderSet<Item> disallowedItems) {
-        return (ContainerProvider) super.disallowedItems(disallowedItems);
+    protected ContainerProvider itemContents(ItemContents itemContents) {
+        return (ContainerProvider) super.itemContents(itemContents);
     }
 
     public ContainerProvider filterContainerItems(boolean filterContainerItems) {
@@ -128,19 +123,18 @@ public class ContainerProvider extends AbstractProvider {
 
     @Override
     public boolean hasContents(ItemStack containerStack) {
-        return containerStack.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY) !=
-                ItemContainerContents.EMPTY;
+        return containerStack.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY)
+                != ItemContainerContents.EMPTY;
     }
 
     @Override
     public boolean allowsPlayerInteractions(ItemStack containerStack, Player player) {
-        return super.allowsPlayerInteractions(containerStack, player) &&
-                this.interactionPermissions.allowsPlayerInteractions(player) &&
-                (player.getAbilities().instabuild || this.equipmentSlots == EquipmentSlotGroup.ANY ||
-                        Arrays.stream(EQUIPMENT_SLOTS)
-                                .filter(this.equipmentSlots::test)
-                                .map(player::getItemBySlot)
-                                .anyMatch((ItemStack itemStack) -> itemStack == containerStack));
+        return super.allowsPlayerInteractions(containerStack, player)
+                && this.interactionPermissions.allowsPlayerInteractions(player) && (player.getAbilities().instabuild
+                || this.equipmentSlots == EquipmentSlotGroup.ANY || Arrays.stream(EQUIPMENT_SLOTS)
+                .filter(this.equipmentSlots::test)
+                .map(player::getItemBySlot)
+                .anyMatch((ItemStack itemStack) -> itemStack == containerStack));
     }
 
     @Override
@@ -153,22 +147,15 @@ public class ContainerProvider extends AbstractProvider {
     }
 
     @Override
-    public boolean isItemAllowedInContainer(ItemStack stackToAdd) {
-        return super.isItemAllowedInContainer(stackToAdd) &&
-                (!this.filterContainerItems || stackToAdd.getItem().canFitInsideContainerItems());
-    }
-
-    @Override
     public TooltipComponent createTooltipImageComponent(ItemStack containerStack, Player player, NonNullList<ItemStack> items) {
         return new ItemContentsTooltip(items,
                 this.getInventoryWidth(),
                 this.getInventoryHeight(),
-                this.getBackgroundColor()
-        );
+                this.getBackgroundColor());
     }
 
     @Override
-    public Type getType() {
+    public Type<?> getType() {
         return ModRegistry.CONTAINER_ITEM_CONTENTS_PROVIDER_TYPE.value();
     }
 

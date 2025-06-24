@@ -10,7 +10,6 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
 
@@ -18,7 +17,7 @@ public class EnderChestProvider implements TooltipProvider {
     /**
      * Pretty ender color from <a href="https://www.curseforge.com/minecraft/mc-mods/tinted">Tinted mod</a>.
      */
-    private static final float[] DEFAULT_ENDER_CHEST_COLOR = {0.16470589F, 0.38431373F, 0.33333334F};
+    private static final int DEFAULT_ENDER_CHEST_COLOR = 0XFF2A6255;
     private static final int GRID_SIZE_X = 9;
     public static final MapCodec<EnderChestProvider> CODEC = MapCodec.unit(EnderChestProvider::new);
 

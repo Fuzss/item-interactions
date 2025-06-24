@@ -106,7 +106,7 @@ public class ClientBundleContentsTooltip extends AbstractClientItemContentsToolt
     }
 
     private void drawEmptyBundleDescriptionText(int x, int y, Font font, GuiGraphics guiGraphics) {
-        guiGraphics.drawWordWrap(font, BUNDLE_EMPTY_DESCRIPTION, x, y, this.getExpandedWidth(font), 0XAAAAAA);
+        guiGraphics.drawWordWrap(font, BUNDLE_EMPTY_DESCRIPTION, x, y, this.getExpandedWidth(font), 0XFFAAAAAA);
     }
 
     private int getEmptyBundleDescriptionTextHeight(Font font) {

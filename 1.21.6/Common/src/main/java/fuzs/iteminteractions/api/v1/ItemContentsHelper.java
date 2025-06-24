@@ -7,7 +7,6 @@ import net.minecraft.util.ARGB;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector3f;
 
 public final class ItemContentsHelper {
 
@@ -19,19 +18,18 @@ public final class ItemContentsHelper {
         return ItemContentsProviders.get(itemStack);
     }
 
-    public static float[] getBackgroundColor(@Nullable DyeBackedColor color) {
+    public static int getBackgroundColor(@Nullable DyeBackedColor color) {
         if (color == null) {
-            return new float[]{1.0F, 1.0F, 1.0F};
+            return -1;
         } else {
             DyeColor dyeColor = DyeColor.byName(color.serialize(), null);
-            int value;
+            int colorValue;
             if (dyeColor != null) {
-                value = ColorLerper.Type.SHEEP.getColor(dyeColor);
+                colorValue = ColorLerper.Type.SHEEP.getColor(dyeColor);
             } else {
-                value = color.getValue();
+                colorValue = color.getValue();
             }
-            Vector3f vector3f = ARGB.vector3fFromRGB24(value);
-            return new float[]{vector3f.x(), vector3f.y(), vector3f.z()};
+            return ARGB.opaque(colorValue);
         }
     }
 }

@@ -1,5 +1,6 @@
 package fuzs.iteminteractions.api.v1.provider;
 
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import fuzs.iteminteractions.api.v1.DyeBackedColor;
 import fuzs.iteminteractions.api.v1.ItemContentsHelper;
@@ -15,8 +16,8 @@ import java.util.Optional;
 public abstract class AbstractProvider implements TooltipProvider {
     @Nullable
     final DyeBackedColor dyeColor;
-    private final float[] backgroundColor;
-    HolderSet<Item> disallowedItems = HolderSet.empty();
+    private final int backgroundColor;
+    ItemContents itemContents = ItemContents.EMPTY;
 
     protected AbstractProvider(@Nullable DyeBackedColor dyeColor) {
         this.dyeColor = dyeColor;
@@ -28,23 +29,45 @@ public abstract class AbstractProvider implements TooltipProvider {
                 .forGetter((T provider) -> Optional.ofNullable(provider.dyeColor));
     }
 
-    protected static <T extends AbstractProvider> RecordCodecBuilder<T, HolderSet<Item>> disallowedItemsCodec() {
-        return RegistryCodecs.homogeneousList(Registries.ITEM).fieldOf("disallowed_item_contents")
-                .orElse(HolderSet.empty())
-                .forGetter(provider -> provider.disallowedItems);
+    protected static <T extends AbstractProvider> RecordCodecBuilder<T, ItemContents> itemContentsCodec() {
+        return ItemContents.CODEC.lenientOptionalFieldOf("item_contents", ItemContents.EMPTY)
+                .forGetter((T provider) -> provider.itemContents);
     }
 
-    protected float[] getBackgroundColor() {
+    protected int getBackgroundColor() {
         return this.backgroundColor;
     }
 
-    public AbstractProvider disallowedItems(HolderSet<Item> disallowedItems) {
-        this.disallowedItems = disallowedItems;
+    protected AbstractProvider itemContents(ItemContents itemContents) {
+        this.itemContents = itemContents;
         return this;
     }
 
     @Override
     public boolean isItemAllowedInContainer(ItemStack stackToAdd) {
-        return !stackToAdd.is(this.disallowedItems);
+        return this.itemContents.canFitInsideContainerItem(stackToAdd);
+    }
+
+    protected record ItemContents(Optional<HolderSet<Item>> items, boolean disallow, boolean filterContainerItems) {
+        public static final ItemContents EMPTY = new ItemContents(Optional.empty(), false, false);
+        public static final Codec<ItemContents> CODEC = RecordCodecBuilder.create((RecordCodecBuilder.Instance<ItemContents> instance) -> instance.group(
+                        RegistryCodecs.homogeneousList(Registries.ITEM)
+                                .lenientOptionalFieldOf("items")
+                                .forGetter((ItemContents itemContents) -> itemContents.items),
+                        Codec.BOOL.lenientOptionalFieldOf("disallow", false)
+                                .forGetter((ItemContents itemContents) -> itemContents.filterContainerItems),
+                        Codec.BOOL.lenientOptionalFieldOf("filter_container_items", false)
+                                .forGetter((ItemContents itemContents) -> itemContents.filterContainerItems))
+                .apply(instance, ItemContents::new));
+
+        public boolean canFitInsideContainerItem(ItemStack itemStack) {
+            if (!this.disallow) {
+                return this.items.isEmpty() || this.items.filter(itemStack::is).isPresent();
+            } else {
+                boolean canFitInsideContainerItems =
+                        !this.filterContainerItems || itemStack.getItem().canFitInsideContainerItems();
+                return canFitInsideContainerItems && this.items.filter(itemStack::is).isEmpty();
+            }
+        }
     }
 }

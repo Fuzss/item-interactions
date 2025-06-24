@@ -73,6 +73,9 @@ public final class ItemContentsProviders extends UnconditionalSimpleJsonResource
     }
 
     public static void onSyncDataPackContents(ServerPlayer serverPlayer, boolean joined) {
-        MessageSender.broadcast(PlayerSet.ofPlayer(serverPlayer), new ClientboundSyncItemContentsProviders(resolvedProviders));
+        if (!serverPlayer.connection.connection.isMemoryConnection()) {
+            MessageSender.broadcast(PlayerSet.ofPlayer(serverPlayer),
+                    new ClientboundSyncItemContentsProviders(resolvedProviders));
+        }
     }
 }

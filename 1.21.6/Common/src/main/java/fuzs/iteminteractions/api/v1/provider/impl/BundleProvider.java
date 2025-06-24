@@ -8,7 +8,6 @@ import fuzs.iteminteractions.api.v1.provider.AbstractProvider;
 import fuzs.iteminteractions.api.v1.tooltip.BundleContentsTooltip;
 import fuzs.iteminteractions.impl.init.ModRegistry;
 import fuzs.puzzleslib.api.container.v1.ContainerMenuHelper;
-import net.minecraft.core.HolderSet;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.util.ExtraCodecs;
@@ -17,7 +16,6 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.BundleItem;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.BundleContents;
 import org.apache.commons.lang3.math.Fraction;
@@ -28,11 +26,11 @@ import java.util.stream.Stream;
 
 public class BundleProvider extends AbstractProvider {
     public static final MapCodec<BundleProvider> CODEC = RecordCodecBuilder.mapCodec(instance -> {
-        return instance.group(capacityMultiplierCodec(), backgroundColorCodec(), disallowedItemsCodec())
+        return instance.group(capacityMultiplierCodec(), backgroundColorCodec(), itemContentsCodec())
                 .apply(instance,
-                        (Integer capacityMultiplier, Optional<DyeBackedColor> dyeColor, HolderSet<Item> disallowedItems) -> {
-                            return new BundleProvider(capacityMultiplier, dyeColor.orElse(null)).disallowedItems(
-                                    disallowedItems);
+                        (Integer capacityMultiplier, Optional<DyeBackedColor> dyeColor, ItemContents itemContents) -> {
+                            return new BundleProvider(capacityMultiplier, dyeColor.orElse(null)).itemContents(
+                                    itemContents);
                         });
     });
 
@@ -53,8 +51,8 @@ public class BundleProvider extends AbstractProvider {
     }
 
     @Override
-    public BundleProvider disallowedItems(HolderSet<Item> disallowedItems) {
-        return (BundleProvider) super.disallowedItems(disallowedItems);
+    protected BundleProvider itemContents(ItemContents itemContents) {
+        return (BundleProvider) super.itemContents(itemContents);
     }
 
     public Fraction getCapacityMultiplier(ItemStack containerStack) {
