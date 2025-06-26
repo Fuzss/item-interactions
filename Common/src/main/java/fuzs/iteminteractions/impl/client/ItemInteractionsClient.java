@@ -34,26 +34,36 @@ public class ItemInteractionsClient implements ClientModConstructor {
     }
 
     private static void registerHandlers() {
-        ScreenMouseEvents.beforeMouseClick(AbstractContainerScreen.class).register(EventPhase.BEFORE, ClientInputActionHandler::onBeforeMousePressed);
-        ScreenMouseEvents.beforeMouseClick(AbstractContainerScreen.class).register(EventPhase.BEFORE, MouseDraggingHandler::onBeforeMousePressed);
-        ScreenMouseEvents.beforeMouseRelease(AbstractContainerScreen.class).register(EventPhase.BEFORE, MouseDraggingHandler::onBeforeMouseRelease);
-        ScreenMouseEvents.beforeMouseRelease(AbstractContainerScreen.class).register(EventPhase.BEFORE, ClientInputActionHandler::onBeforeMouseRelease);
-        ScreenMouseEvents.beforeMouseScroll(AbstractContainerScreen.class).register(EventPhase.BEFORE, ClientInputActionHandler::onBeforeMouseScroll);
-        ScreenMouseEvents.beforeMouseDrag(AbstractContainerScreen.class).register(EventPhase.BEFORE, MouseDraggingHandler::onBeforeMouseDragged);
-        ScreenKeyboardEvents.beforeKeyPress(AbstractContainerScreen.class).register(EventPhase.BEFORE, ClientInputActionHandler::onBeforeKeyPressed);
-        ScreenKeyboardEvents.beforeKeyPress(AbstractContainerScreen.class).register(KeyBindingTogglesHandler::onBeforeKeyPressed);
+        ScreenMouseEvents.beforeMouseClick(AbstractContainerScreen.class)
+                .register(EventPhase.BEFORE, ClientInputActionHandler::onBeforeMousePressed);
+        ScreenMouseEvents.beforeMouseClick(AbstractContainerScreen.class)
+                .register(EventPhase.BEFORE, MouseDraggingHandler::onBeforeMousePressed);
+        ScreenMouseEvents.beforeMouseRelease(AbstractContainerScreen.class)
+                .register(EventPhase.BEFORE, MouseDraggingHandler::onBeforeMouseRelease);
+        ScreenMouseEvents.beforeMouseRelease(AbstractContainerScreen.class)
+                .register(EventPhase.BEFORE, ClientInputActionHandler::onBeforeMouseRelease);
+        ScreenMouseEvents.beforeMouseScroll(AbstractContainerScreen.class)
+                .register(EventPhase.BEFORE, ClientInputActionHandler::onBeforeMouseScroll);
+        ScreenMouseEvents.beforeMouseDrag(AbstractContainerScreen.class)
+                .register(EventPhase.BEFORE, MouseDraggingHandler::onBeforeMouseDragged);
+        ScreenKeyboardEvents.beforeKeyPress(AbstractContainerScreen.class)
+                .register(EventPhase.BEFORE, ClientInputActionHandler::onBeforeKeyPressed);
+        ScreenKeyboardEvents.beforeKeyPress(AbstractContainerScreen.class)
+                .register(KeyBindingTogglesHandler::onBeforeKeyPressed);
         ScreenEvents.afterRender(AbstractContainerScreen.class).register(ClientInputActionHandler::onAfterRender);
         ContainerScreenEvents.FOREGROUND.register(MouseDraggingHandler::onDrawForeground);
         PlayLevelSoundEvents.ENTITY.register(MouseDraggingHandler::onPlaySoundAtPosition);
         PlayLevelSoundEvents.ENTITY.register(ClientInputActionHandler::onPlaySoundAtPosition);
-        ClientPlayerNetworkEvents.LOGGED_IN.register((LocalPlayer player, MultiPlayerGameMode multiPlayerGameMode, Connection connection) -> {
+        ClientPlayerNetworkEvents.LOGGED_OUT.register((LocalPlayer player, MultiPlayerGameMode multiPlayerGameMode, Connection connection) -> {
             ItemContentsProviders.setItemContainerProviders(ImmutableMap.of());
         });
     }
 
     @Override
     public void onRegisterKeyMappings(KeyMappingsContext context) {
-        HeldActivationType.getKeyMappingProviders().map(KeyMappingProvider::getKeyMapping).forEach(context::registerKeyMapping);
+        HeldActivationType.getKeyMappingProviders()
+                .map(KeyMappingProvider::getKeyMapping)
+                .forEach(context::registerKeyMapping);
     }
 
     @Override

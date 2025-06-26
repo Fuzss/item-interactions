@@ -91,8 +91,10 @@ public final class ItemContentsProviders extends SimpleJsonResourceReloadListene
         }
     }
 
-    public static void onSyncDataPackContents(ServerPlayer player, boolean joined) {
-        ItemInteractions.NETWORK.sendTo(player,
-                new S2CSyncItemContentsProviders(resolvedProviders).toClientboundMessage());
+    public static void onSyncDataPackContents(ServerPlayer serverPlayer, boolean joined) {
+        if (!serverPlayer.connection.connection.isMemoryConnection()) {
+            ItemInteractions.NETWORK.sendTo(serverPlayer,
+                    new S2CSyncItemContentsProviders(resolvedProviders).toClientboundMessage());
+        }
     }
 }

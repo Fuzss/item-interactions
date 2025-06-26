@@ -6,3 +6,5 @@ accessible  class   net/minecraft/client/gui/screens/inventory/CreativeModeInven
 accessible  method  net/minecraft/world/item/component/BundleContents   getWeight   (Lnet/minecraft/world/item/ItemStack;)Lorg/apache/commons/lang3/math/Fraction;
 accessible  method  net/minecraft/world/entity/animal/Sheep createSheepColor    (Lnet/minecraft/world/item/DyeColor;)I
 accessible  method  net/minecraft/world/item/component/BundleContents   computeContentWeight    (Ljava/util/List;)Lorg/apache/commons/lang3/math/Fraction;
+transitive-accessible   field   net/minecraft/server/network/ServerCommonPacketListenerImpl connection  Lnet/minecraft/network/Connection;
+transitive-accessible   field   net/minecraft/client/multiplayer/ClientCommonPacketListenerImpl connection  Lnet/minecraft/network/Connection;
