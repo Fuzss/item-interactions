@@ -28,7 +28,7 @@ public class ClientBundleContentsTooltip extends AbstractClientItemContentsToolt
     private final Fraction weight;
 
     public ClientBundleContentsTooltip(BundleContentsTooltip tooltip) {
-        super(tooltip.items(), tooltip.backgroundColor());
+        super(tooltip.items(), tooltip.dyeColor());
         this.weight = tooltip.weight();
     }
 

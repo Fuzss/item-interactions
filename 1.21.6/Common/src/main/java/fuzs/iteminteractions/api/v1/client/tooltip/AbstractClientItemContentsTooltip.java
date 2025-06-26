@@ -1,5 +1,6 @@
 package fuzs.iteminteractions.api.v1.client.tooltip;
 
+import fuzs.iteminteractions.api.v1.DyeBackedColor;
 import fuzs.iteminteractions.impl.ItemInteractions;
 import fuzs.iteminteractions.impl.client.handler.ClientInputActionHandler;
 import fuzs.iteminteractions.impl.config.ClientConfig;
@@ -8,6 +9,7 @@ import fuzs.puzzleslib.api.client.gui.v2.GuiGraphicsHelper;
 import fuzs.puzzleslib.api.client.gui.v2.tooltip.TooltipRenderHelper;
 import fuzs.puzzleslib.api.core.v1.utility.ResourceLocationHelper;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.color.ColorLerper;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -17,7 +19,9 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ARGB;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
@@ -42,9 +46,24 @@ public abstract class AbstractClientItemContentsTooltip extends ExpandableClient
     protected final NonNullList<ItemStack> items;
     private final int backgroundColor;
 
-    public AbstractClientItemContentsTooltip(NonNullList<ItemStack> items, int backgroundColor) {
+    public AbstractClientItemContentsTooltip(NonNullList<ItemStack> items, @Nullable DyeBackedColor dyeColor) {
         this.items = items;
-        this.backgroundColor = backgroundColor;
+        this.backgroundColor = getBackgroundColor(dyeColor);
+    }
+
+    public static int getBackgroundColor(@Nullable DyeBackedColor color) {
+        if (color == null) {
+            return -1;
+        } else {
+            DyeColor dyeColor = DyeColor.byName(color.serialize(), null);
+            int colorValue;
+            if (dyeColor != null) {
+                colorValue = ColorLerper.Type.SHEEP.getColor(dyeColor);
+            } else {
+                colorValue = color.getValue();
+            }
+            return ARGB.opaque(colorValue);
+        }
     }
 
     protected abstract int getGridSizeX();

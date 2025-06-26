@@ -3,7 +3,6 @@ package fuzs.iteminteractions.api.v1.provider;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import fuzs.iteminteractions.api.v1.DyeBackedColor;
-import fuzs.iteminteractions.api.v1.ItemContentsHelper;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.RegistryCodecs;
 import net.minecraft.core.registries.Registries;
@@ -15,13 +14,11 @@ import java.util.Optional;
 
 public abstract class AbstractProvider implements TooltipProvider {
     @Nullable
-    final DyeBackedColor dyeColor;
-    private final int backgroundColor;
+    protected final DyeBackedColor dyeColor;
     ItemContents itemContents = ItemContents.EMPTY;
 
     protected AbstractProvider(@Nullable DyeBackedColor dyeColor) {
         this.dyeColor = dyeColor;
-        this.backgroundColor = ItemContentsHelper.getBackgroundColor(dyeColor);
     }
 
     protected static <T extends AbstractProvider> RecordCodecBuilder<T, Optional<DyeBackedColor>> backgroundColorCodec() {
@@ -32,10 +29,6 @@ public abstract class AbstractProvider implements TooltipProvider {
     protected static <T extends AbstractProvider> RecordCodecBuilder<T, ItemContents> itemContentsCodec() {
         return ItemContents.CODEC.lenientOptionalFieldOf("item_contents", ItemContents.EMPTY)
                 .forGetter((T provider) -> provider.itemContents);
-    }
-
-    protected int getBackgroundColor() {
-        return this.backgroundColor;
     }
 
     protected AbstractProvider itemContents(ItemContents itemContents) {

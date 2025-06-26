@@ -1,6 +1,7 @@
 package fuzs.iteminteractions.api.v1.provider.impl;
 
 import com.mojang.serialization.MapCodec;
+import fuzs.iteminteractions.api.v1.DyeBackedColor;
 import fuzs.iteminteractions.api.v1.provider.TooltipProvider;
 import fuzs.iteminteractions.api.v1.tooltip.ItemContentsTooltip;
 import fuzs.iteminteractions.impl.client.handler.ClientEnderChestHandler;
@@ -17,7 +18,7 @@ public class EnderChestProvider implements TooltipProvider {
     /**
      * Pretty ender color from <a href="https://www.curseforge.com/minecraft/mc-mods/tinted">Tinted mod</a>.
      */
-    private static final int DEFAULT_ENDER_CHEST_COLOR = 0XFF2A6255;
+    private static final DyeBackedColor DEFAULT_ENDER_CHEST_COLOR = DyeBackedColor.fromRgb(0X2A6255);
     private static final int GRID_SIZE_X = 9;
     public static final MapCodec<EnderChestProvider> CODEC = MapCodec.unit(EnderChestProvider::new);
 

@@ -7,7 +7,7 @@ public class ClientItemContentsTooltip extends AbstractClientItemContentsTooltip
     private final int gridSizeY;
 
     public ClientItemContentsTooltip(ItemContentsTooltip tooltip) {
-        super(tooltip.items(), tooltip.backgroundColor());
+        super(tooltip.items(), tooltip.dyeColor());
         this.gridSizeX = tooltip.gridSizeX();
         this.gridSizeY = tooltip.gridSizeY();
     }

@@ -3,6 +3,7 @@ package fuzs.iteminteractions.impl.client.helper;
 import fuzs.iteminteractions.api.v1.provider.ItemContentsBehavior;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.Font;
+import net.minecraft.util.ARGB;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
@@ -16,7 +17,7 @@ public enum ItemDecoratorType {
     private final int color;
 
     ItemDecoratorType(String string, ChatFormatting chatFormatting) {
-        this(string, chatFormatting.getColor());
+        this(string, ARGB.opaque(chatFormatting.getColor()));
     }
 
     ItemDecoratorType(String string, int color) {

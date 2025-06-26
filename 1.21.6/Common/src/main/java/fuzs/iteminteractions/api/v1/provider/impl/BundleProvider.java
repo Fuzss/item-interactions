@@ -119,7 +119,7 @@ public class BundleProvider extends AbstractProvider {
     public TooltipComponent createTooltipImageComponent(ItemStack containerStack, Player player, NonNullList<ItemStack> items) {
         return new BundleContentsTooltip(items,
                 this.computeContentWeight(containerStack, player).divideBy(this.getCapacityMultiplier(containerStack)),
-                this.getBackgroundColor());
+                this.dyeColor);
     }
 
     public int getMaxAmountToAdd(ItemStack containerStack, ItemStack stackToAdd, Player player) {

@@ -148,10 +148,7 @@ public class ContainerProvider extends AbstractProvider {
 
     @Override
     public TooltipComponent createTooltipImageComponent(ItemStack containerStack, Player player, NonNullList<ItemStack> items) {
-        return new ItemContentsTooltip(items,
-                this.getInventoryWidth(),
-                this.getInventoryHeight(),
-                this.getBackgroundColor());
+        return new ItemContentsTooltip(items, this.getInventoryWidth(), this.getInventoryHeight(), this.dyeColor);
     }
 
     @Override
