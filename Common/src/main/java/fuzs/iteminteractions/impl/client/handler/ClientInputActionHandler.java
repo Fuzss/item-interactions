@@ -75,7 +75,7 @@ public class ClientInputActionHandler {
         if (!screen.getMenu().getCarried().isEmpty()) {
             ItemStack itemStack = getContainerItemStack(screen, false);
             if (!itemStack.isEmpty()) {
-                guiGraphics.setTooltipForNextFrame(screen.font, itemStack, mouseX, mouseY);
+                guiGraphics.setTooltipForNextFrame(screen.getFont(), itemStack, mouseX, mouseY);
             }
         }
     }

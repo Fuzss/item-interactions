@@ -66,11 +66,12 @@ public class ItemInteractions implements ModConstructor {
         context.playToClient(ClientboundEnderChestSlotMessage.class, ClientboundEnderChestSlotMessage.STREAM_CODEC);
         context.playToServer(ServerboundEnderChestContentMessage.class,
                 ServerboundEnderChestContentMessage.STREAM_CODEC);
-        context.playToClient(ClientboundSyncItemContentsProviders.class, ClientboundSyncItemContentsProviders.STREAM_CODEC);
+        context.playToClient(ClientboundSyncItemContentsProviders.class,
+                ClientboundSyncItemContentsProviders.STREAM_CODEC);
     }
 
     @Override
-    public void onRegisterGameRegistriesContext(GameRegistriesContext context) {
+    public void onRegisterGameRegistries(GameRegistriesContext context) {
         context.registerRegistry(ItemContentsProvider.REGISTRY);
     }
 
