@@ -15,6 +15,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
@@ -160,27 +161,35 @@ public abstract class AbstractClientItemContentsTooltip extends ExpandableClient
     private void drawSelectedSlotTooltip(GuiGraphics guiGraphics, Font font, int mouseX, int mouseY, int highlightSlot) {
         if (!ItemInteractions.CONFIG.get(ClientConfig.class).selectedItemTooltips.isActive()) return;
         if (ACTIVE_CONTAINER_ITEM_TOOLTIPS.intValue() > 1) return;
-        Minecraft minecraft = Minecraft.getInstance();
-        if (minecraft.screen != null && !willTooltipBeMoved(minecraft, font, mouseX, mouseY) && highlightSlot >= 0
+        if (this.minecraft.screen != null && !this.willTooltipBeMoved(font) && highlightSlot >= 0
                 && highlightSlot < this.items.size()) {
             ItemStack itemStack = this.items.get(highlightSlot);
-            List<Component> itemTooltip = Screen.getTooltipFromItem(minecraft, itemStack);
-            Optional<TooltipComponent> itemTooltipImage = itemStack.getTooltipImage();
             List<ClientTooltipComponent> tooltipComponents = TooltipRenderHelper.getTooltip(itemStack);
             int maxWidth = tooltipComponents.stream()
                     .mapToInt(tooltipComponent -> tooltipComponent.getWidth(font))
                     .max()
                     .orElse(0);
-            guiGraphics.setTooltipForNextFrame(font,
-                    itemTooltip,
-                    itemTooltipImage,
-                    mouseX - maxWidth - 2 * GRID_SIZE,
-                    mouseY);
+            if (ACTIVE_CONTAINER_ITEM_TOOLTIPS.intValue() > 0) {
+                guiGraphics.renderTooltip(font,
+                        tooltipComponents,
+                        mouseX - maxWidth - 2 * GRID_SIZE,
+                        mouseY,
+                        DefaultTooltipPositioner.INSTANCE,
+                        null);
+            } else {
+                List<Component> itemTooltip = Screen.getTooltipFromItem(this.minecraft, itemStack);
+                Optional<TooltipComponent> itemTooltipImage = itemStack.getTooltipImage();
+                guiGraphics.setTooltipForNextFrame(font,
+                        itemTooltip,
+                        itemTooltipImage,
+                        mouseX - maxWidth - 2 * GRID_SIZE,
+                        mouseY);
+            }
         }
     }
 
-    private static boolean willTooltipBeMoved(Minecraft minecraft, Font font, int mouseX, int mouseY) {
-        if (!(minecraft.screen instanceof AbstractContainerScreen<?> containerScreen)) return false;
+    private boolean willTooltipBeMoved(Font font) {
+        if (!(this.minecraft.screen instanceof AbstractContainerScreen<?> containerScreen)) return false;
         ItemStack stack = ClientInputActionHandler.getContainerItemStack(containerScreen, true);
         if (stack.isEmpty()) return false;
         List<ClientTooltipComponent> tooltipComponents = TooltipRenderHelper.getTooltip(stack);
@@ -189,8 +198,8 @@ public abstract class AbstractClientItemContentsTooltip extends ExpandableClient
                 .max()
                 .orElse(0);
         // actual mouseX, tooltip components are passed the adjusted position where the tooltip should be rendered
-        mouseX = (int) (minecraft.mouseHandler.xpos() * (double) minecraft.getWindow().getGuiScaledWidth()
-                / (double) minecraft.getWindow().getScreenWidth());
+        int mouseX = (int) (this.minecraft.mouseHandler.xpos() * (double) this.minecraft.getWindow().getGuiScaledWidth()
+                / (double) this.minecraft.getWindow().getScreenWidth());
         return mouseX + 12 + maxWidth > containerScreen.width;
     }
 
