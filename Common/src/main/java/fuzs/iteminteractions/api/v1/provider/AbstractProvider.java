@@ -36,6 +36,10 @@ public abstract class AbstractProvider implements TooltipProvider {
         return this;
     }
 
+    public AbstractProvider filterContainerItems(boolean filterContainerItems) {
+        return this.itemContents(this.itemContents.filterContainerItems(filterContainerItems));
+    }
+
     @Override
     public boolean isItemAllowedInContainer(ItemStack stackToAdd) {
         return this.itemContents.canFitInsideContainerItem(stackToAdd);
@@ -52,6 +56,10 @@ public abstract class AbstractProvider implements TooltipProvider {
                         Codec.BOOL.lenientOptionalFieldOf("filter_container_items", false)
                                 .forGetter((ItemContents itemContents) -> itemContents.filterContainerItems))
                 .apply(instance, ItemContents::new));
+
+        public ItemContents filterContainerItems(boolean filterContainerItems) {
+            return new ItemContents(this.items, this.disallow, filterContainerItems);
+        }
 
         public boolean canFitInsideContainerItem(ItemStack itemStack) {
             if (!this.disallow) {

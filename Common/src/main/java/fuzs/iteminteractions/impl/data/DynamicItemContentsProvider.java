@@ -23,6 +23,10 @@ public class DynamicItemContentsProvider extends AbstractItemContentsProvider {
         HolderLookup.RegistryLookup<Item> items = registries.lookupOrThrow(Registries.ITEM);
         this.add(items, new EnderChestProvider(), Items.ENDER_CHEST);
         this.add(items, new ContainerProvider(9, 3).filterContainerItems(true), ItemTags.SHULKER_BOXES);
-        this.add(items, "bundle", new BundleProvider(DyeBackedColor.fromRgb(0XFC7703)), Items.BUNDLE, Items.SADDLE);
+        this.add(items,
+                "bundle",
+                new BundleProvider(DyeBackedColor.fromRgb(0XFC7703)).filterContainerItems(true),
+                Items.BUNDLE,
+                Items.SADDLE);
     }
 }

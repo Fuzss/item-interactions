@@ -55,6 +55,11 @@ public class BundleProvider extends AbstractProvider {
         return (BundleProvider) super.itemContents(itemContents);
     }
 
+    @Override
+    public BundleProvider filterContainerItems(boolean filterContainerItems) {
+        return (BundleProvider) super.filterContainerItems(filterContainerItems);
+    }
+
     public Fraction getCapacityMultiplier(ItemStack containerStack) {
         return Fraction.getFraction(this.capacityMultiplier, 1);
     }
@@ -85,11 +90,6 @@ public class BundleProvider extends AbstractProvider {
             }
             containerStack.set(DataComponents.BUNDLE_CONTENTS, newContents);
         } : null);
-    }
-
-    @Override
-    public boolean isItemAllowedInContainer(ItemStack stackToAdd) {
-        return super.isItemAllowedInContainer(stackToAdd) && stackToAdd.getItem().canFitInsideContainerItems();
     }
 
     @Override

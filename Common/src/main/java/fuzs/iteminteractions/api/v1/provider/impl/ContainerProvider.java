@@ -32,15 +32,13 @@ public class ContainerProvider extends AbstractProvider {
                         inventoryHeightCodec(),
                         backgroundColorCodec(),
                         itemContentsCodec(),
-                        filterContainerItemsCodec(),
                         interactionPermissionsCodec(),
                         equipmentSlotsCodec())
                 .apply(instance,
-                        (Integer inventoryWidth, Integer inventoryHeight, Optional<DyeBackedColor> dyeColor, ItemContents itemContents, Boolean filterContainerItems, InteractionPermissions interactionPermissions, EquipmentSlotGroup equipmentSlots) -> {
+                        (Integer inventoryWidth, Integer inventoryHeight, Optional<DyeBackedColor> dyeColor, ItemContents itemContents, InteractionPermissions interactionPermissions, EquipmentSlotGroup equipmentSlots) -> {
                             return new ContainerProvider(inventoryWidth,
                                     inventoryHeight,
                                     dyeColor.orElse(null)).itemContents(itemContents)
-                                    .filterContainerItems(filterContainerItems)
                                     .interactionPermissions(interactionPermissions)
                                     .equipmentSlots(equipmentSlots);
                         });
@@ -49,7 +47,6 @@ public class ContainerProvider extends AbstractProvider {
 
     final int inventoryWidth;
     final int inventoryHeight;
-    boolean filterContainerItems;
     InteractionPermissions interactionPermissions = InteractionPermissions.ALWAYS;
     EquipmentSlotGroup equipmentSlots = EquipmentSlotGroup.ANY;
 
@@ -71,12 +68,6 @@ public class ContainerProvider extends AbstractProvider {
         return ExtraCodecs.POSITIVE_INT.fieldOf("inventory_height").forGetter(ContainerProvider::getInventoryHeight);
     }
 
-    protected static <T extends ContainerProvider> RecordCodecBuilder<T, Boolean> filterContainerItemsCodec() {
-        return Codec.BOOL.fieldOf("filter_container_items")
-                .orElse(false)
-                .forGetter(provider -> provider.filterContainerItems);
-    }
-
     protected static <T extends ContainerProvider> RecordCodecBuilder<T, InteractionPermissions> interactionPermissionsCodec() {
         return InteractionPermissions.CODEC.fieldOf("interaction_permissions")
                 .orElse(InteractionPermissions.ALWAYS)
@@ -94,9 +85,9 @@ public class ContainerProvider extends AbstractProvider {
         return (ContainerProvider) super.itemContents(itemContents);
     }
 
+    @Override
     public ContainerProvider filterContainerItems(boolean filterContainerItems) {
-        this.filterContainerItems = filterContainerItems;
-        return this;
+        return (ContainerProvider) super.filterContainerItems(filterContainerItems);
     }
 
     public ContainerProvider interactionPermissions(InteractionPermissions interactionPermissions) {
