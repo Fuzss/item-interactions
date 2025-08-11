@@ -5,11 +5,12 @@ import fuzs.iteminteractions.api.v1.client.tooltip.ClientBundleContentsTooltip;
 import fuzs.iteminteractions.api.v1.client.tooltip.ClientItemContentsTooltip;
 import fuzs.iteminteractions.api.v1.tooltip.BundleContentsTooltip;
 import fuzs.iteminteractions.api.v1.tooltip.ItemContentsTooltip;
-import fuzs.iteminteractions.impl.client.core.HeldActivationType;
-import fuzs.iteminteractions.impl.client.core.KeyMappingProvider;
 import fuzs.iteminteractions.impl.client.handler.ClientInputActionHandler;
-import fuzs.iteminteractions.impl.client.handler.KeyBindingTogglesHandler;
 import fuzs.iteminteractions.impl.client.handler.MouseDraggingHandler;
+import fuzs.iteminteractions.impl.config.CarriedItemTooltips;
+import fuzs.iteminteractions.impl.config.ExtractSingleItem;
+import fuzs.iteminteractions.impl.config.SelectedItemTooltips;
+import fuzs.iteminteractions.impl.config.VisualItemContents;
 import fuzs.iteminteractions.impl.world.item.container.ItemContentsProviders;
 import fuzs.puzzleslib.api.client.core.v1.ClientModConstructor;
 import fuzs.puzzleslib.api.client.core.v1.context.ClientTooltipComponentsContext;
@@ -19,6 +20,7 @@ import fuzs.puzzleslib.api.client.event.v1.gui.ContainerScreenEvents;
 import fuzs.puzzleslib.api.client.event.v1.gui.ScreenEvents;
 import fuzs.puzzleslib.api.client.event.v1.gui.ScreenKeyboardEvents;
 import fuzs.puzzleslib.api.client.event.v1.gui.ScreenMouseEvents;
+import fuzs.puzzleslib.api.client.key.v1.KeyActivationContext;
 import fuzs.puzzleslib.api.event.v1.core.EventPhase;
 import fuzs.puzzleslib.api.event.v1.level.PlaySoundEvents;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -49,7 +51,13 @@ public class ItemInteractionsClient implements ClientModConstructor {
         ScreenMouseEvents.beforeMouseDrag(AbstractContainerScreen.class)
                 .register(EventPhase.BEFORE, MouseDraggingHandler::onBeforeMouseDragged);
         ScreenKeyboardEvents.beforeKeyPress(AbstractContainerScreen.class)
-                .register(KeyBindingTogglesHandler::onBeforeKeyPressed);
+                .register(SelectedItemTooltips::onBeforeKeyPressed);
+        ScreenKeyboardEvents.beforeKeyPress(AbstractContainerScreen.class)
+                .register(CarriedItemTooltips::onBeforeKeyPressed);
+        ScreenKeyboardEvents.beforeKeyPress(AbstractContainerScreen.class)
+                .register(ExtractSingleItem::onBeforeKeyPressed);
+        ScreenKeyboardEvents.beforeKeyPress(AbstractContainerScreen.class)
+                .register(VisualItemContents::onBeforeKeyPressed);
         ScreenEvents.afterInit(AbstractContainerScreen.class).register(ClientInputActionHandler::onAfterInit);
         ScreenEvents.afterRender(AbstractContainerScreen.class).register(ClientInputActionHandler::onAfterRender);
         ContainerScreenEvents.FOREGROUND.register(MouseDraggingHandler::onDrawForeground);
@@ -62,9 +70,12 @@ public class ItemInteractionsClient implements ClientModConstructor {
 
     @Override
     public void onRegisterKeyMappings(KeyMappingsContext context) {
-        HeldActivationType.getKeyMappingProviders()
-                .map(KeyMappingProvider::getKeyMapping)
-                .forEach(context::registerKeyMapping);
+        context.registerKeyMapping(VisualItemContents.KEY_MAPPING,
+                KeyActivationContext.SCREEN);
+        context.registerKeyMapping(SelectedItemTooltips.KEY_MAPPING,
+                KeyActivationContext.SCREEN);
+        context.registerKeyMapping(CarriedItemTooltips.KEY_MAPPING,
+                KeyActivationContext.SCREEN);
     }
 
     @Override

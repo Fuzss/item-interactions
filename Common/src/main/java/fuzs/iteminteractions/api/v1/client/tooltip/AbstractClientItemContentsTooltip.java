@@ -159,8 +159,14 @@ public abstract class AbstractClientItemContentsTooltip extends ExpandableClient
     }
 
     private void drawSelectedSlotTooltip(GuiGraphics guiGraphics, Font font, int mouseX, int mouseY, int highlightSlot) {
-        if (!ItemInteractions.CONFIG.get(ClientConfig.class).selectedItemTooltips.isActive()) return;
-        if (ACTIVE_CONTAINER_ITEM_TOOLTIPS.intValue() > 1) return;
+        if (!ItemInteractions.CONFIG.get(ClientConfig.class).selectedItemTooltips.isActive()) {
+            return;
+        }
+
+        if (ACTIVE_CONTAINER_ITEM_TOOLTIPS.intValue() > 1) {
+            return;
+        }
+
         if (this.minecraft.screen != null && !this.willTooltipBeMoved(font) && highlightSlot >= 0
                 && highlightSlot < this.items.size()) {
             ItemStack itemStack = this.items.get(highlightSlot);

@@ -1,53 +1,47 @@
 package fuzs.iteminteractions.impl.client.core;
 
-import com.mojang.blaze3d.platform.InputConstants;
-import fuzs.iteminteractions.impl.ItemInteractions;
-import fuzs.puzzleslib.api.client.key.v1.KeyMappingHelper;
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
-public class KeyBackedActivationType extends HeldActivationType implements KeyMappingProvider {
-    public static final String KEY_CATEGORY = "key.categories." + ItemInteractions.MOD_ID;
-    public static final String KEY_TOOLTIP_PRESS_TRANSLATION = "item.container.tooltip.press";
+public enum KeyBackedActivationType implements ActivationTypeProvider {
+    SHIFT {
+        @Override
+        public Component getNameComponent() {
+            return SHIFT_COMPONENT;
+        }
 
-    private final KeyMapping keyMapping;
-    private boolean active;
+        @Override
+        public boolean isActive() {
+            return Screen.hasShiftDown();
+        }
+    },
+    CONTROL {
+        @Override
+        public Component getNameComponent() {
+            return Minecraft.ON_OSX ? COMMAND_COMPONENT : CONTROL_COMPONENT;
+        }
 
-    public KeyBackedActivationType(String id) {
-        super(id);
-        this.keyMapping = new KeyMapping("key." + id, InputConstants.UNKNOWN.getValue(), KEY_CATEGORY);
-    }
+        @Override
+        public boolean isActive() {
+            return Screen.hasControlDown();
+        }
+    },
+    ALT {
+        @Override
+        public Component getNameComponent() {
+            return ALT_COMPONENT;
+        }
 
-    @Override
-    public String getIdentifier() {
-        return "KEY";
-    }
-
-    @Override
-    public Component getComponent(String translationId) {
-        Component keyName = this.keyMapping.getTranslatedKeyMessage();
-        return Component.translatable(translationId,
-                Component.translatable(KEY_TOOLTIP_PRESS_TRANSLATION),
-                Component.empty().append(keyName).withStyle(ChatFormatting.YELLOW)).withStyle(ChatFormatting.GRAY);
-    }
-
-    @Override
-    public boolean isActive() {
-        return this.active;
-    }
-
-    @Override
-    public boolean keyPressed(int keyCode, int scanCode) {
-        if (KeyMappingHelper.isKeyActiveAndMatches(this.keyMapping, keyCode, scanCode)) {
-            this.active = !this.active;
+        @Override
+        public boolean isActive() {
+            return Screen.hasAltDown();
+        }
+    },
+    ALWAYS {
+        @Override
+        public boolean isActive() {
             return true;
         }
-        return false;
-    }
-
-    @Override
-    public KeyMapping getKeyMapping() {
-        return this.keyMapping;
     }
 }

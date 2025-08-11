@@ -9,6 +9,7 @@ import fuzs.iteminteractions.impl.config.ServerConfig;
 import fuzs.iteminteractions.impl.network.client.ServerboundContainerClientInputMessage;
 import fuzs.iteminteractions.impl.world.inventory.ContainerSlotHelper;
 import fuzs.iteminteractions.impl.world.item.container.ItemContentsProviders;
+import fuzs.puzzleslib.api.client.gui.v2.tooltip.TooltipRenderHelper;
 import fuzs.puzzleslib.api.event.v1.core.EventResult;
 import fuzs.puzzleslib.api.event.v1.data.MutableFloat;
 import fuzs.puzzleslib.api.event.v1.data.MutableValue;
@@ -19,6 +20,8 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
 import net.minecraft.core.Holder;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -75,7 +78,13 @@ public class ClientInputActionHandler {
         if (!screen.getMenu().getCarried().isEmpty()) {
             ItemStack itemStack = getContainerItemStack(screen, false);
             if (!itemStack.isEmpty()) {
-                guiGraphics.setTooltipForNextFrame(screen.getFont(), itemStack, mouseX, mouseY);
+                List<ClientTooltipComponent> tooltipComponents = TooltipRenderHelper.getTooltip(itemStack);
+                guiGraphics.renderTooltip(screen.getFont(),
+                        tooltipComponents,
+                        mouseX,
+                        mouseY,
+                        DefaultTooltipPositioner.INSTANCE,
+                        null);
             }
         }
     }
@@ -88,7 +97,7 @@ public class ClientInputActionHandler {
     public static EventResult onBeforeMouseScroll(AbstractContainerScreen<?> screen, double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
         // allows scrolling between filled slots on a container items tooltip to select the slot to be interacted with next
         if (horizontalAmount == 0.0 && verticalAmount == 0.0) return EventResult.PASS;
-        if (!ItemInteractions.CONFIG.get(ClientConfig.class).revealContents.isActive()) return EventResult.PASS;
+        if (!ItemInteractions.CONFIG.get(ClientConfig.class).visualItemContents.isActive()) return EventResult.PASS;
         if (precisionModeAllowedAndActive()) {
             Slot hoveredSlot = screen.hoveredSlot;
             if (hoveredSlot != null) {
@@ -170,7 +179,7 @@ public class ClientInputActionHandler {
 
     public static boolean precisionModeAllowedAndActive() {
         return ItemInteractions.CONFIG.get(ServerConfig.class).allowPrecisionMode && ItemInteractions.CONFIG.get(
-                ClientConfig.class).precisionMode.isActive();
+                ClientConfig.class).extractSingleItem.isActive();
     }
 
     public static void ensureHasSentContainerClientInput(Screen screen, Player player) {
