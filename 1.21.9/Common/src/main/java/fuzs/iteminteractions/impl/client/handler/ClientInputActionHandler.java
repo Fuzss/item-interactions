@@ -22,6 +22,8 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.core.Holder;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -45,7 +47,7 @@ public class ClientInputActionHandler {
     private static int lastSentContainerSlot = -1;
     private static boolean lastSentExtractSingleItem;
 
-    public static EventResult onBeforeKeyPressed(AbstractContainerScreen<?> screen, int keyCode, int scanCode, int modifiers) {
+    public static EventResult onBeforeKeyPressed(AbstractContainerScreen<?> screen, KeyEvent keyEvent) {
         // this must be sent before any slot click action is performed server side, by vanilla this can be caused by either mouse clicks (normal menu interactions)
         // or key presses (hotbar keys for swapping items to those slots)
         // this is already added via mixin to where vanilla sends the click packet, but creative screen doesn't use it, and you never know with other mods...
@@ -53,7 +55,7 @@ public class ClientInputActionHandler {
         return EventResult.PASS;
     }
 
-    public static EventResult onBeforeMousePressed(AbstractContainerScreen<?> screen, double mouseX, double mouseY, int button) {
+    public static EventResult onBeforeMousePressed(AbstractContainerScreen<?> screen, MouseButtonEvent mouseButtonEvent) {
         // this must be sent before any slot click action is performed server side, by vanilla this can be caused by either mouse clicks (normal menu interactions)
         // or key presses (hotbar keys for swapping items to those slots)
         // this is already added via mixin to where vanilla sends the click packet, but creative screen doesn't use it, and you never know with other mods...
@@ -61,7 +63,7 @@ public class ClientInputActionHandler {
         return EventResult.PASS;
     }
 
-    public static EventResult onBeforeMouseRelease(AbstractContainerScreen<?> screen, double mouseX, double mouseY, int button) {
+    public static EventResult onBeforeMouseRelease(AbstractContainerScreen<?> screen, MouseButtonEvent mouseButtonEvent) {
         // prevent vanilla double click feature from interfering with our precision mode, adding an unnecessary delay when quickly inserting items via left-click
         // it wouldn't work anyway, and right-click is fine, leading to inconsistent behavior
         if (precisionModeAllowedAndActive() && !getContainerItemStack(screen, false).isEmpty()) {

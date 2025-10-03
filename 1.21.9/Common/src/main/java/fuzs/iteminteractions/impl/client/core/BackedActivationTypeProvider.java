@@ -3,6 +3,7 @@ package fuzs.iteminteractions.impl.client.core;
 import fuzs.puzzleslib.api.client.key.v1.KeyMappingHelper;
 import fuzs.puzzleslib.api.event.v1.core.EventResult;
 import net.minecraft.client.KeyMapping;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
@@ -44,10 +45,8 @@ public interface BackedActivationTypeProvider extends ActivationTypeProvider {
         // NO-OP
     }
 
-    default boolean keyPressed(int keyCode, int scanCode) {
-        if (this.getKeyMapping() != null && KeyMappingHelper.isKeyActiveAndMatches(this.getKeyMapping(),
-                keyCode,
-                scanCode)) {
+    default boolean keyPressed(KeyEvent keyEvent) {
+        if (this.getKeyMapping() != null && KeyMappingHelper.isKeyActiveAndMatches(this.getKeyMapping(), keyEvent)) {
             this.toggleActive();
             return true;
         } else {
@@ -55,9 +54,9 @@ public interface BackedActivationTypeProvider extends ActivationTypeProvider {
         }
     }
 
-    static EventResult onKeyPressed(BackedActivationTypeProvider[] activationTypeProviders, int keyCode, int scanCode) {
+    static EventResult onKeyPressed(BackedActivationTypeProvider[] activationTypeProviders, KeyEvent keyEvent) {
         for (BackedActivationTypeProvider activationTypeProvider : activationTypeProviders) {
-            if (activationTypeProvider.keyPressed(keyCode, scanCode)) {
+            if (activationTypeProvider.keyPressed(keyEvent)) {
                 return EventResult.INTERRUPT;
             }
         }

@@ -12,9 +12,12 @@ import fuzs.puzzleslib.api.event.v1.data.MutableFloat;
 import fuzs.puzzleslib.api.event.v1.data.MutableValue;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.core.Holder;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -29,17 +32,27 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Set;
 
 public class MouseDraggingHandler {
+    /**
+     * @see AbstractContainerScreen#SLOT_HIGHLIGHT_BACK_SPRITE
+     */
+    private static final ResourceLocation SLOT_HIGHLIGHT_BACK_SPRITE = ResourceLocation.withDefaultNamespace(
+            "container/slot_highlight_back");
+    /**
+     * @see AbstractContainerScreen#SLOT_HIGHLIGHT_FRONT_SPRITE
+     */
+    private static final ResourceLocation SLOT_HIGHLIGHT_FRONT_SPRITE = ResourceLocation.withDefaultNamespace(
+            "container/slot_highlight_front");
     private static final Set<Slot> CONTAINER_DRAG_SLOTS = Sets.newHashSet();
     @Nullable
     private static ContainerDragType containerDragType;
 
-    public static EventResult onBeforeMousePressed(AbstractContainerScreen<?> screen, double mouseX, double mouseY, int button) {
+    public static EventResult onBeforeMousePressed(AbstractContainerScreen<?> screen, MouseButtonEvent mouseButtonEvent) {
         if (!ItemInteractions.CONFIG.get(ServerConfig.class).allowMouseDragging) return EventResult.PASS;
         ItemStack carriedStack = screen.getMenu().getCarried();
-        if (validMouseButton(button)) {
+        if (validMouseButton(mouseButtonEvent)) {
             if (ItemContentsProviders.get(carriedStack)
                     .allowsPlayerInteractions(carriedStack, screen.minecraft.player)) {
-                Slot slot = screen.getHoveredSlot(mouseX, mouseY);
+                Slot slot = screen.getHoveredSlot(mouseButtonEvent.x(), mouseButtonEvent.y());
                 if (slot != null) {
                     if (slot.hasItem() && !ClientInputActionHandler.precisionModeAllowedAndActive()) {
                         containerDragType = ContainerDragType.INSERT;
@@ -55,34 +68,36 @@ public class MouseDraggingHandler {
         return EventResult.PASS;
     }
 
-    public static EventResult onBeforeMouseDragged(AbstractContainerScreen<?> screen, double mouseX, double mouseY, int button, double dragX, double dragY) {
+    public static EventResult onBeforeMouseDragged(AbstractContainerScreen<?> screen, MouseButtonEvent mouseButtonEvent, double dragX, double dragY) {
         if (!ItemInteractions.CONFIG.get(ServerConfig.class).allowMouseDragging) return EventResult.PASS;
         if (containerDragType != null) {
             AbstractContainerMenu menu = screen.getMenu();
             ItemStack carriedStack = menu.getCarried();
             ItemContentsBehavior behavior = ItemContentsProviders.get(carriedStack);
-            if (!validMouseButton(button) ||
-                    !behavior.allowsPlayerInteractions(carriedStack, screen.minecraft.player)) {
+            if (!validMouseButton(mouseButtonEvent) || !behavior.allowsPlayerInteractions(carriedStack,
+                    screen.minecraft.player)) {
                 containerDragType = null;
                 CONTAINER_DRAG_SLOTS.clear();
                 return EventResult.PASS;
             }
-            Slot slot = screen.getHoveredSlot(mouseX, mouseY);
+            Slot slot = screen.getHoveredSlot(mouseButtonEvent.x(), mouseButtonEvent.y());
             if (slot != null && menu.canDragTo(slot) && !CONTAINER_DRAG_SLOTS.contains(slot)) {
                 boolean interact = false;
-                if (containerDragType == ContainerDragType.INSERT && slot.hasItem() &&
-                        behavior.canAddItem(carriedStack, slot.getItem(), screen.minecraft.player)) {
+                if (containerDragType == ContainerDragType.INSERT && slot.hasItem() && behavior.canAddItem(carriedStack,
+                        slot.getItem(),
+                        screen.minecraft.player)) {
                     interact = true;
                 } else if (containerDragType == ContainerDragType.REMOVE) {
-                    boolean normalInteraction = button == InputConstants.MOUSE_BUTTON_RIGHT && !slot.hasItem() &&
-                            !behavior.getItemContainerView(carriedStack, screen.minecraft.player).isEmpty();
-                    if (normalInteraction ||
-                            slot.hasItem() && ClientInputActionHandler.precisionModeAllowedAndActive()) {
+                    boolean normalInteraction =
+                            mouseButtonEvent.button() == InputConstants.MOUSE_BUTTON_RIGHT && !slot.hasItem()
+                                    && !behavior.getItemContainerView(carriedStack, screen.minecraft.player).isEmpty();
+                    if (normalInteraction
+                            || slot.hasItem() && ClientInputActionHandler.precisionModeAllowedAndActive()) {
                         interact = true;
                     }
                 }
                 if (interact) {
-                    screen.slotClicked(slot, slot.index, button, ClickType.PICKUP);
+                    screen.slotClicked(slot, slot.index, mouseButtonEvent.button(), ClickType.PICKUP);
                     CONTAINER_DRAG_SLOTS.add(slot);
                     return EventResult.INTERRUPT;
                 }
@@ -91,12 +106,12 @@ public class MouseDraggingHandler {
         return EventResult.PASS;
     }
 
-    public static EventResult onBeforeMouseRelease(AbstractContainerScreen<?> screen, double mouseX, double mouseY, int button) {
+    public static EventResult onBeforeMouseRelease(AbstractContainerScreen<?> screen, MouseButtonEvent mouseButtonEvent) {
         if (!ItemInteractions.CONFIG.get(ServerConfig.class).allowMouseDragging) return EventResult.PASS;
         if (containerDragType != null) {
-            if (validMouseButton(button) && !CONTAINER_DRAG_SLOTS.isEmpty()) {
+            if (validMouseButton(mouseButtonEvent) && !CONTAINER_DRAG_SLOTS.isEmpty()) {
                 if (!ItemInteractions.CONFIG.get(ClientConfig.class).disableInteractionSounds) {
-                    // play this manually at the end, we suppress all interaction sounds played while dragging
+                    // play this manually at the end; we suppress all interaction sounds played while dragging
                     SimpleSoundInstance sound = SimpleSoundInstance.forUI(containerDragType.sound,
                             0.8F,
                             0.8F + SoundInstance.createUnseededRandom().nextFloat() * 0.4F);
@@ -112,29 +127,55 @@ public class MouseDraggingHandler {
         return EventResult.PASS;
     }
 
-    private static boolean validMouseButton(int button) {
-        if (button == InputConstants.MOUSE_BUTTON_LEFT) {
+    private static boolean validMouseButton(MouseButtonEvent mouseButtonEvent) {
+        if (mouseButtonEvent.button() == InputConstants.MOUSE_BUTTON_LEFT) {
             return ClientInputActionHandler.precisionModeAllowedAndActive();
         } else {
-            return button == InputConstants.MOUSE_BUTTON_RIGHT;
+            return mouseButtonEvent.button() == InputConstants.MOUSE_BUTTON_RIGHT;
         }
     }
 
-    public static void onDrawForeground(AbstractContainerScreen<?> screen, GuiGraphics guiGraphics, int mouseX, int mouseY) {
+    public static void onAfterBackground(AbstractContainerScreen<?> screen, GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        renderDragSlotsHighlight(screen, guiGraphics, mouseX, mouseY, SLOT_HIGHLIGHT_BACK_SPRITE, true);
+    }
+
+    public static void onRenderContainerScreenContents(AbstractContainerScreen<?> screen, GuiGraphics guiGraphics, int mouseX, int mouseY) {
+        renderDragSlotsHighlight(screen, guiGraphics, mouseX, mouseY, SLOT_HIGHLIGHT_FRONT_SPRITE, false);
+    }
+
+    private static void renderDragSlotsHighlight(AbstractContainerScreen<?> screen, GuiGraphics guiGraphics, int mouseX, int mouseY, ResourceLocation resourceLocation, boolean applyTranslation) {
+        if (CONTAINER_DRAG_SLOTS.isEmpty()) {
+            return;
+        }
+
+        if (applyTranslation) {
+            guiGraphics.pose().pushMatrix();
+            guiGraphics.pose().translate(screen.leftPos, screen.topPos);
+        }
+
         for (Slot slot : screen.getMenu().slots) {
-            if (CONTAINER_DRAG_SLOTS.contains(slot)) {
+            if (slot.isHighlightable() && CONTAINER_DRAG_SLOTS.contains(slot)) {
                 // slots will sometimes be added to dragged slots when simply clicking on a slot, so don't render our overlay then
                 if (CONTAINER_DRAG_SLOTS.size() > 1 || !screen.isHovering(slot, mouseX, mouseY)) {
-                    guiGraphics.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, 0x80FFFFFF);
+                    guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED,
+                            resourceLocation,
+                            slot.x - 4,
+                            slot.y - 4,
+                            24,
+                            24);
                 }
             }
+        }
+
+        if (applyTranslation) {
+            guiGraphics.pose().popMatrix();
         }
     }
 
     public static EventResult onPlaySoundAtEntity(Level level, Entity entity, MutableValue<Holder<SoundEvent>> soundEvent, MutableValue<SoundSource> soundSource, MutableFloat soundVolume, MutableFloat soundPitch) {
         // prevent the bundle sounds from being spammed when dragging, not a nice solution, but it works
-        if (containerDragType != null && soundSource.get() == SoundSource.PLAYERS &&
-                soundEvent.get().value() == containerDragType.sound) {
+        if (containerDragType != null && soundSource.get() == SoundSource.PLAYERS
+                && soundEvent.get().value() == containerDragType.sound) {
             return EventResult.INTERRUPT;
         } else {
             return EventResult.PASS;

@@ -8,6 +8,7 @@ import fuzs.puzzleslib.api.client.key.v1.KeyMappingHelper;
 import fuzs.puzzleslib.api.event.v1.core.EventResult;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.input.KeyEvent;
 
 public enum SelectedItemTooltips implements BackedActivationTypeProvider {
     KEY {
@@ -57,7 +58,7 @@ public enum SelectedItemTooltips implements BackedActivationTypeProvider {
     public static final KeyMapping KEY_MAPPING = KeyMappingHelper.registerUnboundKeyMapping(ItemInteractions.id(
             "toggle_selected_item_tooltips"));
 
-    public static EventResult onBeforeKeyPressed(AbstractContainerScreen<?> screen, int keyCode, int scanCode, int modifiers) {
-        return BackedActivationTypeProvider.onKeyPressed(VALUES, keyCode, scanCode);
+    public static EventResult onBeforeKeyPressed(AbstractContainerScreen<?> screen, KeyEvent keyEvent) {
+        return BackedActivationTypeProvider.onKeyPressed(VALUES, keyEvent);
     }
 }

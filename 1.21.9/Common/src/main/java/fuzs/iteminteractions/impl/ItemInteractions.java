@@ -78,7 +78,7 @@ public class ItemInteractions implements ModConstructor {
     @Override
     public void onAddDataPackFinders(PackRepositorySourcesContext context) {
         if (ModLoaderEnvironment.INSTANCE.isDevelopmentEnvironment(MOD_ID)) {
-            context.addRepositorySource(PackResourcesHelper.buildServerPack(id("test_item_interactions"),
+            context.registerRepositorySource(PackResourcesHelper.buildServerPack(id("test_item_interactions"),
                     DynamicPackResources.create(DynamicItemContentsProvider::new),
                     false));
         }

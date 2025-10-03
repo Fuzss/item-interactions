@@ -8,9 +8,13 @@ import fuzs.iteminteractions.impl.network.ClientboundSyncItemContentsProviders;
 import fuzs.puzzleslib.api.network.v4.MessageSender;
 import fuzs.puzzleslib.api.network.v4.PlayerSet;
 import net.minecraft.Util;
-import net.minecraft.core.*;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.ReloadableServerResources;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -53,7 +57,7 @@ public final class ItemContentsProviders extends UnconditionalSimpleJsonResource
         ItemContentsProviders.resolvedProviders = ImmutableMap.copyOf(providers);
     }
 
-    public static void onAddDataPackReloadListeners(RegistryAccess fullRegistries, HolderLookup.Provider lookupWithUpdatedTags, BiConsumer<ResourceLocation, PreparableReloadListener> consumer) {
+    public static void onAddDataPackReloadListeners(ReloadableServerResources serverResources, HolderLookup.Provider lookupWithUpdatedTags, BiConsumer<ResourceLocation, PreparableReloadListener> consumer) {
         consumer.accept(REGISTRY_KEY.location(), new ItemContentsProviders(lookupWithUpdatedTags));
     }
 

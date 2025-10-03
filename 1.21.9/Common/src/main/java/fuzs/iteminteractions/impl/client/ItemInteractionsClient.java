@@ -16,7 +16,7 @@ import fuzs.puzzleslib.api.client.core.v1.ClientModConstructor;
 import fuzs.puzzleslib.api.client.core.v1.context.ClientTooltipComponentsContext;
 import fuzs.puzzleslib.api.client.core.v1.context.KeyMappingsContext;
 import fuzs.puzzleslib.api.client.event.v1.entity.player.ClientPlayerNetworkEvents;
-import fuzs.puzzleslib.api.client.event.v1.gui.ContainerScreenEvents;
+import fuzs.puzzleslib.api.client.event.v1.gui.RenderContainerScreenContentsCallback;
 import fuzs.puzzleslib.api.client.event.v1.gui.ScreenEvents;
 import fuzs.puzzleslib.api.client.event.v1.gui.ScreenKeyboardEvents;
 import fuzs.puzzleslib.api.client.event.v1.gui.ScreenMouseEvents;
@@ -60,7 +60,8 @@ public class ItemInteractionsClient implements ClientModConstructor {
                 .register(VisualItemContents::onBeforeKeyPressed);
         ScreenEvents.afterInit(AbstractContainerScreen.class).register(ClientInputActionHandler::onAfterInit);
         ScreenEvents.afterRender(AbstractContainerScreen.class).register(ClientInputActionHandler::onAfterRender);
-        ContainerScreenEvents.FOREGROUND.register(MouseDraggingHandler::onDrawForeground);
+        ScreenEvents.afterBackground(AbstractContainerScreen.class).register(MouseDraggingHandler::onAfterBackground);
+        RenderContainerScreenContentsCallback.EVENT.register(MouseDraggingHandler::onRenderContainerScreenContents);
         PlaySoundEvents.AT_ENTITY.register(MouseDraggingHandler::onPlaySoundAtEntity);
         PlaySoundEvents.AT_ENTITY.register(ClientInputActionHandler::onPlaySoundAtEntity);
         ClientPlayerNetworkEvents.LOGGED_OUT.register((LocalPlayer player, MultiPlayerGameMode multiPlayerGameMode, Connection connection) -> {
@@ -70,12 +71,9 @@ public class ItemInteractionsClient implements ClientModConstructor {
 
     @Override
     public void onRegisterKeyMappings(KeyMappingsContext context) {
-        context.registerKeyMapping(VisualItemContents.KEY_MAPPING,
-                KeyActivationContext.SCREEN);
-        context.registerKeyMapping(SelectedItemTooltips.KEY_MAPPING,
-                KeyActivationContext.SCREEN);
-        context.registerKeyMapping(CarriedItemTooltips.KEY_MAPPING,
-                KeyActivationContext.SCREEN);
+        context.registerKeyMapping(VisualItemContents.KEY_MAPPING, KeyActivationContext.SCREEN);
+        context.registerKeyMapping(SelectedItemTooltips.KEY_MAPPING, KeyActivationContext.SCREEN);
+        context.registerKeyMapping(CarriedItemTooltips.KEY_MAPPING, KeyActivationContext.SCREEN);
     }
 
     @Override

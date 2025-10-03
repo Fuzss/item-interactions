@@ -5,6 +5,7 @@ import fuzs.iteminteractions.impl.client.core.BackedActivationTypeProvider;
 import fuzs.iteminteractions.impl.client.core.KeyBackedActivationType;
 import fuzs.puzzleslib.api.event.v1.core.EventResult;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.input.KeyEvent;
 
 public enum ExtractSingleItem implements BackedActivationTypeProvider {
     SHIFT {
@@ -28,7 +29,7 @@ public enum ExtractSingleItem implements BackedActivationTypeProvider {
 
     private static final ExtractSingleItem[] VALUES = values();
 
-    public static EventResult onBeforeKeyPressed(AbstractContainerScreen<?> screen, int keyCode, int scanCode, int modifiers) {
-        return BackedActivationTypeProvider.onKeyPressed(VALUES, keyCode, scanCode);
+    public static EventResult onBeforeKeyPressed(AbstractContainerScreen<?> screen, KeyEvent keyEvent) {
+        return BackedActivationTypeProvider.onKeyPressed(VALUES, keyEvent);
     }
 }
