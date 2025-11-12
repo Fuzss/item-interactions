@@ -131,7 +131,7 @@ backpacks from other mods.
 
 ---
 
-### Provider type: `easyshulkerboxes:ender_chest`
+### Provider type: `iteminteractions:ender_chest`
 
 This type is used for blocks and items providing access to the ender chest of a player.
 
