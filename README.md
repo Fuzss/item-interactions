@@ -1,187 +1,194 @@
 # Item Interactions
 
-A Minecraft mod. Downloads can be found on [CurseForge](https://www.curseforge.com/members/fuzs_/projects) and [Modrinth](https://modrinth.com/user/Fuzs).
+A Minecraft mod. Downloads can be found on [CurseForge](https://www.curseforge.com/members/fuzs_/projects)
+and [Modrinth](https://modrinth.com/user/Fuzs).
 
 ![](https://raw.githubusercontent.com/Fuzss/modresources/main/pages/data/iteminteractions/banner.png)
 
 ## Outline
 
-Item Interactions Core is a library mod that offers some great features to supercharge using items with an inventory
-directly from your very own inventory
-without ever having to open the item's dedicated container. Those features are:
+Item Interactions is a library mod that offers some great features to supercharge using items with an inventory
+directly from your very own inventory without ever having to open the item's dedicated container. Those features are:
 
-- Item tooltips with a rich preview of all inventory contents
-- Bundle-like behavior for inserting and extracting individual item stacks
-- Scroll through all items on the item's tooltip to choose which item to extract next
+- Item tooltips with a rich preview of all inventory contents.
+- Bundle-like behavior for inserting and extracting individual item stacks.
+- Scroll through all items on the item's tooltip to choose which item to extract next.
 - A tooltip next to the container item's tooltip for the item you have currently scrolled to in the container, great for
   telling apart tools with different enchantments!
 - Drag above other items in your inventory while holding a container item to add all those items to its inventory, drag
-  above empty slots to extract items from the container
+  above empty slots to extract items from the container.
 
-The default implementation supports a bunch of vanilla items, like shulker boxes, bundles, ender chests and other block
-entities with an inventory. Support has to be enabled via data packs, where a single provider must be included per item.
+Support for individual items is fully data-driven via data packs using so-called item contents providers. This way items
+from mods (mainly backpacks and larger
+shulker boxes) can work, too, when corresponding providers are added.
 
-This way items from mods (mainly backpacks and larger shulker boxes) can be supported, too, when providers are added. Of
-course not all mods will work, this depends on how the mod stores an item's inventory contents.
+While this library itself does not include any such providers adding new item capabilities,
+the [Easy Shulker Boxes](https://github.com/Fuzss/easyshulkerboxes) mod can be used to do just that for a bunch of
+vanilla items: all shulker boxes, all bundles, and the ender chest.
 
-Note that providers only support the default config settings from those mods for backpack sizes, if you change those
-config settings, you'll have to manually update providers with the correct values with your own data pack.
+## Configuration (for Minecraft 1.21.1+)
 
-## Enabling item container providers via data packs
+All item contents providers are found at `data/<namespace>/iteminteractions/item_container_providers/<path>.json`; with
+`<namespace>:<path>` representing the arbitrary provider id.
 
-All providers are found in `data/<modId>/item_container_providers/<itemName>.json` with `<modId>:<itemName>`
-representing the item identifier. Go check out the default providers available in
-the [Easy Shulker Boxes](https://github.com/Fuzss/easyshulkerboxes) mod jar when
-making your own.
+A single provider can enable capabilities for one or more items, meaning there does not have to be one file per item,
+nor do the file names necessarily have to correspond to the item names.
 
-Depending on the kind of item that the provider is for, different provider types are available:
+Depending on the kind of item that the provider is for, different types are available.
 
-### Item Provider Type: `easyshulkerboxes:item`
+---
 
-This type is used for normal items that simply store an inventory, and in most cases show the corresponding screen when
-right-clicked from the hotbar. This provider is intended for backpack items from other mods.
+### Common fields
 
-**Examples:** None in vanilla
+| Field             | Mandatory | Allowed Values                                                              | Explanation                                                                                       |
+|-------------------|-----------|-----------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------|
+| `type`            | ✅         | `ResourceLocation`                                                          | The provide type id for this definition. Available provider types are listed and explained below. |
+| `supported_items` | ❌         | `ResourceLocation` or `TagKey` or a list of `ResourceLocation` and `TagKey` | The container items this provider definition will apply to.                                       |
 
-<details>
-<summary>Available string keys</summary>
+---
 
-| Key                      | Required | Description                                                                                                                                                                                                                    |
-|--------------------------|----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `inventory_width`        | `true`   | Inventory slots width (amount of columns in the item's container screen, e.g. 9 for a simple chest).                                                                                                                           |
-| `inventory_height`       | `true`   | Inventory slots height (amount of rows in the item's container screen, e.g. 3 for a simple chest).                                                                                                                             |
-| `background_color`       | `false`  | The background color used on the item tooltip, defaults to vanilla's gray container background color.                                                                                                                          |
-| `nbt_key`                | `false`  | The string key used in the item nbt tag to store inventory contents, defaults to `Items`. This is treated like a path with parts separated by `/` in case the inventory contents tag is not on the root level of the item tag. |
-| `disallowed_items`       | `false`  | Json array of items and item tags included by their internal identifier not allowed to be put into the container belonging to this item. Empty by default.                                                                     |
-| `filter_container_items` | `false`  | Are shulker boxes (and similar modded items) **NOT** allowed to be put into the container belonging to this item, defaults to `false`.                                                                                         |
-| `equipment_slot`         | `false`  | An equipment slot the item needs to be placed in to allow for inventory interactions in survival mode, like the chest slot for a backpack.                                                                                     |
+### Item contents fields (for Minecraft 1.21.8+)
 
-</details>
+| Field                    | Mandatory | Allowed Values                          | Explanation                                                                               |
+|--------------------------|-----------|-----------------------------------------|-------------------------------------------------------------------------------------------|
+| `disallow`               | ❌         | `true` or `false`                       | Turn the defined item list from including allowed items to excluding disallowed items.    |
+| `filter_container_items` | ❌         | `true` or `false`                       | Prevent shulker boxes from being put into this item container.                            |
+| `items`                  | ❌         | List of `ResourceLocation` and `TagKey` | A list of item ids or tag keys allowed or not allowed to be put into this container item. |
 
-### Item Provider Type: `easyshulkerboxes:block_entity`
+---
 
-This type is used for block items that provide a block entity when placed down. The item inventory can only be
-interacted with (adding/removing items) in creative mode by default.
+### Provider type: `iteminteractions:empty`
 
-**Examples:** `minecraft:shulker_box`, `minecraft:hopper`
+This type, when added to an item, does nothing and adds no new capabilities. It exists solely to allow data packs to
+override existing providers to remove them again.
 
-<details>
-<summary>Available string keys</summary>
+#### Available fields
 
-| Key                      | Required | Description                                                                                                                                                                                                                    |
-|--------------------------|----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `inventory_width`        | `true`   | Inventory slots width (amount of columns in the item's container screen, e.g. 9 for a simple chest).                                                                                                                           |
-| `inventory_height`       | `true`   | Inventory slots height (amount of rows in the item's container screen, e.g. 3 for a simple chest).                                                                                                                             |
-| `block_entity_type`      | `true`   | The block entity type id.                                                                                                                                                                                                      |
-| `background_color`       | `false`  | The background color used on the item tooltip, defaults to vanilla's gray container background color.                                                                                                                          |
-| `nbt_key`                | `false`  | The string key used in the item nbt tag to store inventory contents, defaults to `Items`. This is treated like a path with parts separated by `/` in case the inventory contents tag is not on the root level of the item tag. |
-| `disallowed_items`       | `false`  | Json array of items and item tags included by their internal identifier not allowed to be put into the container belonging to this item. Empty by default.                                                                     |
-| `filter_container_items` | `false`  | Are shulker boxes (and similar modded items) **NOT** allowed to be put into the container belonging to this item, defaults to `false`.                                                                                         |
-| `any_game_mode`          | `false`  | Can the player interact with the item's inventory in any game mode, not just creative, defaults to `false`. This is enabled for the built-in shulker box providers.                                                            |
-| `equipment_slot`         | `false`  | An equipment slot the item needs to be placed in to allow for inventory interactions in survival mode, like the chest slot for a backpack.                                                                                     |
+There are no settings available for this type.
 
-</details>
+#### Example
 
-### Item Provider Type: `easyshulkerboxes:block_entity_view`
+> `data/minecraft/iteminteractions/item_contents_provider/empty.json`
 
-This type is the same as the normal block entity provider, but does not allow for any interaction with the item's
-inventory contents, not even in creative mode. It is simply used for viewing inventory contents of items with certain
-restrictions on their inventory slots (like output and fuel slots).
-
-**Examples:** `minecraft:furnace`, `minecraft:brewing_stand`
-
-<details>
-<summary>Available string keys</summary>
-
-| Key                 | Required | Description                                                                                                                                                                                                                    |
-|---------------------|----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `inventory_width`   | `true`   | Inventory slots width (amount of columns in the item's container screen, e.g. 9 for a simple chest).                                                                                                                           |
-| `inventory_height`  | `true`   | Inventory slots height (amount of rows in the item's container screen, e.g. 3 for a simple chest).                                                                                                                             |
-| `block_entity_type` | `true`   | The block entity type id.                                                                                                                                                                                                      |
-| `background_color`  | `false`  | The background color used on the item tooltip, defaults to vanilla's gray container background color.                                                                                                                          |
-| `nbt_key`           | `false`  | The string key used in the item nbt tag to store inventory contents, defaults to `Items`. This is treated like a path with parts separated by `/` in case the inventory contents tag is not on the root level of the item tag. |
-
-</details>
-
-### Item Provider Type: `easyshulkerboxes:ender_chest`
-
-This type is used for blocks and items providing access to a player's ender chest.
-
-**Examples:** `minecraft:ender_chest`
-
-There are no additional settings available for this type.
-
-### Item Provider Type: `easyshulkerboxes:bundle`
-
-This type is used for bundle items. Instead of specifying inventory dimensions, the capacity of the bundle must be set.
-Shulker boxes (and similar modded items) **CANNOT** be added to the bundle inventory.
-
-**Examples:** `minecraft:bundle`
-
-<details>
-<summary>Available string keys</summary>
-
-| Key                | Required | Description                                                                                                                                                                                                                    |
-|--------------------|----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `capacity`         | `true`   | Total capacity of the bundle (the available weight), is 64 for the vanilla bundle.                                                                                                                                             |
-| `background_color` | `false`  | The background color used on the item tooltip, defaults to vanilla's gray container background color.                                                                                                                          |
-| `nbt_key`          | `false`  | The string key used in the item nbt tag to store inventory contents, defaults to `Items`. This is treated like a path with parts separated by `/` in case the inventory contents tag is not on the root level of the item tag. |
-| `disallowed_items` | `false`  | Json array of items and item tags included by their internal identifier not allowed to be put into the container belonging to this item. Empty by default.                                                                     |
-
-</details>
-
-## Adding custom item container provider types (for developers only)
-
-Item Interactions Core features a very basic api allowing developers to create and register their own item container
-provider types for supporting items where the default provider types are not sufficient.
-
-To do so, create your own provider by
-implementing `fuzs.iteminteractionscore.api.container.v1.provider.ItemContainerProvider`. The provider itself is **NOT**
-registered anywhere.
-
-Instead, make sure to add a serializer for your provider, so Item Interactions Core knows how to handle the provider
-type when deserializing data pack contents.
-This is done by calling `fuzs.iteminteractionscore.api.container.v1.ItemContainerProviderSerializers::register`.
-
-Also note that it is not necessary for an `ItemContainerProvider` to provide all the functions Item Interactions Core
-has to offer. It is entirely possible to e.g. only implement a provider for showing an item tooltip image (for an
-example see `fuzs.iteminteractionscore.world.item.container.MapProvider`).
-
-## Adding Item Interactions Core to your Gradle workspace (for developers only)
-
-Fuzs Mod Resources is the recommended way of adding Item Interactions Core to your project in your `build.gradle` file. 
-
-Furthermore, as there is no publication available intended for production, your mod should include Item Interactions Core directly in its jar.
-```groovy
-repositories {
-    maven {
-        name = "Fuzs Mod Resources"
-        url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/"
-    }
+```json
+{
+  "type": "iteminteractions:empty"
 }
 ```
 
-**Fabric:** On Fabric we include Item Interactions Core via Loom's `include()` feature.
-```groovy
-dependencies {
-  modApi include("fuzs.iteminteractionscore:iteminteractionscore-fabric:<modVersion>")      // e.g. 5.0.0 for Minecraft 1.19.3
+---
+
+### Provider type: `iteminteractions:container`
+
+This type is used for most items that store an inventory. It can be used all the way from shulker boxes to even
+backpacks from other mods.
+
+#### Available fields (for Minecraft 1.21.8+)
+
+| Field                     | Mandatory | Allowed Values                                                                                                                                                                                                                        | Explanation                                                                                                                                                                                          |
+|---------------------------|-----------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `background_color`        | ❌         | [ARGB](https://en.wikipedia.org/wiki/RGBA_color_model) as `Integer` or any of: `white`, `orange`, `magenta`, `light_blue`, `yellow`, `lime`, `pink`, `gray`, `light_gray`, `cyan`, `purple`, `blue`, `brown`, `green`, `red`, `black` | The background color used on the item tooltip, defaults to vanilla's gray container background color.                                                                                                |
+| `equipment_slots`         | ❌         | Any of `any`, `mainhand`, `offhand`, `hand`, `feet`, `legs`, `chest`, `head`, `armor`, `body`, `saddle`                                                                                                                               | An inventory equipment slot the item needs to be placed in to allow for inventory interactions in survival mode. Useful for items that must be worn in some inventory slot to become usable.         |
+| `interaction_permissions` | ❌         | `always`, `creative_only` or `never`                                                                                                                                                                                                  | Controls the game mode the player must be in for using any of the inventory interactions. Purely visual capabilities may still be usable. Also can prevent any interactions at all in any game mode. |
+| `inventory_height`        | ✅         | `0 >`                                                                                                                                                                                                                                 | The number of vertical container slots; meaning the amount of rows in the item container screen.                                                                                                     |
+| `inventory_width`         | ✅         | `0 >`                                                                                                                                                                                                                                 | The number of horizontal container slots; meaning the amount of columns in the item container screen.                                                                                                |
+| `item_contents`           | ❌         | [Item Contents Definition](#item-contents-fields-for-minecraft-1218)                                                                                                                                                                  | An object for filtering items that can or cannot be put into this container item.                                                                                                                    |
+
+#### Available fields (for Minecraft 1.21.1-1.21.7)
+
+<details>
+
+| Field                      | Mandatory | Allowed Values                                                                                                                                                                                                                        | Explanation                                                                                                                                                                                          |
+|----------------------------|-----------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `background_color`         | ❌         | [ARGB](https://en.wikipedia.org/wiki/RGBA_color_model) as `Integer` or any of: `white`, `orange`, `magenta`, `light_blue`, `yellow`, `lime`, `pink`, `gray`, `light_gray`, `cyan`, `purple`, `blue`, `brown`, `green`, `red`, `black` | The background color used on the item tooltip, defaults to vanilla's gray container background color.                                                                                                |
+| `disallowed_item_contents` | ❌         | List of `ResourceLocation` and `TagKey`                                                                                                                                                                                               | A list of item ids or tag keys not allowed to be put into this container item.                                                                                                                       |
+| `equipment_slots`          | ❌         | Any of `any`, `mainhand`, `offhand`, `hand`, `feet`, `legs`, `chest`, `head`, `armor`, `body`, `saddle`                                                                                                                               | An inventory equipment slot the item needs to be placed in to allow for inventory interactions in survival mode. Useful for items that must be worn in some inventory slot to become usable.         |
+| `filter_container_items`   | ❌         | `true` or `false`                                                                                                                                                                                                                     | Prevent shulker boxes from being put into this item container.                                                                                                                                       |
+| `interaction_permissions`  | ❌         | `always`, `creative_only` or `never`                                                                                                                                                                                                  | Controls the game mode the player must be in for using any of the inventory interactions. Purely visual capabilities may still be usable. Also can prevent any interactions at all in any game mode. |
+| `inventory_height`         | ✅         | `0 >`                                                                                                                                                                                                                                 | The number of vertical container slots; meaning the amount of rows in the item container screen.                                                                                                     |
+| `inventory_width`          | ✅         | `0 >`                                                                                                                                                                                                                                 | The number of horizontal container slots; meaning the amount of columns in the item container screen.                                                                                                |
+
+</details>
+
+#### Example
+
+> `data/minecraft/iteminteractions/item_contents_provider/shulker_box.json`
+
+```json
+{
+  "type": "iteminteractions:container",
+  "equipment_slots": "any",
+  "interaction_permissions": "always",
+  "inventory_height": 3,
+  "inventory_width": 9,
+  "item_contents": {
+    "disallow": true,
+    "filter_container_items": true
+  },
+  "supported_items": "minecraft:shulker_box"
 }
 ```
 
-**Forge:** On Forge we include Item Interactions Core via ForgeGradle's JarInJar feature. This does require additional changes in your `build.gradle` file, replacing most usages of the `jar` task with `tasks.jarJar` to ensure that output is used e.g. for uploading your mod.
-```groovy
-dependencies {
-  api fg.deobf("fuzs.iteminteractionscore:iteminteractionscore-forge:<modVersion>")         // e.g. 5.0.0 for Minecraft 1.19.3
-  jarJar fg.deobf("fuzs.iteminteractionscore:iteminteractionscore-forge:<modVersion>") {
-    jarJar.ranged(it, "[<modVersion>,)")
-    transitive = false
-  }
+---
+
+### Provider type: `easyshulkerboxes:ender_chest`
+
+This type is used for blocks and items providing access to the ender chest of a player.
+
+#### Available fields
+
+There are no settings available for this type.
+
+#### Example
+
+> `data/minecraft/iteminteractions/item_contents_provider/ender_chest.json`
+
+```json
+{
+  "type": "iteminteractions:ender_chest",
+  "supported_items": "minecraft:ender_chest"
 }
 ```
 
-**Common:** This publication is intended for multiloader workspaces and is provided deobfuscated with Mojang mappings.
-```groovy
-dependencies {
-  api "fuzs.iteminteractionscore:iteminteractionscore-common:<modVersion>"      // e.g. 5.0.0 for Minecraft 1.19.3
+---
+
+### Provider type: `iteminteractions:bundle`
+
+This type is used for bundle items. Instead of specifying inventory dimensions, the capacity multiplier must be set.
+
+#### Available fields (for Minecraft 1.21.8+)
+
+| Field                 | Mandatory | Allowed Values                                                                                                                                                                                                                        | Explanation                                                                                                                                |
+|-----------------------|-----------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------|
+| `background_color`    | ❌         | [ARGB](https://en.wikipedia.org/wiki/RGBA_color_model) as `Integer` or any of: `white`, `orange`, `magenta`, `light_blue`, `yellow`, `lime`, `pink`, `gray`, `light_gray`, `cyan`, `purple`, `blue`, `brown`, `green`, `red`, `black` | The background color used on the item tooltip, defaults to vanilla's gray container background color.                                      |
+| `capacity_multiplier` | ✅         | `0 >`                                                                                                                                                                                                                                 | Scale for [capacity](https://minecraft.wiki/w/Bundle#Usage) of the bundle (the available weight); multiplied by base capacity which is 64. |
+| `item_contents`       | ❌         | [Item Contents Definition](#item-contents-fields-for-minecraft-1218)                                                                                                                                                                  | An object for filtering items that can or cannot be put into this container item.                                                          |
+
+#### Available fields (for Minecraft 1.21.1-1.21.7)
+
+<details>
+
+| Field                      | Mandatory | Allowed Values                                                                                                                                                                                                                        | Explanation                                                                                                                                |
+|----------------------------|-----------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------|
+| `background_color`         | ❌         | [ARGB](https://en.wikipedia.org/wiki/RGBA_color_model) as `Integer` or any of: `white`, `orange`, `magenta`, `light_blue`, `yellow`, `lime`, `pink`, `gray`, `light_gray`, `cyan`, `purple`, `blue`, `brown`, `green`, `red`, `black` | The background color used on the item tooltip, defaults to vanilla's gray container background color.                                      |
+| `capacity_multiplier`      | ✅         | `0 >`                                                                                                                                                                                                                                 | Scale for [capacity](https://minecraft.wiki/w/Bundle#Usage) of the bundle (the available weight); multiplied by base capacity which is 64. |
+| `disallowed_item_contents` | ❌         | List of `ResourceLocation` and `TagKey`                                                                                                                                                                                               | A list of item ids or tag keys not allowed to be put into this container item. Shulker boxes are always prevented from being stored.       |
+
+</details>
+
+#### Example
+
+> `data/minecraft/iteminteractions/item_contents_provider/bundle.json`
+
+```json
+{
+  "type": "iteminteractions:bundle",
+  "background_color": "brown",
+  "capacity_multiplier": 1,
+  "item_contents": {
+    "disallow": true,
+    "filter_container_items": true
+  },
+  "supported_items": "minecraft:bundle"
 }
 ```
