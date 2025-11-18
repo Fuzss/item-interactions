@@ -12,6 +12,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
@@ -52,7 +53,8 @@ public interface ItemContentsProvider {
      * Codec that includes a list of supported items.
      */
     Codec<Map.Entry<HolderSet<Item>, ItemContentsProvider>> WITH_ITEMS_CODEC = RecordCodecBuilder.create(instance -> {
-        return instance.group(Ingredient.NON_AIR_HOLDER_SET_CODEC.optionalFieldOf("supported_items", HolderSet.empty())
+        return instance.group(ExtraCodecs.nonEmptyHolderSet(Ingredient.NON_AIR_HOLDER_SET_CODEC)
+                .fieldOf("supported_items")
                 .forGetter(Map.Entry::getKey), CODEC.forGetter(Map.Entry::getValue)).apply(instance, Map::entry);
     });
     /**
