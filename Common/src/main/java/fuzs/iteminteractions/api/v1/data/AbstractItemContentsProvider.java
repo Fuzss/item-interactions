@@ -22,6 +22,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * TODO remove deprecated members
+ */
 public abstract class AbstractItemContentsProvider implements DataProvider {
     private final Map<ResourceLocation, Map.Entry<HolderSet<Item>, ItemContentsProvider>> providers = Maps.newHashMap();
     private final String modId;
@@ -62,52 +65,44 @@ public abstract class AbstractItemContentsProvider implements DataProvider {
     public abstract void addItemProviders(HolderLookup.Provider registries);
 
     public void add(HolderLookup.RegistryLookup<Item> itemLookup, ItemContentsProvider provider, TagKey<Item> tagKey) {
-        this.add(itemLookup, tagKey.location().getPath(), provider, tagKey);
+        this.add(itemLookup, tagKey.location(), provider, tagKey);
     }
 
+    @Deprecated(forRemoval = true)
     public void add(HolderLookup.RegistryLookup<Item> itemLookup, String id, ItemContentsProvider provider, TagKey<Item> tagKey) {
-        ResourceLocation resourceLocation = ResourceLocationHelper.fromNamespaceAndPath(this.modId, id);
-        this.add(itemLookup, resourceLocation, provider, tagKey);
+        this.add(itemLookup, ResourceLocationHelper.fromNamespaceAndPath(this.modId, id), provider, tagKey);
     }
 
     public final void add(HolderLookup.RegistryLookup<Item> itemLookup, ResourceLocation resourceLocation, ItemContentsProvider provider, TagKey<Item> tagKey) {
         this.add(resourceLocation, provider, itemLookup.getOrThrow(tagKey));
     }
 
-    /**
-     * TODO remove this with the unused argument
-     */
     @Deprecated(forRemoval = true)
     public void add(HolderLookup.RegistryLookup<Item> itemLookup, ItemContentsProvider provider, Item item) {
         this.add(provider, item);
     }
 
     public void add(ItemContentsProvider provider, Item item) {
-        this.add(BuiltInRegistries.ITEM.getKey(item).getPath(), provider, item);
+        this.add(BuiltInRegistries.ITEM.getKey(item), provider, item);
     }
 
-    /**
-     * TODO remove this with the unused argument
-     */
     @Deprecated(forRemoval = true)
     public void add(HolderLookup.RegistryLookup<Item> itemLookup, String id, ItemContentsProvider provider, Item... items) {
         this.add(id, provider, items);
     }
 
+    @Deprecated(forRemoval = true)
     public void add(String id, ItemContentsProvider provider, Item... items) {
         this.add(ResourceLocationHelper.fromNamespaceAndPath(this.modId, id), provider, items);
     }
 
-    /**
-     * TODO remove this with the unused argument
-     */
     @Deprecated(forRemoval = true)
     public void add(HolderLookup.RegistryLookup<Item> itemLookup, ResourceLocation resourceLocation, ItemContentsProvider provider, Item... items) {
         this.add(resourceLocation, provider, items);
     }
 
     public final void add(ResourceLocation resourceLocation, ItemContentsProvider provider, Item... items) {
-        this.add(resourceLocation, provider, HolderSet.direct(Item::builtInRegistryHolder, items));
+        this.add(resourceLocation, provider, HolderSet.direct(BuiltInRegistries.ITEM::wrapAsHolder, items));
     }
 
     @SafeVarargs
