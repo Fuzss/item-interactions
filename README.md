@@ -47,7 +47,7 @@ Depending on the kind of item that the provider is for, different types are avai
 | Field             | Mandatory | Allowed Values                                                              | Explanation                                                                                       |
 |-------------------|-----------|-----------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------|
 | `type`            | ✅         | `ResourceLocation`                                                          | The provide type id for this definition. Available provider types are listed and explained below. |
-| `supported_items` | ❌         | `ResourceLocation` or `TagKey` or a list of `ResourceLocation` and `TagKey` | The container items this provider definition will apply to.                                       |
+| `supported_items` | ✅         | `ResourceLocation` or `TagKey` or a list of `ResourceLocation` and `TagKey` | The container items this provider definition will apply to.                                       |
 
 ---
 
@@ -76,7 +76,8 @@ There are no settings available for this type.
 
 ```json
 {
-  "type": "iteminteractions:empty"
+  "type": "iteminteractions:empty",
+  "supported_items": "..."
 }
 ```
 
