@@ -1,5 +1,6 @@
 package fuzs.iteminteractions.impl.world.item.container;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import fuzs.iteminteractions.api.v1.provider.ItemContentsBehavior;
 import fuzs.iteminteractions.api.v1.provider.ItemContentsProvider;
@@ -7,7 +8,6 @@ import fuzs.iteminteractions.impl.ItemInteractions;
 import fuzs.iteminteractions.impl.network.ClientboundSyncItemContentsProviders;
 import fuzs.puzzleslib.api.network.v4.MessageSender;
 import fuzs.puzzleslib.api.network.v4.PlayerSet;
-import net.minecraft.Util;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.HolderSet;
@@ -24,6 +24,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
@@ -32,7 +33,7 @@ public final class ItemContentsProviders extends UnconditionalSimpleJsonResource
             ItemInteractions.id("item_contents_provider"));
 
     @Nullable
-    private static Map<HolderSet<Item>, ItemContentsProvider> unresolvedProviders;
+    private static List<Map.Entry<HolderSet<Item>, ItemContentsProvider>> unresolvedProviders;
     private static Map<Item, ItemContentsProvider> resolvedProviders = ImmutableMap.of();
 
     public ItemContentsProviders(HolderLookup.Provider registries) {
@@ -41,7 +42,7 @@ public final class ItemContentsProviders extends UnconditionalSimpleJsonResource
 
     @Override
     public void apply(Map<ResourceLocation, Map.Entry<HolderSet<Item>, ItemContentsProvider>> map, ResourceManager resourceManager, ProfilerFiller profiler) {
-        unresolvedProviders = map.values().stream().collect(Util.toMap());
+        unresolvedProviders = ImmutableList.copyOf(map.values());
         resolvedProviders = ImmutableMap.of();
     }
 
@@ -62,15 +63,16 @@ public final class ItemContentsProviders extends UnconditionalSimpleJsonResource
     }
 
     public static void onTagsUpdated(HolderLookup.Provider registries, boolean client) {
-        Map<HolderSet<Item>, ItemContentsProvider> map = unresolvedProviders;
-        if (map != null && !client) {
+        List<Map.Entry<HolderSet<Item>, ItemContentsProvider>> holderSets = unresolvedProviders;
+        if (holderSets != null && !client) {
             Map<Item, ItemContentsProvider> providers = new IdentityHashMap<>();
-            for (Map.Entry<HolderSet<Item>, ItemContentsProvider> entry : map.entrySet()) {
+            for (Map.Entry<HolderSet<Item>, ItemContentsProvider> entry : holderSets) {
                 entry.getKey().forEach((Holder<Item> holder) -> {
                     // multiple entries can define a provider for the same item, in that case just let the first one win
                     providers.putIfAbsent(holder.value(), entry.getValue());
                 });
             }
+
             unresolvedProviders = null;
             setItemContainerProviders(providers);
         }

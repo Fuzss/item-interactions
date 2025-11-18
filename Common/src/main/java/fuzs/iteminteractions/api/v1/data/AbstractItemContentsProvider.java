@@ -5,6 +5,7 @@ import fuzs.iteminteractions.api.v1.provider.ItemContentsProvider;
 import fuzs.iteminteractions.impl.world.item.container.ItemContentsProviders;
 import fuzs.puzzleslib.api.core.v1.utility.ResourceLocationHelper;
 import fuzs.puzzleslib.api.data.v2.core.DataProviderContext;
+import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -60,30 +61,62 @@ public abstract class AbstractItemContentsProvider implements DataProvider {
 
     public abstract void addItemProviders(HolderLookup.Provider registries);
 
-    public void add(HolderLookup.RegistryLookup<Item> items, ItemContentsProvider provider, TagKey<Item> tagKey) {
-        this.add(items, tagKey.location().getPath(), provider, tagKey);
+    public void add(HolderLookup.RegistryLookup<Item> itemLookup, ItemContentsProvider provider, TagKey<Item> tagKey) {
+        this.add(itemLookup, tagKey.location().getPath(), provider, tagKey);
     }
 
-    public void add(HolderLookup.RegistryLookup<Item> items, String id, ItemContentsProvider provider, TagKey<Item> tagKey) {
+    public void add(HolderLookup.RegistryLookup<Item> itemLookup, String id, ItemContentsProvider provider, TagKey<Item> tagKey) {
         ResourceLocation resourceLocation = ResourceLocationHelper.fromNamespaceAndPath(this.modId, id);
-        this.add(items, resourceLocation, provider, tagKey);
+        this.add(itemLookup, resourceLocation, provider, tagKey);
     }
 
-    public void add(HolderLookup.RegistryLookup<Item> items, ResourceLocation resourceLocation, ItemContentsProvider provider, TagKey<Item> tagKey) {
-        this.providers.put(resourceLocation, Map.entry(items.getOrThrow(tagKey), provider));
+    public final void add(HolderLookup.RegistryLookup<Item> itemLookup, ResourceLocation resourceLocation, ItemContentsProvider provider, TagKey<Item> tagKey) {
+        this.add(resourceLocation, provider, itemLookup.getOrThrow(tagKey));
     }
 
-    public void add(HolderLookup.RegistryLookup<Item> items, ItemContentsProvider provider, Item item) {
-        this.add(items, BuiltInRegistries.ITEM.getKey(item).getPath(), provider, item);
+    /**
+     * TODO remove this with the unused argument
+     */
+    @Deprecated(forRemoval = true)
+    public void add(HolderLookup.RegistryLookup<Item> itemLookup, ItemContentsProvider provider, Item item) {
+        this.add(provider, item);
     }
 
-    public void add(HolderLookup.RegistryLookup<Item> items, String id, ItemContentsProvider provider, Item... item) {
-        ResourceLocation resourceLocation = ResourceLocationHelper.fromNamespaceAndPath(this.modId, id);
-        this.add(items, resourceLocation, provider, item);
+    public void add(ItemContentsProvider provider, Item item) {
+        this.add(BuiltInRegistries.ITEM.getKey(item).getPath(), provider, item);
     }
 
-    public void add(HolderLookup.RegistryLookup<Item> items, ResourceLocation resourceLocation, ItemContentsProvider provider, Item... item) {
-        this.providers.put(resourceLocation, Map.entry(HolderSet.direct(Item::builtInRegistryHolder, item), provider));
+    /**
+     * TODO remove this with the unused argument
+     */
+    @Deprecated(forRemoval = true)
+    public void add(HolderLookup.RegistryLookup<Item> itemLookup, String id, ItemContentsProvider provider, Item... items) {
+        this.add(id, provider, items);
+    }
+
+    public void add(String id, ItemContentsProvider provider, Item... items) {
+        this.add(ResourceLocationHelper.fromNamespaceAndPath(this.modId, id), provider, items);
+    }
+
+    /**
+     * TODO remove this with the unused argument
+     */
+    @Deprecated(forRemoval = true)
+    public void add(HolderLookup.RegistryLookup<Item> itemLookup, ResourceLocation resourceLocation, ItemContentsProvider provider, Item... items) {
+        this.add(resourceLocation, provider, items);
+    }
+
+    public final void add(ResourceLocation resourceLocation, ItemContentsProvider provider, Item... items) {
+        this.add(resourceLocation, provider, HolderSet.direct(Item::builtInRegistryHolder, items));
+    }
+
+    @SafeVarargs
+    public final void add(ResourceLocation resourceLocation, ItemContentsProvider provider, Holder<Item>... items) {
+        this.add(resourceLocation, provider, HolderSet.direct(items));
+    }
+
+    public void add(ResourceLocation resourceLocation, ItemContentsProvider provider, HolderSet<Item> holderSet) {
+        this.providers.put(resourceLocation, Map.entry(holderSet, provider));
     }
 
     @Override
