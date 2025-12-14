@@ -14,7 +14,7 @@ import java.util.List;
 
 public class EnderChestSyncHandler {
 
-    public static void onLoggedIn(ServerPlayer player) {
+    public static void onPlayerJoin(ServerPlayer player) {
         broadcastFullState(player);
     }
 

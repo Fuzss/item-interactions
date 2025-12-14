@@ -19,12 +19,12 @@ abstract class AbstractContainerScreenMixin extends Screen {
     }
 
     @Inject(method = "renderSlot", at = @At("HEAD"))
-    private void renderSlot$1(GuiGraphics guiGraphics, Slot slot, CallbackInfo callback) {
+    private void renderSlot$1(GuiGraphics guiGraphics, Slot slot, int mouseX, int mouseY, CallbackInfo callback) {
         ItemDecorationHelper.setSlotBeingRendered(slot);
     }
 
     @Inject(method = "renderSlot", at = @At("RETURN"))
-    private void renderSlot$2(GuiGraphics guiGraphics, Slot slot, CallbackInfo callback) {
+    private void renderSlot$2(GuiGraphics guiGraphics, Slot slot, int mouseX, int mouseY, CallbackInfo callback) {
         ItemDecorationHelper.setSlotBeingRendered(null);
     }
 }

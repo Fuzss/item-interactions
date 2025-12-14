@@ -15,20 +15,21 @@ import fuzs.iteminteractions.impl.world.item.container.ItemContentsProviders;
 import fuzs.puzzleslib.api.config.v3.ConfigHolder;
 import fuzs.puzzleslib.api.core.v1.ModConstructor;
 import fuzs.puzzleslib.api.core.v1.ModLoaderEnvironment;
+import fuzs.puzzleslib.api.core.v1.context.DataPackReloadListenersContext;
 import fuzs.puzzleslib.api.core.v1.context.GameRegistriesContext;
 import fuzs.puzzleslib.api.core.v1.context.PackRepositorySourcesContext;
 import fuzs.puzzleslib.api.core.v1.context.PayloadTypesContext;
-import fuzs.puzzleslib.api.core.v1.utility.ResourceLocationHelper;
 import fuzs.puzzleslib.api.event.v1.entity.player.AfterChangeDimensionCallback;
 import fuzs.puzzleslib.api.event.v1.entity.player.ContainerEvents;
 import fuzs.puzzleslib.api.event.v1.entity.player.PlayerCopyEvents;
 import fuzs.puzzleslib.api.event.v1.entity.player.PlayerNetworkEvents;
-import fuzs.puzzleslib.api.event.v1.server.AddDataPackReloadListenersCallback;
 import fuzs.puzzleslib.api.event.v1.server.SyncDataPackContentsCallback;
 import fuzs.puzzleslib.api.event.v1.server.TagsUpdatedCallback;
 import fuzs.puzzleslib.api.resources.v1.DynamicPackResources;
 import fuzs.puzzleslib.api.resources.v1.PackResourcesHelper;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.ReloadableServerResources;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,10 +51,9 @@ public class ItemInteractions implements ModConstructor {
     private static void registerEventHandlers() {
         ContainerEvents.OPEN.register(EnderChestSyncHandler::onContainerOpen);
         SyncDataPackContentsCallback.EVENT.register(ItemContentsProviders::onSyncDataPackContents);
-        PlayerNetworkEvents.LOGGED_IN.register(EnderChestSyncHandler::onLoggedIn);
+        PlayerNetworkEvents.JOIN.register(EnderChestSyncHandler::onPlayerJoin);
         AfterChangeDimensionCallback.EVENT.register(EnderChestSyncHandler::onAfterChangeDimension);
         PlayerCopyEvents.RESPAWN.register(EnderChestSyncHandler::onRespawn);
-        AddDataPackReloadListenersCallback.EVENT.register(ItemContentsProviders::onAddDataPackReloadListeners);
         TagsUpdatedCallback.EVENT.register(ItemContentsProviders::onTagsUpdated);
     }
 
@@ -84,7 +84,15 @@ public class ItemInteractions implements ModConstructor {
         }
     }
 
-    public static ResourceLocation id(String path) {
-        return ResourceLocationHelper.fromNamespaceAndPath(MOD_ID, path);
+    @Override
+    public void onAddDataPackReloadListeners(DataPackReloadListenersContext context) {
+        context.registerReloadListener(ItemContentsProviders.REGISTRY_KEY.identifier(),
+                (DataPackReloadListenersContext.PreparableReloadListenerFactory) (ReloadableServerResources serverResources, HolderLookup.Provider lookupWithUpdatedTags) -> {
+                    return new ItemContentsProviders(lookupWithUpdatedTags);
+                });
+    }
+
+    public static Identifier id(String path) {
+        return Identifier.fromNamespaceAndPath(MOD_ID, path);
     }
 }

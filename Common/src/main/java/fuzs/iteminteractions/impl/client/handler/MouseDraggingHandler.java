@@ -17,7 +17,7 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.core.Holder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -27,7 +27,7 @@ import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Set;
 
@@ -35,16 +35,15 @@ public class MouseDraggingHandler {
     /**
      * @see AbstractContainerScreen#SLOT_HIGHLIGHT_BACK_SPRITE
      */
-    private static final ResourceLocation SLOT_HIGHLIGHT_BACK_SPRITE = ResourceLocation.withDefaultNamespace(
+    private static final Identifier SLOT_HIGHLIGHT_BACK_SPRITE = Identifier.withDefaultNamespace(
             "container/slot_highlight_back");
     /**
      * @see AbstractContainerScreen#SLOT_HIGHLIGHT_FRONT_SPRITE
      */
-    private static final ResourceLocation SLOT_HIGHLIGHT_FRONT_SPRITE = ResourceLocation.withDefaultNamespace(
+    private static final Identifier SLOT_HIGHLIGHT_FRONT_SPRITE = Identifier.withDefaultNamespace(
             "container/slot_highlight_front");
     private static final Set<Slot> CONTAINER_DRAG_SLOTS = Sets.newHashSet();
-    @Nullable
-    private static ContainerDragType containerDragType;
+    @Nullable private static ContainerDragType containerDragType;
 
     public static EventResult onBeforeMousePressed(AbstractContainerScreen<?> screen, MouseButtonEvent mouseButtonEvent) {
         if (!ItemInteractions.CONFIG.get(ServerConfig.class).allowMouseDragging) return EventResult.PASS;
@@ -143,7 +142,7 @@ public class MouseDraggingHandler {
         renderDragSlotsHighlight(screen, guiGraphics, mouseX, mouseY, SLOT_HIGHLIGHT_FRONT_SPRITE, false);
     }
 
-    private static void renderDragSlotsHighlight(AbstractContainerScreen<?> screen, GuiGraphics guiGraphics, int mouseX, int mouseY, ResourceLocation resourceLocation, boolean applyTranslation) {
+    private static void renderDragSlotsHighlight(AbstractContainerScreen<?> screen, GuiGraphics guiGraphics, int mouseX, int mouseY, Identifier identifier, boolean applyTranslation) {
         if (CONTAINER_DRAG_SLOTS.isEmpty()) {
             return;
         }
@@ -158,7 +157,7 @@ public class MouseDraggingHandler {
                 // slots will sometimes be added to dragged slots when simply clicking on a slot, so don't render our overlay then
                 if (CONTAINER_DRAG_SLOTS.size() > 1 || !screen.isHovering(slot, mouseX, mouseY)) {
                     guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED,
-                            resourceLocation,
+                            identifier,
                             slot.x - 4,
                             slot.y - 4,
                             24,

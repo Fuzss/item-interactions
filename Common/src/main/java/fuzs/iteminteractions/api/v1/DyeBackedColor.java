@@ -8,7 +8,7 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Lifecycle;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.material.MapColor;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Locale;
 import java.util.Map;
@@ -29,8 +29,7 @@ public final class DyeBackedColor {
             .collect(ImmutableMap.toImmutableMap(textColor -> textColor.name, Function.identity()));
 
     private final int value;
-    @Nullable
-    private final String name;
+    @Nullable private final String name;
 
     private DyeBackedColor(int value, String name) {
         this.value = value & 0XFFFFFF;
@@ -54,8 +53,7 @@ public final class DyeBackedColor {
         return String.format(Locale.ROOT, "%s%06X", CUSTOM_COLOR_PREFIX, this.value);
     }
 
-    @Nullable
-    public DyeColor unwrap() {
+    @Nullable public DyeColor unwrap() {
         return LEGACY_FORMAT_TO_COLOR.inverse().get(this);
     }
 
@@ -107,4 +105,3 @@ public final class DyeBackedColor {
         }
     }
 }
-

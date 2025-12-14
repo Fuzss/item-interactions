@@ -7,7 +7,7 @@ import fuzs.iteminteractions.impl.client.helper.GuiGraphicsHelper;
 import fuzs.iteminteractions.impl.config.ClientConfig;
 import fuzs.iteminteractions.impl.world.inventory.ContainerSlotHelper;
 import fuzs.puzzleslib.api.client.gui.v2.tooltip.TooltipRenderHelper;
-import fuzs.puzzleslib.api.core.v1.utility.ResourceLocationHelper;
+import net.minecraft.resources.Identifier;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.ColorLerper;
 import net.minecraft.client.gui.Font;
@@ -19,25 +19,25 @@ import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPosition
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
 
 public abstract class AbstractClientItemContentsTooltip extends ExpandableClientContentsTooltip {
-    private static final ResourceLocation HOTBAR_SELECTION_SPRITE = ResourceLocationHelper.withDefaultNamespace(
+    private static final Identifier HOTBAR_SELECTION_SPRITE = Identifier.withDefaultNamespace(
             "hud/hotbar_selection");
-    public static final ResourceLocation TEXTURE_LOCATION = ItemInteractions.id(
+    public static final Identifier TEXTURE_LOCATION = ItemInteractions.id(
             "textures/gui/container/inventory_tooltip.png");
-    private static final ResourceLocation SLOT_HIGHLIGHT_BACK_SPRITE = ResourceLocation.withDefaultNamespace(
+    private static final Identifier SLOT_HIGHLIGHT_BACK_SPRITE = Identifier.withDefaultNamespace(
             "container/slot_highlight_back");
-    private static final ResourceLocation SLOT_HIGHLIGHT_FRONT_SPRITE = ResourceLocation.withDefaultNamespace(
+    private static final Identifier SLOT_HIGHLIGHT_FRONT_SPRITE = Identifier.withDefaultNamespace(
             "container/slot_highlight_front");
     protected static final int BORDER_SIZE = 7;
     protected static final int GRID_SIZE = 18;
@@ -258,7 +258,7 @@ public abstract class AbstractClientItemContentsTooltip extends ExpandableClient
                 color);
     }
 
-    private void drawSlotHighlight(GuiGraphics guiGraphics, int posX, int posY, @Nullable ResourceLocation hotbarSelectionSprite, @Nullable ResourceLocation slotHighlightSprite) {
+    private void drawSlotHighlight(GuiGraphics guiGraphics, int posX, int posY, @Nullable Identifier hotbarSelectionSprite, @Nullable Identifier slotHighlightSprite) {
         if (ACTIVE_CONTAINER_ITEM_TOOLTIPS.intValue() > 1) return;
         ClientConfig.SlotOverlay slotOverlay = ItemInteractions.CONFIG.get(ClientConfig.class).slotOverlay;
         switch (slotOverlay) {

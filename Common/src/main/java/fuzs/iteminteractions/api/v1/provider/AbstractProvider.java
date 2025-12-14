@@ -8,13 +8,12 @@ import net.minecraft.core.RegistryCodecs;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 
 public abstract class AbstractProvider implements TooltipProvider {
-    @Nullable
-    protected final DyeBackedColor dyeColor;
+    @Nullable protected final DyeBackedColor dyeColor;
     ItemContents itemContents = ItemContents.EMPTY;
 
     protected AbstractProvider(@Nullable DyeBackedColor dyeColor) {

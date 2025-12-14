@@ -5,7 +5,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import org.apache.commons.lang3.math.Fraction;
 
@@ -13,11 +13,11 @@ import org.apache.commons.lang3.math.Fraction;
  * Most methods here are copied from {@link net.minecraft.client.gui.screens.inventory.tooltip.ClientBundleTooltip}.
  */
 public class ClientBundleContentsTooltip extends AbstractClientItemContentsTooltip {
-    private static final ResourceLocation PROGRESSBAR_BORDER_SPRITE = ResourceLocation.withDefaultNamespace(
+    private static final Identifier PROGRESSBAR_BORDER_SPRITE = Identifier.withDefaultNamespace(
             "container/bundle/bundle_progressbar_border");
-    private static final ResourceLocation PROGRESSBAR_FILL_SPRITE = ResourceLocation.withDefaultNamespace(
+    private static final Identifier PROGRESSBAR_FILL_SPRITE = Identifier.withDefaultNamespace(
             "container/bundle/bundle_progressbar_fill");
-    private static final ResourceLocation PROGRESSBAR_FULL_SPRITE = ResourceLocation.withDefaultNamespace(
+    private static final Identifier PROGRESSBAR_FULL_SPRITE = Identifier.withDefaultNamespace(
             "container/bundle/bundle_progressbar_full");
     private static final Component BUNDLE_FULL_TEXT = Component.translatable("item.minecraft.bundle.full");
     private static final Component BUNDLE_EMPTY_TEXT = Component.translatable("item.minecraft.bundle.empty");
@@ -118,7 +118,7 @@ public class ClientBundleContentsTooltip extends AbstractClientItemContentsToolt
         return Mth.clamp(Mth.mulAndTruncate(this.weight, maxWidth), 0, maxWidth);
     }
 
-    private ResourceLocation getProgressBarTexture() {
+    private Identifier getProgressBarTexture() {
         return this.isBundleFull() ? PROGRESSBAR_FULL_SPRITE : PROGRESSBAR_FILL_SPRITE;
     }
 

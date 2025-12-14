@@ -5,7 +5,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -29,8 +29,8 @@ public abstract class UnconditionalSimpleJsonResourceReloadListener<T> extends S
     }
 
     @Override
-    protected Map<ResourceLocation, T> prepare(ResourceManager resourceManager, ProfilerFiller profiler) {
-        Map<ResourceLocation, T> map = new HashMap<>();
+    protected Map<Identifier, T> prepare(ResourceManager resourceManager, ProfilerFiller profiler) {
+        Map<Identifier, T> map = new HashMap<>();
         scanDirectory(resourceManager, this.lister, this.ops, this.codec, map);
         return map;
     }

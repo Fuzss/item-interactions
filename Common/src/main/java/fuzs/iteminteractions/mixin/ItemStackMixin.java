@@ -3,7 +3,7 @@ package fuzs.iteminteractions.mixin;
 import fuzs.iteminteractions.api.v1.provider.ItemContentsBehavior;
 import fuzs.iteminteractions.impl.world.item.container.ItemContentsProviders;
 import fuzs.iteminteractions.impl.world.item.container.ItemInteractionHelper;
-import fuzs.puzzleslib.impl.core.proxy.ProxyImpl;
+import fuzs.puzzleslib.api.util.v1.CommonHelper;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickAction;
@@ -62,8 +62,8 @@ abstract class ItemStackMixin {
     public void getTooltipImage(CallbackInfoReturnable<Optional<TooltipComponent>> callback) {
         ItemStack containerStack = ItemStack.class.cast(this);
         ItemContentsBehavior behavior = ItemContentsProviders.get(containerStack);
-        if (behavior.canProvideTooltipImage(containerStack, ProxyImpl.get().getClientPlayer())) {
-            callback.setReturnValue(behavior.getTooltipImage(containerStack, ProxyImpl.get().getClientPlayer()));
+        if (behavior.canProvideTooltipImage(containerStack, CommonHelper.getClientPlayer())) {
+            callback.setReturnValue(behavior.getTooltipImage(containerStack, CommonHelper.getClientPlayer()));
         }
     }
 }

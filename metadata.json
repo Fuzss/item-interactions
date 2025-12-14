@@ -1,0 +1,51 @@
+{
+    "mod": {
+        "id": "iteminteractions",
+        "group": "fuzs.iteminteractions",
+        "name": "Item Interactions",
+        "version": "21.11.0",
+        "authors": [
+            "Fuzs"
+        ],
+        "description": "A library for providing advanced inventory interactions for container items similar to bundles.",
+        "license": "MPL-2.0"
+    },
+    "dependencies": [
+        {
+            "name": "fabricapi",
+            "type": "required",
+            "platforms": [
+                "fabric"
+            ]
+        },
+        {
+            "name": "forgeconfigapiport",
+            "type": "required",
+            "platforms": [
+                "fabric"
+            ]
+        },
+        {
+            "name": "puzzleslib",
+            "type": "required",
+            "platforms": [
+                "fabric",
+                "neoforge"
+            ]
+        }
+    ],
+    "links": [
+        {
+            "name": "github",
+            "slug": "iteminteractions"
+        }
+    ],
+    "environments": {
+        "client": "required",
+        "server": "required"
+    },
+    "platforms": [
+        "fabric",
+        "neoforge"
+    ]
+}

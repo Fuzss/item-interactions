@@ -3,7 +3,7 @@ package fuzs.iteminteractions.api.v1.data;
 import com.google.common.collect.Maps;
 import fuzs.iteminteractions.api.v1.provider.ItemContentsProvider;
 import fuzs.iteminteractions.impl.world.item.container.ItemContentsProviders;
-import fuzs.puzzleslib.api.core.v1.utility.ResourceLocationHelper;
+import net.minecraft.resources.Identifier;
 import fuzs.puzzleslib.api.data.v2.core.DataProviderContext;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
@@ -12,7 +12,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 
@@ -26,7 +26,7 @@ import java.util.concurrent.CompletableFuture;
  * TODO remove deprecated members
  */
 public abstract class AbstractItemContentsProvider implements DataProvider {
-    private final Map<ResourceLocation, Map.Entry<HolderSet<Item>, ItemContentsProvider>> providers = Maps.newHashMap();
+    private final Map<Identifier, Map.Entry<HolderSet<Item>, ItemContentsProvider>> providers = Maps.newHashMap();
     private final String modId;
     private final PackOutput.PathProvider pathProvider;
     private final CompletableFuture<HolderLookup.Provider> registries;
@@ -51,7 +51,7 @@ public abstract class AbstractItemContentsProvider implements DataProvider {
     public CompletableFuture<?> run(CachedOutput output, HolderLookup.Provider registries) {
         this.addItemProviders(registries);
         List<CompletableFuture<?>> completableFutures = new ArrayList<>();
-        for (Map.Entry<ResourceLocation, Map.Entry<HolderSet<Item>, ItemContentsProvider>> entry : this.providers.entrySet()) {
+        for (Map.Entry<Identifier, Map.Entry<HolderSet<Item>, ItemContentsProvider>> entry : this.providers.entrySet()) {
             Path path = this.pathProvider.json(entry.getKey());
             completableFutures.add(DataProvider.saveStable(output,
                     registries,
@@ -70,11 +70,11 @@ public abstract class AbstractItemContentsProvider implements DataProvider {
 
     @Deprecated(forRemoval = true)
     public void add(HolderLookup.RegistryLookup<Item> itemLookup, String id, ItemContentsProvider provider, TagKey<Item> tagKey) {
-        this.add(itemLookup, ResourceLocationHelper.fromNamespaceAndPath(this.modId, id), provider, tagKey);
+        this.add(itemLookup, Identifier.fromNamespaceAndPath(this.modId, id), provider, tagKey);
     }
 
-    public final void add(HolderLookup.RegistryLookup<Item> itemLookup, ResourceLocation resourceLocation, ItemContentsProvider provider, TagKey<Item> tagKey) {
-        this.add(resourceLocation, provider, itemLookup.getOrThrow(tagKey));
+    public final void add(HolderLookup.RegistryLookup<Item> itemLookup, Identifier identifier, ItemContentsProvider provider, TagKey<Item> tagKey) {
+        this.add(identifier, provider, itemLookup.getOrThrow(tagKey));
     }
 
     @Deprecated(forRemoval = true)
@@ -93,25 +93,25 @@ public abstract class AbstractItemContentsProvider implements DataProvider {
 
     @Deprecated(forRemoval = true)
     public void add(String id, ItemContentsProvider provider, Item... items) {
-        this.add(ResourceLocationHelper.fromNamespaceAndPath(this.modId, id), provider, items);
+        this.add(Identifier.fromNamespaceAndPath(this.modId, id), provider, items);
     }
 
     @Deprecated(forRemoval = true)
-    public void add(HolderLookup.RegistryLookup<Item> itemLookup, ResourceLocation resourceLocation, ItemContentsProvider provider, Item... items) {
-        this.add(resourceLocation, provider, items);
+    public void add(HolderLookup.RegistryLookup<Item> itemLookup, Identifier identifier, ItemContentsProvider provider, Item... items) {
+        this.add(identifier, provider, items);
     }
 
-    public final void add(ResourceLocation resourceLocation, ItemContentsProvider provider, Item... items) {
-        this.add(resourceLocation, provider, HolderSet.direct(BuiltInRegistries.ITEM::wrapAsHolder, items));
+    public final void add(Identifier identifier, ItemContentsProvider provider, Item... items) {
+        this.add(identifier, provider, HolderSet.direct(BuiltInRegistries.ITEM::wrapAsHolder, items));
     }
 
     @SafeVarargs
-    public final void add(ResourceLocation resourceLocation, ItemContentsProvider provider, Holder<Item>... items) {
-        this.add(resourceLocation, provider, HolderSet.direct(items));
+    public final void add(Identifier identifier, ItemContentsProvider provider, Holder<Item>... items) {
+        this.add(identifier, provider, HolderSet.direct(items));
     }
 
-    public void add(ResourceLocation resourceLocation, ItemContentsProvider provider, HolderSet<Item> holderSet) {
-        this.providers.put(resourceLocation, Map.entry(holderSet, provider));
+    public void add(Identifier identifier, ItemContentsProvider provider, HolderSet<Item> holderSet) {
+        this.providers.put(identifier, Map.entry(holderSet, provider));
     }
 
     @Override

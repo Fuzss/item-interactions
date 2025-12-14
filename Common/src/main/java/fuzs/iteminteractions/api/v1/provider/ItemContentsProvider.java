@@ -38,7 +38,7 @@ public interface ItemContentsProvider {
     /**
      * The {@link Type} registry key.
      */
-    ResourceKey<Registry<Type<?>>> REGISTRY_KEY = ResourceKey.createRegistryKey(ItemContentsProviders.REGISTRY_KEY.location());
+    ResourceKey<Registry<Type<?>>> REGISTRY_KEY = ResourceKey.createRegistryKey(ItemContentsProviders.REGISTRY_KEY.identifier());
     /**
      * The {@link Type} registry.
      */

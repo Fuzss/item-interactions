@@ -64,7 +64,7 @@ public class ItemInteractionsClient implements ClientModConstructor {
         RenderContainerScreenContentsCallback.EVENT.register(MouseDraggingHandler::onRenderContainerScreenContents);
         PlaySoundEvents.AT_ENTITY.register(MouseDraggingHandler::onPlaySoundAtEntity);
         PlaySoundEvents.AT_ENTITY.register(ClientInputActionHandler::onPlaySoundAtEntity);
-        ClientPlayerNetworkEvents.LOGGED_OUT.register((LocalPlayer player, MultiPlayerGameMode multiPlayerGameMode, Connection connection) -> {
+        ClientPlayerNetworkEvents.LEAVE.register((LocalPlayer player, MultiPlayerGameMode multiPlayerGameMode, Connection connection) -> {
             ItemContentsProviders.setItemContainerProviders(ImmutableMap.of());
         });
     }

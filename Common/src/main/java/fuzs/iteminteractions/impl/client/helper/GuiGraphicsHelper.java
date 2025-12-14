@@ -5,7 +5,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.Material;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * TODO remove and replace with original class from Puzzles Lib
@@ -22,7 +22,7 @@ public class GuiGraphicsHelper {
      * @param guiGraphics    the gui graphics instance
      * @param renderPipeline the render pipeline, usually
      *                       {@link net.minecraft.client.renderer.RenderPipelines#GUI_TEXTURED}
-     * @param sprite         the sprite resource location
+     * @param sprite         the sprite identifier
      * @param x              the x-position on the screen
      * @param y              the y-position on the screen
      * @param width          the width to draw
@@ -30,7 +30,7 @@ public class GuiGraphicsHelper {
      * @param spriteWidth    the sprite texture file width
      * @param spriteHeight   the sprite texture file height
      */
-    public static void blitTiledSprite(GuiGraphics guiGraphics, RenderPipeline renderPipeline, ResourceLocation sprite, int x, int y, int width, int height, int spriteWidth, int spriteHeight) {
+    public static void blitTiledSprite(GuiGraphics guiGraphics, RenderPipeline renderPipeline, Identifier sprite, int x, int y, int width, int height, int spriteWidth, int spriteHeight) {
         blitTiledSprite(guiGraphics, renderPipeline, sprite, x, y, width, height, spriteWidth, spriteHeight, -1);
     }
 
@@ -43,7 +43,7 @@ public class GuiGraphicsHelper {
      * @param guiGraphics    the gui graphics instance
      * @param renderPipeline the render pipeline, usually
      *                       {@link net.minecraft.client.renderer.RenderPipelines#GUI_TEXTURED}
-     * @param sprite         the sprite resource location
+     * @param sprite         the sprite identifier
      * @param x              the x-position on the screen
      * @param y              the y-position on the screen
      * @param width          the width to draw
@@ -52,7 +52,7 @@ public class GuiGraphicsHelper {
      * @param spriteHeight   the sprite texture file height
      * @param color          the vertex color, usually {@code -1}
      */
-    public static void blitTiledSprite(GuiGraphics guiGraphics, RenderPipeline renderPipeline, ResourceLocation sprite, int x, int y, int width, int height, int spriteWidth, int spriteHeight, int color) {
+    public static void blitTiledSprite(GuiGraphics guiGraphics, RenderPipeline renderPipeline, Identifier sprite, int x, int y, int width, int height, int spriteWidth, int spriteHeight, int color) {
         blitTiledSprite(guiGraphics,
                 renderPipeline,
                 sprite,
@@ -76,7 +76,7 @@ public class GuiGraphicsHelper {
      * @param guiGraphics    the gui graphics instance
      * @param renderPipeline the render pipeline, usually
      *                       {@link net.minecraft.client.renderer.RenderPipelines#GUI_TEXTURED}
-     * @param sprite         the sprite resource location
+     * @param sprite         the sprite identifier
      * @param x              the x-position on the screen
      * @param y              the y-position on the screen
      * @param width          the width to draw
@@ -87,7 +87,7 @@ public class GuiGraphicsHelper {
      * @param vOffset        the sprite v-offset on the texture sheet
      * @param color          the vertex color, usually {@code -1}
      */
-    public static void blitTiledSprite(GuiGraphics guiGraphics, RenderPipeline renderPipeline, ResourceLocation sprite, int x, int y, int width, int height, int spriteWidth, int spriteHeight, int uOffset, int vOffset, int color) {
+    public static void blitTiledSprite(GuiGraphics guiGraphics, RenderPipeline renderPipeline, Identifier sprite, int x, int y, int width, int height, int spriteWidth, int spriteHeight, int uOffset, int vOffset, int color) {
         TextureAtlasSprite textureAtlasSprite = guiGraphics.getSprite(new Material(Sheets.GUI_SHEET, sprite));
         guiGraphics.blitTiledSprite(renderPipeline,
                 textureAtlasSprite,
