@@ -14,6 +14,8 @@ import java.util.Optional;
 /**
  * A holder class for individual {@link ItemContentsProvider} instances, mainly to include additional checks when
  * calling various methods.
+ * <p>
+ * TODO rename and refactor as ItemStorageHolder
  *
  * @param provider the wrapped {@link ItemContentsProvider}
  */
@@ -70,8 +72,9 @@ public record ItemContentsBehavior(ItemContentsProvider provider) {
      * @return is adding any portion of <code>stackToAdd</code> to the container possible
      */
     public boolean canAddItem(ItemStack containerStack, ItemStack stackToAdd, Player player) {
-        return this.canAcceptItem(containerStack, stackToAdd, player) &&
-                this.provider.canAddItem(containerStack, stackToAdd, player);
+        return this.canAcceptItem(containerStack, stackToAdd, player) && this.provider.canAddItem(containerStack,
+                stackToAdd,
+                player);
     }
 
     /**
@@ -115,9 +118,8 @@ public record ItemContentsBehavior(ItemContentsProvider provider) {
      * @return is any item of the same type as <code>stackToAdd</code> already in the container
      */
     public boolean hasAnyOf(ItemStack containerStack, ItemStack stackToAdd, Player player) {
-        return this.canAcceptItem(containerStack, stackToAdd, player) &&
-                this.getItemContainerView(containerStack, player)
-                        .hasAnyMatching(stack -> ItemStack.isSameItem(stack, stackToAdd));
+        return this.canAcceptItem(containerStack, stackToAdd, player) && this.getItemContainerView(containerStack,
+                player).hasAnyMatching(stack -> ItemStack.isSameItem(stack, stackToAdd));
     }
 
     /**
@@ -152,8 +154,8 @@ public record ItemContentsBehavior(ItemContentsProvider provider) {
      * @return can the item be added
      */
     public boolean canAcceptItem(ItemStack containerStack, ItemStack stackToAdd, Player player) {
-        return !stackToAdd.isEmpty() && this.allowsPlayerInteractions(containerStack, player) &&
-                this.isItemAllowedInContainer(stackToAdd);
+        return !stackToAdd.isEmpty() && this.allowsPlayerInteractions(containerStack, player)
+                && this.isItemAllowedInContainer(stackToAdd);
     }
 
     /**

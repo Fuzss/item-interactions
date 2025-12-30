@@ -14,6 +14,7 @@ import fuzs.puzzleslib.api.event.v1.core.EventResult;
 import fuzs.puzzleslib.api.event.v1.data.MutableFloat;
 import fuzs.puzzleslib.api.event.v1.data.MutableValue;
 import fuzs.puzzleslib.api.network.v4.MessageSender;
+import fuzs.puzzleslib.api.util.v1.CommonHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.ScrollWheelHandler;
 import net.minecraft.client.gui.GuiGraphics;
@@ -35,8 +36,8 @@ import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import org.jspecify.annotations.Nullable;
 import org.joml.Vector2i;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -135,7 +136,8 @@ public class ClientInputActionHandler {
                             .getItemContainerView(itemStack, screen.minecraft.player);
                     int newContainerSlot = ContainerSlotHelper.findClosestSlotWithContent(container,
                             oldContainerSlot,
-                            scrollAmount < 0.0);
+                            scrollAmount < 0.0,
+                            CommonHelper.hasShiftDown());
                     ContainerSlotHelper.setCurrentContainerSlot(screen.minecraft.player, newContainerSlot);
                     if (oldContainerSlot != -1) {
                         pair.getSecond().provider().onToggleSelectedItem(itemStack, oldContainerSlot, newContainerSlot);

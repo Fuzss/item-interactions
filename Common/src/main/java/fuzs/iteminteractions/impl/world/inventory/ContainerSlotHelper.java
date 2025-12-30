@@ -6,10 +6,11 @@ import net.minecraft.world.entity.player.Player;
 
 public class ContainerSlotHelper {
 
-    public static int findClosestSlotWithContent(SimpleContainer container, int currentContainerSlot, boolean forwards) {
+    public static int findClosestSlotWithContent(SimpleContainer container, int currentContainerSlot, boolean forwards, boolean scrollRows) {
         int size = container.getContainerSize();
         if (currentContainerSlot == -1) currentContainerSlot = size - 1;
-        for (int i = 1; i <= size; i++) {
+        // TODO should not be hardcoded to 9, instead make container grid width and height methods on all providers
+        for (int i = scrollRows ? 9 : 1; i <= size; i++) {
             int currentIndex = ((currentContainerSlot + (forwards ? i : -i)) % size + size) % size;
             if (!container.getItem(currentIndex).isEmpty()) {
                 return currentIndex;
@@ -20,7 +21,7 @@ public class ContainerSlotHelper {
 
     public static void cycleCurrentSlotBackwards(Player player, SimpleContainer container) {
         int currentContainerSlot = getCurrentContainerSlot(player);
-        currentContainerSlot = findClosestSlotWithContent(container, currentContainerSlot, false);
+        currentContainerSlot = findClosestSlotWithContent(container, currentContainerSlot, false, false);
         setCurrentContainerSlot(player, currentContainerSlot);
     }
 

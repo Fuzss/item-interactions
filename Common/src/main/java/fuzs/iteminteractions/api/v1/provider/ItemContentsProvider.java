@@ -33,6 +33,8 @@ import java.util.Optional;
  * <p>
  * This overrides any already implemented behavior (the default providers in Easy Shulker Boxes actually do this for
  * vanilla bundles).
+ * <p>
+ * TODO rename and refactor as ItemStorage
  */
 public interface ItemContentsProvider {
     /**
