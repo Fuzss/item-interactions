@@ -9,7 +9,6 @@ import fuzs.iteminteractions.common.api.v1.tooltip.ItemContentsTooltip;
 import fuzs.iteminteractions.common.impl.client.handler.ClientInputActionHandler;
 import fuzs.iteminteractions.common.impl.client.handler.MouseDraggingHandler;
 import fuzs.iteminteractions.common.impl.config.ExtractSingleItem;
-import fuzs.iteminteractions.common.impl.config.SelectedItemTooltips;
 import fuzs.iteminteractions.common.impl.config.VisualItemContents;
 import fuzs.iteminteractions.common.impl.world.item.container.ItemContentsProviders;
 import fuzs.puzzleslib.common.api.client.core.v1.ClientModConstructor;
@@ -51,8 +50,6 @@ public class ItemInteractionsClient implements ClientModConstructor {
         ScreenMouseEvents.beforeMouseDrag(AbstractContainerScreen.class)
                 .register(EventPhase.BEFORE, MouseDraggingHandler::onBeforeMouseDragged);
         ScreenKeyboardEvents.beforeKeyPress(AbstractContainerScreen.class)
-                .register(SelectedItemTooltips::onBeforeKeyPressed);
-        ScreenKeyboardEvents.beforeKeyPress(AbstractContainerScreen.class)
                 .register(ExtractSingleItem::onBeforeKeyPressed);
         ScreenKeyboardEvents.beforeKeyPress(AbstractContainerScreen.class)
                 .register(VisualItemContents::onBeforeKeyPressed);
@@ -69,7 +66,6 @@ public class ItemInteractionsClient implements ClientModConstructor {
     @Override
     public void onRegisterKeyMappings(KeyMappingsContext context) {
         context.registerKeyMapping(VisualItemContents.KEY_MAPPING, KeyActivationContext.SCREEN);
-        context.registerKeyMapping(SelectedItemTooltips.KEY_MAPPING, KeyActivationContext.SCREEN);
     }
 
     @Override

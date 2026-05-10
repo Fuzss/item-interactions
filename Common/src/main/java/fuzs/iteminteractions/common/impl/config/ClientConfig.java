@@ -15,11 +15,6 @@ public class ClientConfig implements ConfigCore {
     public SlotOverlay slotOverlay = SlotOverlay.HOVER;
     @Config(description = "Show an indicator on container items when the stack carried by the cursor can be added in your inventory.")
     public boolean containerItemIndicator = true;
-    @Config(description = {
-            "Show a tooltip for the item currently selected in a container item's tooltip next to the main tooltip.",
-            ACTIVATION_TYPE_MESSAGE
-    })
-    public SelectedItemTooltips selectedItemTooltips = SelectedItemTooltips.ALWAYS;
     @Config(name = "precision_mode", description = {
             "Select a modifier key required to be held to use precision mode.", ServerConfig.PRECISION_MODE_MESSAGE
     })

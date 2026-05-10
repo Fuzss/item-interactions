@@ -2,31 +2,26 @@ package fuzs.iteminteractions.common.api.v1.client.tooltip;
 
 import fuzs.iteminteractions.common.api.v1.DyeBackedColor;
 import fuzs.iteminteractions.common.impl.ItemInteractions;
-import fuzs.iteminteractions.common.impl.client.handler.ClientInputActionHandler;
 import fuzs.iteminteractions.common.impl.config.ClientConfig;
 import fuzs.iteminteractions.common.impl.world.inventory.ContainerSlotHelper;
-import fuzs.puzzleslib.common.api.client.gui.v2.tooltip.TooltipRenderHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.ColorLerper;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
-import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.jspecify.annotations.Nullable;
 
 import java.util.List;
-import java.util.Optional;
 
 public abstract class AbstractClientItemContentsTooltip implements ClientTooltipComponent {
     private static final Identifier CONTAINER_SPRITE = ItemInteractions.id("container/container");
@@ -34,7 +29,6 @@ public abstract class AbstractClientItemContentsTooltip implements ClientTooltip
     private static final Identifier SLOT_SELECTION_SPRITE = ItemInteractions.id("container/slot_selection");
     protected static final int BORDER_SIZE = 7;
     protected static final int SLOT_SIZE = 18;
-    private static final MutableInt ACTIVE_CONTAINER_ITEM_TOOLTIPS = new MutableInt();
 
     private final Minecraft minecraft = Minecraft.getInstance();
     protected final NonNullList<ItemStack> items;
@@ -90,7 +84,6 @@ public abstract class AbstractClientItemContentsTooltip implements ClientTooltip
 
     @Override
     public void extractImage(Font font, int x, int y, int width, int height, GuiGraphicsExtractor guiGraphics) {
-        ACTIVE_CONTAINER_ITEM_TOOLTIPS.increment();
         guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED,
                 CONTAINER_SPRITE,
                 x,
@@ -98,124 +91,30 @@ public abstract class AbstractClientItemContentsTooltip implements ClientTooltip
                 this.getGridSize(this.getGridSizeX()),
                 this.getGridSize(this.getGridSizeY()),
                 this.getBackgroundColor());
-        int highlightSlot = this.getLastFilledSlot();
-        this.drawSlots(guiGraphics, font, x, y, highlightSlot, this::extractBlockedSlots);
-        this.drawSlots(guiGraphics, font, x, y, highlightSlot, this::extractSlotContents);
-        this.drawSlots(guiGraphics, font, x, y, highlightSlot, this::extractHighlightSlotContents);
-        this.drawSelectedSlotTooltip(guiGraphics, font, x, y, highlightSlot);
-        ACTIVE_CONTAINER_ITEM_TOOLTIPS.decrement();
+        this.extractSlots(font, guiGraphics, x, y, this::extractBlockedSlots);
+        this.extractSlots(font, guiGraphics, x, y, this::extractSlotContents);
+        this.extractSlots(font, guiGraphics, x, y, this::extractHighlightSlotContents);
+        this.extractSelectedItemTooltip(font, guiGraphics, x, y, width);
     }
 
     private int getBackgroundColor() {
         return ItemInteractions.CONFIG.get(ClientConfig.class).colorfulTooltips ? this.backgroundColor : -1;
     }
 
-    private void drawSlots(GuiGraphicsExtractor guiGraphics, Font font, int x, int y, int highlightSlot, SlotRenderer slotRenderer) {
+    private void extractSlots(Font font, GuiGraphicsExtractor guiGraphics, int x, int y, SlotRenderer slotRenderer) {
+        int isSelectedSlot = this.getSelectedSlot();
         int slotIndex = 0;
         for (int gridY = 0; gridY < this.getGridSizeY(); ++gridY) {
             for (int gridX = 0; gridX < this.getGridSizeX(); ++gridX) {
                 int posX = x + gridX * SLOT_SIZE + BORDER_SIZE;
                 int posY = y + gridY * SLOT_SIZE + BORDER_SIZE;
-                slotRenderer.extractSlot(guiGraphics, font, posX, posY, slotIndex, slotIndex == highlightSlot);
+                slotRenderer.extractSlot(font, guiGraphics, posX, posY, slotIndex, slotIndex == isSelectedSlot);
                 slotIndex++;
             }
         }
     }
 
-    private void extractBlockedSlots(GuiGraphicsExtractor guiGraphics, Font font, int posX, int posY, int slotIndex, boolean isHighlightSlot) {
-        if (this.isSlotBlocked(slotIndex)) {
-            guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED,
-                    SLOT_BLOCKED_SPRITE,
-                    posX,
-                    posY,
-                    18,
-                    18,
-                    this.getBackgroundColor());
-        }
-    }
-
-    private void extractSlotContents(GuiGraphicsExtractor guiGraphics, Font font, int posX, int posY, int slotIndex, boolean isHighlightSlot) {
-        if (!isHighlightSlot) {
-            this.extractSlot(guiGraphics, font, posX, posY, slotIndex);
-        }
-    }
-
-    private void extractSlot(GuiGraphicsExtractor guiGraphics, Font font, int posX, int posY, int slotIndex) {
-        if (slotIndex < this.items.size()) {
-            ItemStack itemstack = this.items.get(slotIndex);
-            guiGraphics.item(itemstack, posX + 1, posY + 1, slotIndex);
-            guiGraphics.itemDecorations(font, itemstack, posX + 1, posY + 1);
-        }
-    }
-
-    private void extractHighlightSlotContents(GuiGraphicsExtractor guiGraphics, Font font, int posX, int posY, int slotIndex, boolean isHighlightSlot) {
-        if (isHighlightSlot) {
-            this.extractSlotHighlight(guiGraphics,
-                    posX,
-                    posY,
-                    SLOT_SELECTION_SPRITE,
-                    AbstractContainerScreen.SLOT_HIGHLIGHT_BACK_SPRITE);
-            this.extractSlot(guiGraphics, font, posX, posY, slotIndex);
-            this.extractSlotHighlight(guiGraphics,
-                    posX,
-                    posY,
-                    null,
-                    AbstractContainerScreen.SLOT_HIGHLIGHT_FRONT_SPRITE);
-        }
-    }
-
-    private void drawSelectedSlotTooltip(GuiGraphicsExtractor guiGraphics, Font font, int mouseX, int mouseY, int highlightSlot) {
-        if (!ItemInteractions.CONFIG.get(ClientConfig.class).selectedItemTooltips.isActive()) {
-            return;
-        }
-
-        if (ACTIVE_CONTAINER_ITEM_TOOLTIPS.intValue() > 1) {
-            return;
-        }
-
-        if (this.minecraft.screen != null && !this.willTooltipBeMoved(font) && highlightSlot >= 0
-                && highlightSlot < this.items.size()) {
-            ItemStack itemStack = this.items.get(highlightSlot);
-            List<ClientTooltipComponent> tooltipComponents = TooltipRenderHelper.getTooltip(itemStack);
-            int maxWidth = tooltipComponents.stream()
-                    .mapToInt(tooltipComponent -> tooltipComponent.getWidth(font))
-                    .max()
-                    .orElse(0);
-            if (ACTIVE_CONTAINER_ITEM_TOOLTIPS.intValue() > 0) {
-                guiGraphics.tooltip(font,
-                        tooltipComponents,
-                        mouseX - maxWidth - 2 * SLOT_SIZE,
-                        mouseY,
-                        DefaultTooltipPositioner.INSTANCE,
-                        null);
-            } else {
-                List<Component> itemTooltip = Screen.getTooltipFromItem(this.minecraft, itemStack);
-                Optional<TooltipComponent> itemTooltipImage = itemStack.getTooltipImage();
-                guiGraphics.setTooltipForNextFrame(font,
-                        itemTooltip,
-                        itemTooltipImage,
-                        mouseX - maxWidth - 2 * SLOT_SIZE,
-                        mouseY);
-            }
-        }
-    }
-
-    private boolean willTooltipBeMoved(Font font) {
-        if (!(this.minecraft.screen instanceof AbstractContainerScreen<?> containerScreen)) return false;
-        ItemStack stack = ClientInputActionHandler.getContainerItemStack(containerScreen, true);
-        if (stack.isEmpty()) return false;
-        List<ClientTooltipComponent> tooltipComponents = TooltipRenderHelper.getTooltip(stack);
-        int maxWidth = tooltipComponents.stream()
-                .mapToInt(tooltipComponent -> tooltipComponent.getWidth(font))
-                .max()
-                .orElse(0);
-        // actual mouseX, tooltip components are passed the adjusted position where the tooltip should be rendered
-        int mouseX = (int) (this.minecraft.mouseHandler.xpos() * (double) this.minecraft.getWindow().getGuiScaledWidth()
-                / (double) this.minecraft.getWindow().getScreenWidth());
-        return mouseX + 12 + maxWidth > containerScreen.width;
-    }
-
-    private int getLastFilledSlot() {
+    private int getSelectedSlot() {
         int currentContainerSlot = ContainerSlotHelper.getCurrentContainerSlot(this.minecraft.player);
         if (currentContainerSlot != -1 && currentContainerSlot < this.items.size()) {
             if (!this.items.get(currentContainerSlot).isEmpty()) {
@@ -232,11 +131,49 @@ public abstract class AbstractClientItemContentsTooltip implements ClientTooltip
         return -1;
     }
 
-    private void extractSlotHighlight(GuiGraphicsExtractor guiGraphics, int posX, int posY, @Nullable Identifier hotbarSelectionSprite, @Nullable Identifier slotHighlightSprite) {
-        if (ACTIVE_CONTAINER_ITEM_TOOLTIPS.intValue() > 1) {
-            return;
+    private void extractBlockedSlots(Font font, GuiGraphicsExtractor guiGraphics, int posX, int posY, int slotIndex, boolean isHighlightSlot) {
+        if (this.isSlotBlocked(slotIndex)) {
+            guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED,
+                    SLOT_BLOCKED_SPRITE,
+                    posX,
+                    posY,
+                    18,
+                    18,
+                    this.getBackgroundColor());
         }
+    }
 
+    private void extractSlotContents(Font font, GuiGraphicsExtractor guiGraphics, int posX, int posY, int slotIndex, boolean isHighlightSlot) {
+        if (!isHighlightSlot) {
+            this.extractSlot(font, guiGraphics, posX, posY, slotIndex);
+        }
+    }
+
+    private void extractSlot(Font font, GuiGraphicsExtractor guiGraphics, int posX, int posY, int slotIndex) {
+        if (slotIndex < this.items.size()) {
+            ItemStack itemstack = this.items.get(slotIndex);
+            guiGraphics.item(itemstack, posX + 1, posY + 1, slotIndex);
+            guiGraphics.itemDecorations(font, itemstack, posX + 1, posY + 1);
+        }
+    }
+
+    private void extractHighlightSlotContents(Font font, GuiGraphicsExtractor guiGraphics, int posX, int posY, int slotIndex, boolean isHighlightSlot) {
+        if (isHighlightSlot) {
+            this.extractSlotHighlight(guiGraphics,
+                    posX,
+                    posY,
+                    SLOT_SELECTION_SPRITE,
+                    AbstractContainerScreen.SLOT_HIGHLIGHT_BACK_SPRITE);
+            this.extractSlot(font, guiGraphics, posX, posY, slotIndex);
+            this.extractSlotHighlight(guiGraphics,
+                    posX,
+                    posY,
+                    null,
+                    AbstractContainerScreen.SLOT_HIGHLIGHT_FRONT_SPRITE);
+        }
+    }
+
+    private void extractSlotHighlight(GuiGraphicsExtractor guiGraphics, int posX, int posY, @Nullable Identifier hotbarSelectionSprite, @Nullable Identifier slotHighlightSprite) {
         ClientConfig.SlotOverlay slotOverlay = ItemInteractions.CONFIG.get(ClientConfig.class).slotOverlay;
         switch (slotOverlay) {
             case HOTBAR -> {
@@ -262,8 +199,37 @@ public abstract class AbstractClientItemContentsTooltip implements ClientTooltip
         }
     }
 
+    /**
+     * @see net.minecraft.client.gui.screens.inventory.tooltip.ClientBundleTooltip#extractSelectedItemTooltip(Font,
+     *         GuiGraphicsExtractor, int, int, int)
+     */
+    private void extractSelectedItemTooltip(Font font, GuiGraphicsExtractor graphics, int x, int y, int width) {
+        ItemStack itemStack = this.getSelectedItem();
+        if (!itemStack.isEmpty()) {
+            Component selectedItemName = itemStack.getStyledHoverName();
+            int textWidth = font.width(selectedItemName.getVisualOrderText());
+            int centerTooltip = x + width / 2 - 12;
+            ClientTooltipComponent selectedItemNameTooltip = ClientTooltipComponent.create(selectedItemName.getVisualOrderText());
+            graphics.tooltip(font,
+                    List.of(selectedItemNameTooltip),
+                    centerTooltip - textWidth / 2,
+                    y - 15,
+                    DefaultTooltipPositioner.INSTANCE,
+                    itemStack.get(DataComponents.TOOLTIP_STYLE));
+        }
+    }
+
+    private ItemStack getSelectedItem() {
+        int isSelectedSlot = this.getSelectedSlot();
+        if (isSelectedSlot >= 0 && isSelectedSlot < this.items.size()) {
+            return this.items.get(isSelectedSlot);
+        } else {
+            return ItemStack.EMPTY;
+        }
+    }
+
     @FunctionalInterface
     private interface SlotRenderer {
-        void extractSlot(GuiGraphicsExtractor guiGraphics, Font font, int posX, int posY, int slotIndex, boolean isHighlightSlot);
+        void extractSlot(Font font, GuiGraphicsExtractor guiGraphics, int posX, int posY, int slotIndex, boolean isSelectedSlot);
     }
 }
