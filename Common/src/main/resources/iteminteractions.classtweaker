@@ -1,4 +1,4 @@
-accessWidener   v2  named
+classTweaker    v2  official
 accessible  field   net/minecraft/client/gui/screens/inventory/AbstractContainerScreen  doubleclick Z
 accessible  method  net/minecraft/client/gui/screens/inventory/AbstractContainerScreen  slotClicked (Lnet/minecraft/world/inventory/Slot;IILnet/minecraft/world/inventory/ClickType;)V
 accessible  class   net/minecraft/client/gui/screens/inventory/CreativeModeInventoryScreen$CustomCreativeSlot
