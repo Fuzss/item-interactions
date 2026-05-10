@@ -28,7 +28,7 @@ import org.jspecify.annotations.Nullable;
 import java.util.List;
 import java.util.Optional;
 
-public abstract class AbstractClientItemContentsTooltip extends ExpandableClientContentsTooltip {
+public abstract class AbstractClientItemContentsTooltip implements ClientTooltipComponent {
     private static final Identifier CONTAINER_SPRITE = ItemInteractions.id("container/container");
     private static final Identifier SLOT_BLOCKED_SPRITE = ItemInteractions.id("container/slot_blocked");
     private static final Identifier SLOT_SELECTION_SPRITE = ItemInteractions.id("container/slot_selection");
@@ -70,12 +70,12 @@ public abstract class AbstractClientItemContentsTooltip extends ExpandableClient
     }
 
     @Override
-    public int getExpandedHeight(Font font) {
+    public int getHeight(Font font) {
         return this.getGridSize(this.getGridSizeY());
     }
 
     @Override
-    public int getExpandedWidth(Font font) {
+    public int getWidth(Font font) {
         return this.getGridSize(this.getGridSizeX());
     }
 
@@ -84,7 +84,12 @@ public abstract class AbstractClientItemContentsTooltip extends ExpandableClient
     }
 
     @Override
-    public void extractExpandedImage(Font font, int x, int y, GuiGraphicsExtractor guiGraphics) {
+    public boolean showTooltipWithItemInHand() {
+        return true;
+    }
+
+    @Override
+    public void extractImage(Font font, int x, int y, int width, int height, GuiGraphicsExtractor guiGraphics) {
         ACTIVE_CONTAINER_ITEM_TOOLTIPS.increment();
         guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED,
                 CONTAINER_SPRITE,

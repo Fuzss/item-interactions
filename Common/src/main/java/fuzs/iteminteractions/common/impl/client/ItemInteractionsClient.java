@@ -3,11 +3,11 @@ package fuzs.iteminteractions.common.impl.client;
 import com.google.common.collect.ImmutableMap;
 import fuzs.iteminteractions.common.api.v1.client.tooltip.ClientBundleContentsTooltip;
 import fuzs.iteminteractions.common.api.v1.client.tooltip.ClientItemContentsTooltip;
+import fuzs.iteminteractions.common.api.v1.client.tooltip.CollapsibleClientTooltipComponent;
 import fuzs.iteminteractions.common.api.v1.tooltip.BundleContentsTooltip;
 import fuzs.iteminteractions.common.api.v1.tooltip.ItemContentsTooltip;
 import fuzs.iteminteractions.common.impl.client.handler.ClientInputActionHandler;
 import fuzs.iteminteractions.common.impl.client.handler.MouseDraggingHandler;
-import fuzs.iteminteractions.common.impl.config.CarriedItemTooltips;
 import fuzs.iteminteractions.common.impl.config.ExtractSingleItem;
 import fuzs.iteminteractions.common.impl.config.SelectedItemTooltips;
 import fuzs.iteminteractions.common.impl.config.VisualItemContents;
@@ -53,13 +53,10 @@ public class ItemInteractionsClient implements ClientModConstructor {
         ScreenKeyboardEvents.beforeKeyPress(AbstractContainerScreen.class)
                 .register(SelectedItemTooltips::onBeforeKeyPressed);
         ScreenKeyboardEvents.beforeKeyPress(AbstractContainerScreen.class)
-                .register(CarriedItemTooltips::onBeforeKeyPressed);
-        ScreenKeyboardEvents.beforeKeyPress(AbstractContainerScreen.class)
                 .register(ExtractSingleItem::onBeforeKeyPressed);
         ScreenKeyboardEvents.beforeKeyPress(AbstractContainerScreen.class)
                 .register(VisualItemContents::onBeforeKeyPressed);
         ScreenEvents.afterInit(AbstractContainerScreen.class).register(ClientInputActionHandler::onAfterInit);
-        ScreenEvents.afterRender(AbstractContainerScreen.class).register(ClientInputActionHandler::onAfterRender);
         ScreenEvents.afterBackground(AbstractContainerScreen.class).register(MouseDraggingHandler::onAfterBackground);
         RenderContainerScreenContentsCallback.EVENT.register(MouseDraggingHandler::onRenderContainerScreenContents);
         PlaySoundEvents.AT_ENTITY.register(MouseDraggingHandler::onPlaySoundAtEntity);
@@ -73,12 +70,13 @@ public class ItemInteractionsClient implements ClientModConstructor {
     public void onRegisterKeyMappings(KeyMappingsContext context) {
         context.registerKeyMapping(VisualItemContents.KEY_MAPPING, KeyActivationContext.SCREEN);
         context.registerKeyMapping(SelectedItemTooltips.KEY_MAPPING, KeyActivationContext.SCREEN);
-        context.registerKeyMapping(CarriedItemTooltips.KEY_MAPPING, KeyActivationContext.SCREEN);
     }
 
     @Override
     public void onRegisterClientTooltipComponents(ClientTooltipComponentsContext context) {
-        context.registerClientTooltipComponent(ItemContentsTooltip.class, ClientItemContentsTooltip::new);
-        context.registerClientTooltipComponent(BundleContentsTooltip.class, ClientBundleContentsTooltip::new);
+        context.registerClientTooltipComponent(ItemContentsTooltip.class,
+                CollapsibleClientTooltipComponent.wrapFactory(ClientItemContentsTooltip::new));
+        context.registerClientTooltipComponent(BundleContentsTooltip.class,
+                CollapsibleClientTooltipComponent.wrapFactory(ClientBundleContentsTooltip::new));
     }
 }

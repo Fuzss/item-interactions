@@ -57,14 +57,13 @@ public class ClientBundleContentsTooltip extends AbstractClientItemContentsToolt
     }
 
     @Override
-    public int getExpandedHeight(Font font) {
-        return this.isBundleEmpty() ? this.getEmptyBundleBackgroundHeight(font) :
-                super.getExpandedHeight(font) + 13 + 8;
+    public int getHeight(Font font) {
+        return this.isBundleEmpty() ? this.getEmptyBundleBackgroundHeight(font) : super.getHeight(font) + 13 + 8;
     }
 
     @Override
-    public int getExpandedWidth(Font font) {
-        return this.isBundleEmpty() ? this.getGridSize(4) : super.getExpandedWidth(font);
+    public int getWidth(Font font) {
+        return this.isBundleEmpty() ? this.getGridSize(4) : super.getWidth(font);
     }
 
     private int getEmptyBundleBackgroundHeight(Font font) {
@@ -72,12 +71,12 @@ public class ClientBundleContentsTooltip extends AbstractClientItemContentsToolt
     }
 
     @Override
-    public void extractExpandedImage(Font font, int x, int y, GuiGraphicsExtractor guiGraphics) {
+    public void extractImage(Font font, int x, int y, int width, int height, GuiGraphicsExtractor guiGraphics) {
         if (this.isBundleEmpty()) {
             this.renderEmptyBundleTooltip(font, x, y, guiGraphics);
         } else {
-            super.extractExpandedImage(font, x, y, guiGraphics);
-            this.drawProgressbar(x, y + super.getExpandedHeight(font) + 4, font, guiGraphics);
+            super.extractImage(font, x, y, width, height, guiGraphics);
+            this.drawProgressbar(x, y + super.getHeight(font) + 4, font, guiGraphics);
         }
     }
 
@@ -93,28 +92,23 @@ public class ClientBundleContentsTooltip extends AbstractClientItemContentsToolt
                 y,
                 this.getProgressBarFill(font),
                 13);
-        guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED,
-                PROGRESSBAR_BORDER_SPRITE,
-                x,
-                y,
-                this.getExpandedWidth(font),
-                13);
+        guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, PROGRESSBAR_BORDER_SPRITE, x, y, this.getWidth(font), 13);
         Component component = this.getProgressBarFillText();
         if (component != null) {
-            guiGraphics.centeredText(font, component, x + this.getExpandedWidth(font) / 2, y + 3, -1);
+            guiGraphics.centeredText(font, component, x + this.getWidth(font) / 2, y + 3, -1);
         }
     }
 
     private void drawEmptyBundleDescriptionText(int x, int y, Font font, GuiGraphicsExtractor guiGraphics) {
-        guiGraphics.textWithWordWrap(font, BUNDLE_EMPTY_DESCRIPTION, x, y, this.getExpandedWidth(font), 0XFFAAAAAA);
+        guiGraphics.textWithWordWrap(font, BUNDLE_EMPTY_DESCRIPTION, x, y, this.getWidth(font), 0XFFAAAAAA);
     }
 
     private int getEmptyBundleDescriptionTextHeight(Font font) {
-        return font.split(BUNDLE_EMPTY_DESCRIPTION, this.getExpandedWidth(font)).size() * 9;
+        return font.split(BUNDLE_EMPTY_DESCRIPTION, this.getWidth(font)).size() * 9;
     }
 
     private int getProgressBarFill(Font font) {
-        int maxWidth = this.getExpandedWidth(font) - PROGRESSBAR_BORDER_SIZE * 2;
+        int maxWidth = this.getWidth(font) - PROGRESSBAR_BORDER_SIZE * 2;
         return Mth.clamp(Mth.mulAndTruncate(this.weight, maxWidth), 0, maxWidth);
     }
 

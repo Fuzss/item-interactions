@@ -9,19 +9,15 @@ import fuzs.iteminteractions.common.impl.config.ServerConfig;
 import fuzs.iteminteractions.common.impl.network.client.ServerboundContainerClientInputMessage;
 import fuzs.iteminteractions.common.impl.world.inventory.ContainerSlotHelper;
 import fuzs.iteminteractions.common.impl.world.item.container.ItemContentsProviders;
-import fuzs.puzzleslib.common.api.client.gui.v2.tooltip.TooltipRenderHelper;
 import fuzs.puzzleslib.common.api.event.v1.core.EventResult;
 import fuzs.puzzleslib.common.api.event.v1.data.MutableFloat;
 import fuzs.puzzleslib.common.api.event.v1.data.MutableValue;
 import fuzs.puzzleslib.common.api.network.v4.MessageSender;
 import fuzs.puzzleslib.common.api.util.v1.CommonHelper;
 import net.minecraft.client.ScrollWheelHandler;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
-import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.core.Holder;
@@ -73,24 +69,6 @@ public class ClientInputActionHandler {
         return EventResult.PASS;
     }
 
-    public static void onAfterRender(AbstractContainerScreen<?> screen, GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
-        // renders vanilla item tooltips when a stack is carried and the cursor hovers over a container item
-        // intended to be used with single item extraction/insertion feature to be able to continuously see what's going on in the container item
-        if (!ItemInteractions.CONFIG.get(ClientConfig.class).carriedItemTooltips.isActive()) return;
-        if (!screen.getMenu().getCarried().isEmpty()) {
-            ItemStack itemStack = getContainerItemStack(screen, false);
-            if (!itemStack.isEmpty()) {
-                List<ClientTooltipComponent> tooltipComponents = TooltipRenderHelper.getTooltip(itemStack);
-                guiGraphics.tooltip(screen.getFont(),
-                        tooltipComponents,
-                        mouseX,
-                        mouseY,
-                        DefaultTooltipPositioner.INSTANCE,
-                        null);
-            }
-        }
-    }
-
     public static void onAfterInit(AbstractContainerScreen<?> screen, int screenWidth, int screenHeight, List<AbstractWidget> widgets, UnaryOperator<AbstractWidget> addWidget, Consumer<AbstractWidget> removeWidget) {
         // no way to reset internal values other than to create a new instance
         scrollWheelHandler = new ScrollWheelHandler();
@@ -98,8 +76,14 @@ public class ClientInputActionHandler {
 
     public static EventResult onBeforeMouseScroll(AbstractContainerScreen<?> screen, double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
         // allows scrolling between filled slots on a container items tooltip to select the slot to be interacted with next
-        if (horizontalAmount == 0.0 && verticalAmount == 0.0) return EventResult.PASS;
-        if (!ItemInteractions.CONFIG.get(ClientConfig.class).visualItemContents.isActive()) return EventResult.PASS;
+        if (horizontalAmount == 0.0 && verticalAmount == 0.0) {
+            return EventResult.PASS;
+        }
+
+        if (!ItemInteractions.CONFIG.get(ClientConfig.class).visualItemContents.isActive()) {
+            return EventResult.PASS;
+        }
+
         if (precisionModeAllowedAndActive()) {
             Slot hoveredSlot = screen.hoveredSlot;
             if (hoveredSlot != null) {
@@ -119,11 +103,6 @@ public class ClientInputActionHandler {
                 }
             }
         } else if (ItemInteractions.CONFIG.get(ServerConfig.class).allowSlotCycling) {
-            ItemStack carriedStack = screen.getMenu().getCarried();
-            if (!carriedStack.isEmpty()
-                    && !ItemInteractions.CONFIG.get(ClientConfig.class).carriedItemTooltips.isActive()) {
-                return EventResult.PASS;
-            }
             Pair<ItemStack, ItemContentsBehavior> pair = getContainerPair(screen, true);
             ItemStack itemStack = pair.getFirst();
             if (!itemStack.isEmpty()) {

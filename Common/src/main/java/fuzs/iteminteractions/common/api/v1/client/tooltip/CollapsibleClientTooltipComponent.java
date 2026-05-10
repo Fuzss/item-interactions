@@ -8,37 +8,49 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.inventory.tooltip.TooltipComponent;
 
-public abstract class ExpandableClientContentsTooltip implements ClientTooltipComponent {
+import java.util.function.Function;
+
+public record CollapsibleClientTooltipComponent(ClientTooltipComponent component) implements ClientTooltipComponent {
     public static final String REVEAL_CONTENTS_TRANSLATION_KEY = ItemInteractions.id("container")
             .toLanguageKey(Registries.elementsDirPath(Registries.ITEM), "tooltip.reveal_contents");
 
+    public static <T extends TooltipComponent> Function<? super T, CollapsibleClientTooltipComponent> wrapFactory(Function<? super T, ? extends ClientTooltipComponent> factory) {
+        return (T t) -> new CollapsibleClientTooltipComponent(factory.apply(t));
+    }
+
     @Override
-    public final int getHeight(Font font) {
+    public int getHeight(Font font) {
         if (!ItemInteractions.CONFIG.get(ClientConfig.class).visualItemContents.isActive()) {
             return 10;
         } else {
-            return this.getExpandedHeight(font);
+            return this.component.getHeight(font);
         }
     }
 
-    public abstract int getExpandedHeight(Font font);
-
     @Override
-    public final int getWidth(Font font) {
+    public int getWidth(Font font) {
         ActivationTypeProvider activation = ItemInteractions.CONFIG.get(ClientConfig.class).visualItemContents;
         if (!activation.isActive()) {
             Component component = activation.getComponent(REVEAL_CONTENTS_TRANSLATION_KEY);
             return font.width(component);
         } else {
-            return this.getExpandedWidth(font);
+            return this.component.getWidth(font);
         }
     }
 
-    public abstract int getExpandedWidth(Font font);
+    @Override
+    public boolean showTooltipWithItemInHand() {
+        if (ItemInteractions.CONFIG.get(ClientConfig.class).visualItemContents.isActive()) {
+            return this.component.showTooltipWithItemInHand();
+        } else {
+            return false;
+        }
+    }
 
     @Override
-    public final void extractText(GuiGraphicsExtractor guiGraphics, Font font, int x, int y) {
+    public void extractText(GuiGraphicsExtractor guiGraphics, Font font, int x, int y) {
         ActivationTypeProvider activation = ItemInteractions.CONFIG.get(ClientConfig.class).visualItemContents;
         if (!activation.isActive()) {
             Component component = activation.getComponent(REVEAL_CONTENTS_TRANSLATION_KEY);
@@ -47,11 +59,9 @@ public abstract class ExpandableClientContentsTooltip implements ClientTooltipCo
     }
 
     @Override
-    public final void extractImage(Font font, int x, int y, int width, int height, GuiGraphicsExtractor guiGraphics) {
+    public void extractImage(Font font, int x, int y, int width, int height, GuiGraphicsExtractor guiGraphics) {
         if (ItemInteractions.CONFIG.get(ClientConfig.class).visualItemContents.isActive()) {
-            this.extractExpandedImage(font, x, y, guiGraphics);
+            this.component.extractImage(font, x, y, width, height, guiGraphics);
         }
     }
-
-    public abstract void extractExpandedImage(Font font, int x, int y, GuiGraphicsExtractor guiGraphics);
 }

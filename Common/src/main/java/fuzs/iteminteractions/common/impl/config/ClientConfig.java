@@ -26,11 +26,6 @@ public class ClientConfig implements ConfigCore {
     public ExtractSingleItem extractSingleItem = ExtractSingleItem.CONTROL;
     @Config(description = "Disable sounds from inserting and extracting items from playing, as they trigger quite often with all the new interactions.")
     public boolean disableInteractionSounds = true;
-    @Config(description = {
-            "Always show item tooltips while interacting with container items, even when the cursor is currently carrying an item.",
-            ACTIVATION_TYPE_MESSAGE
-    })
-    public CarriedItemTooltips carriedItemTooltips = CarriedItemTooltips.ALT;
     @Config(description = "Invert scroll wheel direction for extracting / inserting items from a container item in precision mode.")
     public boolean invertPrecisionModeScrolling = false;
 
