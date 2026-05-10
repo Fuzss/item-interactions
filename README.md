@@ -2,15 +2,15 @@
 
 ### Minecraft 26.x
 
-| Branch | Status | Changelog |
-| --- | --- | --- |
-| [26.1.x](https://github.com/Fuzss/item-interactions/tree/26.1.x) | ✅&nbsp;Primary | [CHANGELOG.md](https://github.com/Fuzss/item-interactions/blob/26.1.x/CHANGELOG.md) |
+| Branch | Status | Changelog | Maven |
+| --- | --- | --- | --- |
+| [26.1.x](https://github.com/Fuzss/item-interactions/tree/26.1.x) | ✅&nbsp;Primary | [CHANGELOG.md](https://github.com/Fuzss/item-interactions/blob/26.1.x/CHANGELOG.md) | [`fuzs.iteminteractions:iteminteractions-common:26.1.0`](https://github.com/Fuzss/modresources/tree/main/maven/fuzs/iteminteractions/iteminteractions-common/26.1.0)<br />[`fuzs.iteminteractions:iteminteractions-fabric:26.1.0`](https://github.com/Fuzss/modresources/tree/main/maven/fuzs/iteminteractions/iteminteractions-fabric/26.1.0)<br />[`fuzs.iteminteractions:iteminteractions-neoforge:26.1.0`](https://github.com/Fuzss/modresources/tree/main/maven/fuzs/iteminteractions/iteminteractions-neoforge/26.1.0) |
 
 ### Minecraft 1.21.x
 
-| Branch | Status | Changelog |
-| --- | --- | --- |
-| [1.21.11](https://github.com/Fuzss/item-interactions/tree/1.21.11) | ❌&nbsp;Archived | [CHANGELOG.md](https://github.com/Fuzss/item-interactions/blob/1.21.11/CHANGELOG.md) |
+| Branch | Status | Changelog | Maven |
+| --- | --- | --- | --- |
+| [1.21.11](https://github.com/Fuzss/item-interactions/tree/1.21.11) | ❌&nbsp;Archived | [CHANGELOG.md](https://github.com/Fuzss/item-interactions/blob/1.21.11/CHANGELOG.md) | [`fuzs.iteminteractions:iteminteractions-common:21.11.0`](https://github.com/Fuzss/modresources/tree/main/maven/fuzs/iteminteractions/iteminteractions-common/21.11.0)<br />[`fuzs.iteminteractions:iteminteractions-fabric:21.11.0`](https://github.com/Fuzss/modresources/tree/main/maven/fuzs/iteminteractions/iteminteractions-fabric/21.11.0)<br />[`fuzs.iteminteractions:iteminteractions-neoforge:21.11.0`](https://github.com/Fuzss/modresources/tree/main/maven/fuzs/iteminteractions/iteminteractions-neoforge/21.11.0) |
 
 | Branch | Status | Changelog | Downloads |
 | --- | --- | --- | --- |
