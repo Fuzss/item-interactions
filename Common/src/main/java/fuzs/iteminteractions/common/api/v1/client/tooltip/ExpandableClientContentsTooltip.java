@@ -30,8 +30,9 @@ public abstract class ExpandableClientContentsTooltip implements ClientTooltipCo
         if (!activation.isActive()) {
             Component component = activation.getComponent(REVEAL_CONTENTS_TRANSLATION_KEY);
             return font.width(component);
+        } else {
+            return this.getExpandedWidth(font);
         }
-        return this.getExpandedWidth(font);
     }
 
     public abstract int getExpandedWidth(Font font);
@@ -47,9 +48,10 @@ public abstract class ExpandableClientContentsTooltip implements ClientTooltipCo
 
     @Override
     public final void extractImage(Font font, int x, int y, int width, int height, GuiGraphicsExtractor guiGraphics) {
-        if (!ItemInteractions.CONFIG.get(ClientConfig.class).visualItemContents.isActive()) return;
-        this.renderExpandedImage(font, x, y, guiGraphics);
+        if (ItemInteractions.CONFIG.get(ClientConfig.class).visualItemContents.isActive()) {
+            this.extractExpandedImage(font, x, y, guiGraphics);
+        }
     }
 
-    public abstract void renderExpandedImage(Font font, int x, int y, GuiGraphicsExtractor guiGraphics);
+    public abstract void extractExpandedImage(Font font, int x, int y, GuiGraphicsExtractor guiGraphics);
 }

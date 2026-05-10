@@ -10,7 +10,7 @@ import net.minecraft.util.Mth;
 import org.apache.commons.lang3.math.Fraction;
 
 /**
- * Most methods here are copied from {@link net.minecraft.client.gui.screens.inventory.tooltip.ClientBundleTooltip}.
+ * @see net.minecraft.client.gui.screens.inventory.tooltip.ClientBundleTooltip
  */
 public class ClientBundleContentsTooltip extends AbstractClientItemContentsTooltip {
     private static final Identifier PROGRESSBAR_BORDER_SPRITE = Identifier.withDefaultNamespace(
@@ -64,7 +64,7 @@ public class ClientBundleContentsTooltip extends AbstractClientItemContentsToolt
 
     @Override
     public int getExpandedWidth(Font font) {
-        return this.isBundleEmpty() ? getGridSize(4) : super.getExpandedWidth(font);
+        return this.isBundleEmpty() ? this.getGridSize(4) : super.getExpandedWidth(font);
     }
 
     private int getEmptyBundleBackgroundHeight(Font font) {
@@ -72,11 +72,11 @@ public class ClientBundleContentsTooltip extends AbstractClientItemContentsToolt
     }
 
     @Override
-    public void renderExpandedImage(Font font, int x, int y, GuiGraphicsExtractor guiGraphics) {
+    public void extractExpandedImage(Font font, int x, int y, GuiGraphicsExtractor guiGraphics) {
         if (this.isBundleEmpty()) {
             this.renderEmptyBundleTooltip(font, x, y, guiGraphics);
         } else {
-            super.renderExpandedImage(font, x, y, guiGraphics);
+            super.extractExpandedImage(font, x, y, guiGraphics);
             this.drawProgressbar(x, y + super.getExpandedHeight(font) + 4, font, guiGraphics);
         }
     }
