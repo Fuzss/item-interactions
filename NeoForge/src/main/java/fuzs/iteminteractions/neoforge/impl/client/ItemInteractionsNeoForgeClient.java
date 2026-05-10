@@ -1,8 +1,8 @@
 package fuzs.iteminteractions.neoforge.impl.client;
 
-import fuzs.iteminteractions.impl.ItemInteractions;
-import fuzs.iteminteractions.impl.client.ItemInteractionsClient;
-import fuzs.iteminteractions.impl.data.client.ModLanguageProvider;
+import fuzs.iteminteractions.common.impl.ItemInteractions;
+import fuzs.iteminteractions.common.impl.client.ItemInteractionsClient;
+import fuzs.iteminteractions.common.impl.data.client.ModLanguageProvider;
 import fuzs.puzzleslib.common.api.client.core.v1.ClientModConstructor;
 import fuzs.puzzleslib.neoforge.api.data.v2.core.DataProviderHelper;
 import net.neoforged.api.distmarker.Dist;

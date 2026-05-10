@@ -1,0 +1,64 @@
+package fuzs.iteminteractions.common.impl.config;
+
+import fuzs.iteminteractions.common.impl.ItemInteractions;
+import fuzs.iteminteractions.common.impl.client.core.ActivationTypeProvider;
+import fuzs.iteminteractions.common.impl.client.core.BackedActivationTypeProvider;
+import fuzs.iteminteractions.common.impl.client.core.KeyBackedActivationType;
+import fuzs.puzzleslib.common.api.client.key.v1.KeyMappingHelper;
+import fuzs.puzzleslib.common.api.event.v1.core.EventResult;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.input.KeyEvent;
+
+public enum VisualItemContents implements BackedActivationTypeProvider {
+    KEY {
+        private boolean isActive;
+
+        @Override
+        public boolean isActive() {
+            return this.isActive;
+        }
+
+        @Override
+        public void toggleActive() {
+            this.isActive = !this.isActive;
+        }
+
+        @Override
+        public KeyMapping getKeyMapping() {
+            return KEY_MAPPING;
+        }
+    },
+    ALWAYS {
+        @Override
+        public ActivationTypeProvider getBackingProvider() {
+            return KeyBackedActivationType.ALWAYS;
+        }
+    },
+    SHIFT {
+        @Override
+        public ActivationTypeProvider getBackingProvider() {
+            return KeyBackedActivationType.SHIFT;
+        }
+    },
+    CONTROL {
+        @Override
+        public ActivationTypeProvider getBackingProvider() {
+            return KeyBackedActivationType.CONTROL;
+        }
+    },
+    ALT {
+        @Override
+        public ActivationTypeProvider getBackingProvider() {
+            return KeyBackedActivationType.ALT;
+        }
+    };
+
+    private static final VisualItemContents[] VALUES = values();
+    public static final KeyMapping KEY_MAPPING = KeyMappingHelper.registerUnboundKeyMapping(ItemInteractions.id(
+            "toggle_visual_item_contents"));
+
+    public static EventResult onBeforeKeyPressed(AbstractContainerScreen<?> screen, KeyEvent keyEvent) {
+        return BackedActivationTypeProvider.onKeyPressed(VALUES, keyEvent);
+    }
+}
