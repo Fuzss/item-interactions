@@ -2,8 +2,8 @@ package fuzs.iteminteractions.impl.handler;
 
 import fuzs.iteminteractions.impl.network.ClientboundEnderChestContentMessage;
 import fuzs.iteminteractions.impl.network.ClientboundEnderChestSlotMessage;
-import fuzs.puzzleslib.api.network.v4.MessageSender;
-import fuzs.puzzleslib.api.network.v4.PlayerSet;
+import fuzs.puzzleslib.common.api.network.v4.MessageSender;
+import fuzs.puzzleslib.common.api.network.v4.PlayerSet;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;

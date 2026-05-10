@@ -7,10 +7,10 @@ import fuzs.iteminteractions.impl.ItemInteractions;
 import fuzs.iteminteractions.impl.config.ClientConfig;
 import fuzs.iteminteractions.impl.config.ServerConfig;
 import fuzs.iteminteractions.impl.world.item.container.ItemContentsProviders;
-import fuzs.puzzleslib.api.event.v1.core.EventResult;
-import fuzs.puzzleslib.api.event.v1.data.MutableFloat;
-import fuzs.puzzleslib.api.event.v1.data.MutableValue;
-import net.minecraft.client.gui.GuiGraphics;
+import fuzs.puzzleslib.common.api.event.v1.core.EventResult;
+import fuzs.puzzleslib.common.api.event.v1.data.MutableFloat;
+import fuzs.puzzleslib.common.api.event.v1.data.MutableValue;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -23,7 +23,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -43,7 +43,8 @@ public class MouseDraggingHandler {
     private static final Identifier SLOT_HIGHLIGHT_FRONT_SPRITE = Identifier.withDefaultNamespace(
             "container/slot_highlight_front");
     private static final Set<Slot> CONTAINER_DRAG_SLOTS = Sets.newHashSet();
-    @Nullable private static ContainerDragType containerDragType;
+    @Nullable
+    private static ContainerDragType containerDragType;
 
     public static EventResult onBeforeMousePressed(AbstractContainerScreen<?> screen, MouseButtonEvent mouseButtonEvent) {
         if (!ItemInteractions.CONFIG.get(ServerConfig.class).allowMouseDragging) return EventResult.PASS;
@@ -96,7 +97,7 @@ public class MouseDraggingHandler {
                     }
                 }
                 if (interact) {
-                    screen.slotClicked(slot, slot.index, mouseButtonEvent.button(), ClickType.PICKUP);
+                    screen.slotClicked(slot, slot.index, mouseButtonEvent.button(), ContainerInput.PICKUP);
                     CONTAINER_DRAG_SLOTS.add(slot);
                     return EventResult.INTERRUPT;
                 }
@@ -134,15 +135,15 @@ public class MouseDraggingHandler {
         }
     }
 
-    public static void onAfterBackground(AbstractContainerScreen<?> screen, GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    public static void onAfterBackground(AbstractContainerScreen<?> screen, GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
         renderDragSlotsHighlight(screen, guiGraphics, mouseX, mouseY, SLOT_HIGHLIGHT_BACK_SPRITE, true);
     }
 
-    public static void onRenderContainerScreenContents(AbstractContainerScreen<?> screen, GuiGraphics guiGraphics, int mouseX, int mouseY) {
+    public static void onRenderContainerScreenContents(AbstractContainerScreen<?> screen, GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY) {
         renderDragSlotsHighlight(screen, guiGraphics, mouseX, mouseY, SLOT_HIGHLIGHT_FRONT_SPRITE, false);
     }
 
-    private static void renderDragSlotsHighlight(AbstractContainerScreen<?> screen, GuiGraphics guiGraphics, int mouseX, int mouseY, Identifier identifier, boolean applyTranslation) {
+    private static void renderDragSlotsHighlight(AbstractContainerScreen<?> screen, GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, Identifier identifier, boolean applyTranslation) {
         if (CONTAINER_DRAG_SLOTS.isEmpty()) {
             return;
         }
@@ -156,12 +157,7 @@ public class MouseDraggingHandler {
             if (slot.isHighlightable() && CONTAINER_DRAG_SLOTS.contains(slot)) {
                 // slots will sometimes be added to dragged slots when simply clicking on a slot, so don't render our overlay then
                 if (CONTAINER_DRAG_SLOTS.size() > 1 || !screen.isHovering(slot, mouseX, mouseY)) {
-                    guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED,
-                            identifier,
-                            slot.x - 4,
-                            slot.y - 4,
-                            24,
-                            24);
+                    guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, identifier, slot.x - 4, slot.y - 4, 24, 24);
                 }
             }
         }

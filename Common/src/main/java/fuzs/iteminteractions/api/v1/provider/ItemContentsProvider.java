@@ -5,7 +5,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import fuzs.iteminteractions.impl.ItemInteractions;
 import fuzs.iteminteractions.impl.world.item.container.ItemContentsProviders;
-import fuzs.puzzleslib.api.init.v3.registry.RegistryFactory;
+import fuzs.puzzleslib.common.api.init.v3.registry.RegistryFactory;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.network.RegistryFriendlyByteBuf;

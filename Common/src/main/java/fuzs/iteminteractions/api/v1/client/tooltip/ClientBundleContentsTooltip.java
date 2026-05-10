@@ -2,7 +2,7 @@ package fuzs.iteminteractions.api.v1.client.tooltip;
 
 import fuzs.iteminteractions.api.v1.tooltip.BundleContentsTooltip;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -72,7 +72,7 @@ public class ClientBundleContentsTooltip extends AbstractClientItemContentsToolt
     }
 
     @Override
-    public void renderExpandedImage(Font font, int x, int y, GuiGraphics guiGraphics) {
+    public void renderExpandedImage(Font font, int x, int y, GuiGraphicsExtractor guiGraphics) {
         if (this.isBundleEmpty()) {
             this.renderEmptyBundleTooltip(font, x, y, guiGraphics);
         } else {
@@ -81,12 +81,12 @@ public class ClientBundleContentsTooltip extends AbstractClientItemContentsToolt
         }
     }
 
-    private void renderEmptyBundleTooltip(Font font, int x, int y, GuiGraphics guiGraphics) {
+    private void renderEmptyBundleTooltip(Font font, int x, int y, GuiGraphicsExtractor guiGraphics) {
         this.drawEmptyBundleDescriptionText(x, y, font, guiGraphics);
         this.drawProgressbar(x, y + this.getEmptyBundleDescriptionTextHeight(font) + 4, font, guiGraphics);
     }
 
-    private void drawProgressbar(int x, int y, Font font, GuiGraphics guiGraphics) {
+    private void drawProgressbar(int x, int y, Font font, GuiGraphicsExtractor guiGraphics) {
         guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED,
                 this.getProgressBarTexture(),
                 x + PROGRESSBAR_BORDER_SIZE,
@@ -101,12 +101,12 @@ public class ClientBundleContentsTooltip extends AbstractClientItemContentsToolt
                 13);
         Component component = this.getProgressBarFillText();
         if (component != null) {
-            guiGraphics.drawCenteredString(font, component, x + this.getExpandedWidth(font) / 2, y + 3, -1);
+            guiGraphics.centeredText(font, component, x + this.getExpandedWidth(font) / 2, y + 3, -1);
         }
     }
 
-    private void drawEmptyBundleDescriptionText(int x, int y, Font font, GuiGraphics guiGraphics) {
-        guiGraphics.drawWordWrap(font, BUNDLE_EMPTY_DESCRIPTION, x, y, this.getExpandedWidth(font), 0XFFAAAAAA);
+    private void drawEmptyBundleDescriptionText(int x, int y, Font font, GuiGraphicsExtractor guiGraphics) {
+        guiGraphics.textWithWordWrap(font, BUNDLE_EMPTY_DESCRIPTION, x, y, this.getExpandedWidth(font), 0XFFAAAAAA);
     }
 
     private int getEmptyBundleDescriptionTextHeight(Font font) {

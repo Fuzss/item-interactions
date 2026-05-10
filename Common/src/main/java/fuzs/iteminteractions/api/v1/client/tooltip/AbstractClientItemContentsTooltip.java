@@ -3,15 +3,14 @@ package fuzs.iteminteractions.api.v1.client.tooltip;
 import fuzs.iteminteractions.api.v1.DyeBackedColor;
 import fuzs.iteminteractions.impl.ItemInteractions;
 import fuzs.iteminteractions.impl.client.handler.ClientInputActionHandler;
-import fuzs.iteminteractions.impl.client.helper.GuiGraphicsHelper;
 import fuzs.iteminteractions.impl.config.ClientConfig;
 import fuzs.iteminteractions.impl.world.inventory.ContainerSlotHelper;
-import fuzs.puzzleslib.api.client.gui.v2.tooltip.TooltipRenderHelper;
-import net.minecraft.resources.Identifier;
+import fuzs.puzzleslib.common.api.client.gui.v2.GuiGraphicsHelper;
+import fuzs.puzzleslib.common.api.client.gui.v2.tooltip.TooltipRenderHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.ColorLerper;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
@@ -31,10 +30,8 @@ import java.util.List;
 import java.util.Optional;
 
 public abstract class AbstractClientItemContentsTooltip extends ExpandableClientContentsTooltip {
-    private static final Identifier HOTBAR_SELECTION_SPRITE = Identifier.withDefaultNamespace(
-            "hud/hotbar_selection");
-    public static final Identifier TEXTURE_LOCATION = ItemInteractions.id(
-            "textures/gui/container/inventory_tooltip.png");
+    private static final Identifier HOTBAR_SELECTION_SPRITE = Identifier.withDefaultNamespace("hud/hotbar_selection");
+    public static final Identifier TEXTURE_LOCATION = ItemInteractions.id("textures/gui/container/inventory_tooltip.png");
     private static final Identifier SLOT_HIGHLIGHT_BACK_SPRITE = Identifier.withDefaultNamespace(
             "container/slot_highlight_back");
     private static final Identifier SLOT_HIGHLIGHT_FRONT_SPRITE = Identifier.withDefaultNamespace(
@@ -90,7 +87,7 @@ public abstract class AbstractClientItemContentsTooltip extends ExpandableClient
     }
 
     @Override
-    public void renderExpandedImage(Font font, int x, int y, GuiGraphics guiGraphics) {
+    public void renderExpandedImage(Font font, int x, int y, GuiGraphicsExtractor guiGraphics) {
         ACTIVE_CONTAINER_ITEM_TOOLTIPS.increment();
         if (this.defaultSize()) {
             ContainerTexture.FULL.blit(guiGraphics, x, y, this.getBackgroundColor());
@@ -116,7 +113,7 @@ public abstract class AbstractClientItemContentsTooltip extends ExpandableClient
         return ItemInteractions.CONFIG.get(ClientConfig.class).colorfulTooltips ? this.backgroundColor : -1;
     }
 
-    private void drawSlots(GuiGraphics guiGraphics, Font font, int x, int y, int highlightSlot, SlotRenderer slotRenderer) {
+    private void drawSlots(GuiGraphicsExtractor guiGraphics, Font font, int x, int y, int highlightSlot, SlotRenderer slotRenderer) {
         int slotIndex = 0;
         for (int gridY = 0; gridY < this.getGridSizeY(); ++gridY) {
             for (int gridX = 0; gridX < this.getGridSizeX(); ++gridX) {
@@ -128,7 +125,7 @@ public abstract class AbstractClientItemContentsTooltip extends ExpandableClient
         }
     }
 
-    private void drawBackgroundSlots(GuiGraphics guiGraphics, Font font, int posX, int posY, int slotIndex, boolean isHighlightSlot) {
+    private void drawBackgroundSlots(GuiGraphicsExtractor guiGraphics, Font font, int posX, int posY, int slotIndex, boolean isHighlightSlot) {
         if (this.isSlotBlocked(slotIndex)) {
             ContainerTexture.BLOCKED_SLOT.blit(guiGraphics, posX, posY, this.getBackgroundColor());
         } else {
@@ -136,29 +133,29 @@ public abstract class AbstractClientItemContentsTooltip extends ExpandableClient
         }
     }
 
-    private void drawSlotContents(GuiGraphics guiGraphics, Font font, int posX, int posY, int slotIndex, boolean isHighlightSlot) {
+    private void drawSlotContents(GuiGraphicsExtractor guiGraphics, Font font, int posX, int posY, int slotIndex, boolean isHighlightSlot) {
         if (!isHighlightSlot) {
-            this.drawSlot(guiGraphics, font, posX, posY, slotIndex);
+            this.extractSlot(guiGraphics, font, posX, posY, slotIndex);
         }
     }
 
-    private void drawSlot(GuiGraphics guiGraphics, Font font, int posX, int posY, int slotIndex) {
+    private void extractSlot(GuiGraphicsExtractor guiGraphics, Font font, int posX, int posY, int slotIndex) {
         if (slotIndex < this.items.size()) {
             ItemStack itemstack = this.items.get(slotIndex);
-            guiGraphics.renderItem(itemstack, posX + 1, posY + 1, slotIndex);
-            guiGraphics.renderItemDecorations(font, itemstack, posX + 1, posY + 1);
+            guiGraphics.item(itemstack, posX + 1, posY + 1, slotIndex);
+            guiGraphics.itemDecorations(font, itemstack, posX + 1, posY + 1);
         }
     }
 
-    private void drawHighlightSlotContents(GuiGraphics guiGraphics, Font font, int posX, int posY, int slotIndex, boolean isHighlightSlot) {
+    private void drawHighlightSlotContents(GuiGraphicsExtractor guiGraphics, Font font, int posX, int posY, int slotIndex, boolean isHighlightSlot) {
         if (isHighlightSlot) {
             this.drawSlotHighlight(guiGraphics, posX, posY, HOTBAR_SELECTION_SPRITE, SLOT_HIGHLIGHT_BACK_SPRITE);
-            this.drawSlot(guiGraphics, font, posX, posY, slotIndex);
+            this.extractSlot(guiGraphics, font, posX, posY, slotIndex);
             this.drawSlotHighlight(guiGraphics, posX, posY, null, SLOT_HIGHLIGHT_FRONT_SPRITE);
         }
     }
 
-    private void drawSelectedSlotTooltip(GuiGraphics guiGraphics, Font font, int mouseX, int mouseY, int highlightSlot) {
+    private void drawSelectedSlotTooltip(GuiGraphicsExtractor guiGraphics, Font font, int mouseX, int mouseY, int highlightSlot) {
         if (!ItemInteractions.CONFIG.get(ClientConfig.class).selectedItemTooltips.isActive()) {
             return;
         }
@@ -176,7 +173,7 @@ public abstract class AbstractClientItemContentsTooltip extends ExpandableClient
                     .max()
                     .orElse(0);
             if (ACTIVE_CONTAINER_ITEM_TOOLTIPS.intValue() > 0) {
-                guiGraphics.renderTooltip(font,
+                guiGraphics.tooltip(font,
                         tooltipComponents,
                         mouseX - maxWidth - 2 * GRID_SIZE,
                         mouseY,
@@ -224,7 +221,7 @@ public abstract class AbstractClientItemContentsTooltip extends ExpandableClient
         return -1;
     }
 
-    private void drawBorder(int mouseX, int mouseY, int gridSizeX, int gridSizeY, GuiGraphics guiGraphics) {
+    private void drawBorder(int mouseX, int mouseY, int gridSizeX, int gridSizeY, GuiGraphicsExtractor guiGraphics) {
         int color = this.getBackgroundColor();
         ContainerTexture.BORDER_TOP_LEFT.blit(guiGraphics, mouseX, mouseY, color);
         ContainerTexture.BORDER_TOP_RIGHT.blit(guiGraphics,
@@ -258,8 +255,11 @@ public abstract class AbstractClientItemContentsTooltip extends ExpandableClient
                 color);
     }
 
-    private void drawSlotHighlight(GuiGraphics guiGraphics, int posX, int posY, @Nullable Identifier hotbarSelectionSprite, @Nullable Identifier slotHighlightSprite) {
-        if (ACTIVE_CONTAINER_ITEM_TOOLTIPS.intValue() > 1) return;
+    private void drawSlotHighlight(GuiGraphicsExtractor guiGraphics, int posX, int posY, @Nullable Identifier hotbarSelectionSprite, @Nullable Identifier slotHighlightSprite) {
+        if (ACTIVE_CONTAINER_ITEM_TOOLTIPS.intValue() > 1) {
+            return;
+        }
+
         ClientConfig.SlotOverlay slotOverlay = ItemInteractions.CONFIG.get(ClientConfig.class).slotOverlay;
         switch (slotOverlay) {
             case HOTBAR -> {
@@ -291,7 +291,7 @@ public abstract class AbstractClientItemContentsTooltip extends ExpandableClient
     @FunctionalInterface
     private interface SlotRenderer {
 
-        void drawSlot(GuiGraphics guiGraphics, Font font, int posX, int posY, int slotIndex, boolean isHighlightSlot);
+        void drawSlot(GuiGraphicsExtractor guiGraphics, Font font, int posX, int posY, int slotIndex, boolean isHighlightSlot);
     }
 
     private enum ContainerTexture {
@@ -319,7 +319,7 @@ public abstract class AbstractClientItemContentsTooltip extends ExpandableClient
             this.height = height;
         }
 
-        public void blit(GuiGraphics guiGraphics, int posX, int posY, int color) {
+        public void blit(GuiGraphicsExtractor guiGraphics, int posX, int posY, int color) {
             guiGraphics.blit(RenderPipelines.GUI_TEXTURED,
                     TEXTURE_LOCATION,
                     posX,

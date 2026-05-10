@@ -1,6 +1,6 @@
 package fuzs.iteminteractions.impl.client.core;
 
-import fuzs.puzzleslib.api.util.v1.CommonHelper;
+import fuzs.puzzleslib.common.api.util.v1.CommonHelper;
 import net.minecraft.client.input.InputQuirks;
 import net.minecraft.network.chat.Component;
 

@@ -7,7 +7,7 @@ import fuzs.iteminteractions.api.v1.DyeBackedColor;
 import fuzs.iteminteractions.api.v1.provider.AbstractProvider;
 import fuzs.iteminteractions.api.v1.tooltip.ItemContentsTooltip;
 import fuzs.iteminteractions.impl.init.ModRegistry;
-import fuzs.puzzleslib.api.container.v1.ContainerMenuHelper;
+import fuzs.puzzleslib.common.api.container.v1.ContainerMenuHelper;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.util.ExtraCodecs;

@@ -1,7 +1,7 @@
 package fuzs.iteminteractions.mixin.client;
 
 import fuzs.iteminteractions.impl.client.helper.ItemDecorationHelper;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
@@ -18,13 +18,13 @@ abstract class AbstractContainerScreenMixin extends Screen {
         super(component);
     }
 
-    @Inject(method = "renderSlot", at = @At("HEAD"))
-    private void renderSlot$1(GuiGraphics guiGraphics, Slot slot, int mouseX, int mouseY, CallbackInfo callback) {
+    @Inject(method = "extractSlot", at = @At("HEAD"))
+    private void extractSlot$0(GuiGraphicsExtractor graphics, Slot slot, int mouseX, int mouseY, CallbackInfo callback) {
         ItemDecorationHelper.setSlotBeingRendered(slot);
     }
 
-    @Inject(method = "renderSlot", at = @At("RETURN"))
-    private void renderSlot$2(GuiGraphics guiGraphics, Slot slot, int mouseX, int mouseY, CallbackInfo callback) {
+    @Inject(method = "extractSlot", at = @At("RETURN"))
+    private void extractSlot$1(GuiGraphicsExtractor graphics, Slot slot, int mouseX, int mouseY, CallbackInfo callback) {
         ItemDecorationHelper.setSlotBeingRendered(null);
     }
 }

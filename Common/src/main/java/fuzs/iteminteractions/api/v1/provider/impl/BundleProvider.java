@@ -7,7 +7,7 @@ import fuzs.iteminteractions.api.v1.DyeBackedColor;
 import fuzs.iteminteractions.api.v1.provider.AbstractProvider;
 import fuzs.iteminteractions.api.v1.tooltip.BundleContentsTooltip;
 import fuzs.iteminteractions.impl.init.ModRegistry;
-import fuzs.puzzleslib.api.container.v1.ContainerMenuHelper;
+import fuzs.puzzleslib.common.api.container.v1.ContainerMenuHelper;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.util.ExtraCodecs;
@@ -17,6 +17,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.BundleItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.component.BundleContents;
 import org.apache.commons.lang3.math.Fraction;
 import org.jspecify.annotations.Nullable;
@@ -82,10 +83,13 @@ public class BundleProvider extends AbstractProvider {
                 newContents = BundleContents.EMPTY;
             } else {
                 // empty stacks must not get in here, the codec will fail otherwise
-                ImmutableList.Builder<ItemStack> builder = ImmutableList.builder();
+                ImmutableList.Builder<ItemStackTemplate> builder = ImmutableList.builder();
                 for (ItemStack itemStack : items) {
-                    if (!itemStack.isEmpty()) builder.add(itemStack);
+                    if (!itemStack.isEmpty()) {
+                        builder.add(ItemStackTemplate.fromNonEmptyStack(itemStack));
+                    }
                 }
+
                 newContents = new BundleContents(builder.build());
             }
             containerStack.set(DataComponents.BUNDLE_CONTENTS, newContents);
@@ -125,12 +129,12 @@ public class BundleProvider extends AbstractProvider {
     public int getMaxAmountToAdd(ItemStack containerStack, ItemStack stackToAdd, Player player) {
         Fraction fraction = this.getCapacityMultiplier(containerStack)
                 .subtract(this.computeContentWeight(containerStack, player));
-        return Math.max(fraction.divideBy(BundleContents.getWeight(stackToAdd)).intValue(), 0);
+        return Math.max(fraction.divideBy(BundleContents.getWeight(stackToAdd).getOrThrow()).intValue(), 0);
     }
 
     public Fraction computeContentWeight(ItemStack containerStack, Player player) {
         SimpleContainer container = this.getItemContainer(containerStack, player, false);
-        return BundleContents.computeContentWeight(container.getItems());
+        return BundleContents.computeContentWeight(container.getItems()).getOrThrow();
     }
 
     @Override

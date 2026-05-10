@@ -3,7 +3,7 @@ package fuzs.iteminteractions.mixin;
 import fuzs.iteminteractions.api.v1.provider.ItemContentsBehavior;
 import fuzs.iteminteractions.impl.world.item.container.ItemContentsProviders;
 import fuzs.iteminteractions.impl.world.item.container.ItemInteractionHelper;
-import fuzs.puzzleslib.api.util.v1.CommonHelper;
+import fuzs.puzzleslib.common.api.util.v1.CommonHelper;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickAction;

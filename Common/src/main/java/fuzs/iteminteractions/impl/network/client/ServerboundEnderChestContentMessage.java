@@ -1,8 +1,8 @@
 package fuzs.iteminteractions.impl.network.client;
 
 import fuzs.iteminteractions.impl.handler.EnderChestSyncHandler;
-import fuzs.puzzleslib.api.network.v4.message.MessageListener;
-import fuzs.puzzleslib.api.network.v4.message.play.ServerboundPlayMessage;
+import fuzs.puzzleslib.common.api.network.v4.message.MessageListener;
+import fuzs.puzzleslib.common.api.network.v4.message.play.ServerboundPlayMessage;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;

@@ -9,15 +9,14 @@ import fuzs.iteminteractions.impl.config.ServerConfig;
 import fuzs.iteminteractions.impl.network.client.ServerboundContainerClientInputMessage;
 import fuzs.iteminteractions.impl.world.inventory.ContainerSlotHelper;
 import fuzs.iteminteractions.impl.world.item.container.ItemContentsProviders;
-import fuzs.puzzleslib.api.client.gui.v2.tooltip.TooltipRenderHelper;
-import fuzs.puzzleslib.api.event.v1.core.EventResult;
-import fuzs.puzzleslib.api.event.v1.data.MutableFloat;
-import fuzs.puzzleslib.api.event.v1.data.MutableValue;
-import fuzs.puzzleslib.api.network.v4.MessageSender;
-import fuzs.puzzleslib.api.util.v1.CommonHelper;
-import net.minecraft.client.Minecraft;
+import fuzs.puzzleslib.common.api.client.gui.v2.tooltip.TooltipRenderHelper;
+import fuzs.puzzleslib.common.api.event.v1.core.EventResult;
+import fuzs.puzzleslib.common.api.event.v1.data.MutableFloat;
+import fuzs.puzzleslib.common.api.event.v1.data.MutableValue;
+import fuzs.puzzleslib.common.api.network.v4.MessageSender;
+import fuzs.puzzleslib.common.api.util.v1.CommonHelper;
 import net.minecraft.client.ScrollWheelHandler;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -32,7 +31,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -74,7 +73,7 @@ public class ClientInputActionHandler {
         return EventResult.PASS;
     }
 
-    public static void onAfterRender(AbstractContainerScreen<?> screen, GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    public static void onAfterRender(AbstractContainerScreen<?> screen, GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
         // renders vanilla item tooltips when a stack is carried and the cursor hovers over a container item
         // intended to be used with single item extraction/insertion feature to be able to continuously see what's going on in the container item
         if (!ItemInteractions.CONFIG.get(ClientConfig.class).carriedItemTooltips.isActive()) return;
@@ -82,7 +81,7 @@ public class ClientInputActionHandler {
             ItemStack itemStack = getContainerItemStack(screen, false);
             if (!itemStack.isEmpty()) {
                 List<ClientTooltipComponent> tooltipComponents = TooltipRenderHelper.getTooltip(itemStack);
-                guiGraphics.renderTooltip(screen.getFont(),
+                guiGraphics.tooltip(screen.getFont(),
                         tooltipComponents,
                         mouseX,
                         mouseY,
@@ -92,7 +91,7 @@ public class ClientInputActionHandler {
         }
     }
 
-    public static void onAfterInit(Minecraft minecraft, AbstractContainerScreen<?> screen, int screenWidth, int screenHeight, List<AbstractWidget> widgets, UnaryOperator<AbstractWidget> addWidget, Consumer<AbstractWidget> removeWidget) {
+    public static void onAfterInit(AbstractContainerScreen<?> screen, int screenWidth, int screenHeight, List<AbstractWidget> widgets, UnaryOperator<AbstractWidget> addWidget, Consumer<AbstractWidget> removeWidget) {
         // no way to reset internal values other than to create a new instance
         scrollWheelHandler = new ScrollWheelHandler();
     }
@@ -114,7 +113,7 @@ public class ClientInputActionHandler {
                                         scrollAmount < 0 : scrollAmount > 0) ? InputConstants.MOUSE_BUTTON_RIGHT :
                                         InputConstants.MOUSE_BUTTON_LEFT;
                         ensureHasSentContainerClientInput(screen, screen.minecraft.player, true);
-                        screen.slotClicked(hoveredSlot, hoveredSlot.index, mouseButton, ClickType.PICKUP);
+                        screen.slotClicked(hoveredSlot, hoveredSlot.index, mouseButton, ContainerInput.PICKUP);
                     }
                     return EventResult.INTERRUPT;
                 }

@@ -4,7 +4,7 @@ import com.google.common.collect.Maps;
 import fuzs.iteminteractions.api.v1.provider.ItemContentsProvider;
 import fuzs.iteminteractions.impl.world.item.container.ItemContentsProviders;
 import net.minecraft.resources.Identifier;
-import fuzs.puzzleslib.api.data.v2.core.DataProviderContext;
+import fuzs.puzzleslib.common.api.data.v2.core.DataProviderContext;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.HolderSet;

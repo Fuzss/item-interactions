@@ -6,7 +6,7 @@ import fuzs.iteminteractions.impl.config.ClientConfig;
 import fuzs.iteminteractions.impl.world.item.container.ItemContentsProviders;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.world.entity.player.Player;
@@ -16,9 +16,10 @@ import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
 public class ItemDecorationHelper {
-    @Nullable private static Slot slotBeingRendered;
+    @Nullable
+    private static Slot slotBeingRendered;
 
-    public static void renderItemDecorations(GuiGraphics guiGraphics, Font font, ItemStack itemStack, int itemPosX, int itemPosY) {
+    public static void renderItemDecorations(GuiGraphicsExtractor guiGraphics, Font font, ItemStack itemStack, int itemPosX, int itemPosY) {
         if (!ItemInteractions.CONFIG.get(ClientConfig.class).containerItemIndicator) return;
         Minecraft minecraft = Minecraft.getInstance();
         // prevent rendering on items used as icons for creative mode tabs and for backpacks in locked slots (like Inmis)
@@ -56,9 +57,9 @@ public class ItemDecorationHelper {
     }
 
     @SuppressWarnings("ConstantConditions")
-    private static void renderItemDecoratorType(ItemDecoratorType type, GuiGraphics guiGraphics, Font font, int itemPosX, int itemPosY) {
+    private static void renderItemDecoratorType(ItemDecoratorType type, GuiGraphicsExtractor guiGraphics, Font font, int itemPosX, int itemPosY) {
         guiGraphics.pose().pushMatrix();
-        guiGraphics.drawString(font,
+        guiGraphics.text(font,
                 type.getString(),
                 itemPosX + 19 - 2 - type.getWidth(font),
                 itemPosY + 6 + 3,

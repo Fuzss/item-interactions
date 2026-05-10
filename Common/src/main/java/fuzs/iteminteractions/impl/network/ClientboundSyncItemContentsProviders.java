@@ -2,8 +2,8 @@ package fuzs.iteminteractions.impl.network;
 
 import fuzs.iteminteractions.api.v1.provider.ItemContentsProvider;
 import fuzs.iteminteractions.impl.world.item.container.ItemContentsProviders;
-import fuzs.puzzleslib.api.network.v4.message.MessageListener;
-import fuzs.puzzleslib.api.network.v4.message.play.ClientboundPlayMessage;
+import fuzs.puzzleslib.common.api.network.v4.message.MessageListener;
+import fuzs.puzzleslib.common.api.network.v4.message.play.ClientboundPlayMessage;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;

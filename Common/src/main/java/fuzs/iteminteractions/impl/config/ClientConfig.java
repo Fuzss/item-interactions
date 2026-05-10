@@ -1,7 +1,7 @@
 package fuzs.iteminteractions.impl.config;
 
-import fuzs.puzzleslib.api.config.v3.Config;
-import fuzs.puzzleslib.api.config.v3.ConfigCore;
+import fuzs.puzzleslib.common.api.config.v3.Config;
+import fuzs.puzzleslib.common.api.config.v3.ConfigCore;
 
 public class ClientConfig implements ConfigCore {
     private static final String ACTIVATION_TYPE_MESSAGE = "Select a modifier key required to be held, otherwise selecting \"KEY\" serves as a toggle. The key is defined in vanilla's controls menu.";

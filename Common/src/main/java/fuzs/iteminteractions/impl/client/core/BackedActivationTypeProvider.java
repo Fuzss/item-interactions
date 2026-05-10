@@ -1,7 +1,7 @@
 package fuzs.iteminteractions.impl.client.core;
 
-import fuzs.puzzleslib.api.client.key.v1.KeyMappingHelper;
-import fuzs.puzzleslib.api.event.v1.core.EventResult;
+import fuzs.puzzleslib.common.api.client.key.v1.KeyMappingHelper;
+import fuzs.puzzleslib.common.api.event.v1.core.EventResult;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;

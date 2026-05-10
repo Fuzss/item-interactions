@@ -1,7 +1,7 @@
 package fuzs.iteminteractions.impl.client.handler;
 
 import fuzs.iteminteractions.impl.network.client.ServerboundEnderChestContentMessage;
-import fuzs.puzzleslib.api.network.v4.MessageSender;
+import fuzs.puzzleslib.common.api.network.v4.MessageSender;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.core.NonNullList;

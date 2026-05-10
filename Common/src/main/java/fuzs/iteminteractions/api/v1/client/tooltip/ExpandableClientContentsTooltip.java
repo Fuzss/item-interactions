@@ -4,7 +4,7 @@ import fuzs.iteminteractions.impl.ItemInteractions;
 import fuzs.iteminteractions.impl.client.core.ActivationTypeProvider;
 import fuzs.iteminteractions.impl.config.ClientConfig;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -37,19 +37,19 @@ public abstract class ExpandableClientContentsTooltip implements ClientTooltipCo
     public abstract int getExpandedWidth(Font font);
 
     @Override
-    public final void renderText(GuiGraphics guiGraphics, Font font, int x, int y) {
+    public final void extractText(GuiGraphicsExtractor guiGraphics, Font font, int x, int y) {
         ActivationTypeProvider activation = ItemInteractions.CONFIG.get(ClientConfig.class).visualItemContents;
         if (!activation.isActive()) {
             Component component = activation.getComponent(REVEAL_CONTENTS_TRANSLATION_KEY);
-            guiGraphics.drawString(font, component, x, y, -1);
+            guiGraphics.text(font, component, x, y, -1);
         }
     }
 
     @Override
-    public final void renderImage(Font font, int x, int y, int width, int height, GuiGraphics guiGraphics) {
+    public final void extractImage(Font font, int x, int y, int width, int height, GuiGraphicsExtractor guiGraphics) {
         if (!ItemInteractions.CONFIG.get(ClientConfig.class).visualItemContents.isActive()) return;
         this.renderExpandedImage(font, x, y, guiGraphics);
     }
 
-    public abstract void renderExpandedImage(Font font, int x, int y, GuiGraphics guiGraphics);
+    public abstract void renderExpandedImage(Font font, int x, int y, GuiGraphicsExtractor guiGraphics);
 }

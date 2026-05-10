@@ -1,7 +1,7 @@
 package fuzs.iteminteractions.impl.config;
 
-import fuzs.puzzleslib.api.config.v3.Config;
-import fuzs.puzzleslib.api.config.v3.ConfigCore;
+import fuzs.puzzleslib.common.api.config.v3.Config;
+import fuzs.puzzleslib.common.api.config.v3.ConfigCore;
 
 public class ServerConfig implements ConfigCore {
     public static final String PRECISION_MODE_MESSAGE = "In precision mode left-clicking inserts an item, and right-clicking extracts a single item, overriding vanilla mouse interactions. The scroll wheel can also be used for quickly moving items.";
