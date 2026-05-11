@@ -2,6 +2,7 @@ package fuzs.iteminteractions.common.impl.client.helper;
 
 import fuzs.iteminteractions.common.api.v1.world.item.storage.ItemStorageHolder;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.util.ARGB;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
@@ -29,29 +30,28 @@ public enum ItemDecorationsType {
         this.color = color;
     }
 
-    public String getString() {
-        return this.string;
-    }
-
-    public int getWidth(Font font) {
-        return font.width(this.string);
-    }
-
-    public int getColor() {
-        return this.color;
-    }
-
-    public static @Nullable ItemDecorationsType pickType(ItemStorageHolder behavior, ItemStack containerStack, ItemStack carriedStack, Player player) {
-        if (behavior.canAddItem(containerStack, carriedStack, player)) {
-            if (behavior.hasAnyOf(containerStack, carriedStack, player)) {
+    public static @Nullable ItemDecorationsType pickType(ItemStorageHolder holder, ItemStack itemStack, ItemStack itemHeldByCursor, Player player) {
+        if (holder.canAddItem(itemStack, itemHeldByCursor, player)) {
+            if (holder.hasAnyOf(itemStack, itemHeldByCursor, player)) {
                 return ItemDecorationsType.HAS_ITEM;
             } else {
                 return ItemDecorationsType.NOT_FULL;
             }
-        } else if (behavior.hasAnyOf(containerStack, carriedStack, player)) {
+        } else if (holder.hasAnyOf(itemStack, itemHeldByCursor, player)) {
             return ItemDecorationsType.HAS_ITEM_BUT_FULL;
         } else {
             return null;
         }
+    }
+
+    public void extractRenderState(GuiGraphicsExtractor guiGraphics, Font font, int itemPosX, int itemPosY) {
+        guiGraphics.pose().pushMatrix();
+        guiGraphics.text(font,
+                this.string,
+                itemPosX + 19 - 2 - font.width(this.string),
+                itemPosY + 6 + 3,
+                this.color,
+                true);
+        guiGraphics.pose().popMatrix();
     }
 }

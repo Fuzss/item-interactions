@@ -21,7 +21,7 @@ public record ItemStorageHolder(ItemStorage storage) {
     /**
      * The empty instance.
      */
-    public static final ItemStorageHolder EMPTY = new ItemStorageHolder(DefaultItemStorage.INSTANCE);
+    public static final ItemStorageHolder EMPTY = new ItemStorageHolder(VoidStorage.INSTANCE);
 
     /**
      * Get a registered holder for an item.
@@ -201,6 +201,6 @@ public record ItemStorageHolder(ItemStorage storage) {
      * @return is this the empty behavior singleton instance
      */
     public boolean isEmpty() {
-        return this.storage == DefaultItemStorage.INSTANCE;
+        return this.storage == VoidStorage.INSTANCE;
     }
 }

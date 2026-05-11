@@ -19,29 +19,38 @@ public class ItemDecorationsHelper {
     @Nullable
     private static Slot slotBeingRendered;
 
-    public static void renderItemDecorations(GuiGraphicsExtractor guiGraphics, Font font, ItemStack itemStack, int itemPosX, int itemPosY) {
+    /**
+     * @see GuiGraphicsExtractor#itemDecorations(Font, ItemStack, int, int, String)
+     */
+    public static void extractItemDecorations(GuiGraphicsExtractor guiGraphics, Font font, ItemStack itemStack, int itemPosX, int itemPosY) {
         if (!ItemInteractions.CONFIG.get(ClientConfig.class).containerItemIndicator) {
             return;
         }
 
         Minecraft minecraft = Minecraft.getInstance();
-        // prevent rendering on items used as icons for creative mode tabs and for backpacks in locked slots (like Inmis)
         if (!(minecraft.screen instanceof AbstractContainerScreen<?> screen)) {
             return;
         }
 
         ItemStorageHolder holder = ItemContentsProviders.get(itemStack);
         if (!holder.isEmpty() && isValidSlot(slotBeingRendered, itemStack, minecraft.player)) {
-            ItemStack carriedStack = screen.getMenu().getCarried();
-            if (itemStack != carriedStack) {
-                ItemDecorationsType type = ItemDecorationsType.pickType(holder, itemStack, carriedStack, minecraft.player);
+            ItemStack itemHeldByCursor = screen.getMenu().getCarried();
+            if (itemStack != itemHeldByCursor) {
+                ItemDecorationsType type = ItemDecorationsType.pickType(holder,
+                        itemStack,
+                        itemHeldByCursor,
+                        minecraft.player);
                 if (type != null) {
-                    renderItemDecoratorType(type, guiGraphics, font, itemPosX, itemPosY);
+                    type.extractRenderState(guiGraphics, font, itemPosX, itemPosY);
                 }
             }
         }
     }
 
+    /**
+     * Prevent rendering on items used as icons for creative mode tabs and for backpacks in locked slots (like the Inmis
+     * mod).
+     */
     private static boolean isValidSlot(@Nullable Slot slot, ItemStack itemStack, Player player) {
         if (slot == null || slot.getItem() != itemStack) {
             return false;
@@ -57,18 +66,6 @@ public class ItemDecorationsHelper {
         } else {
             return true;
         }
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    private static void renderItemDecoratorType(ItemDecorationsType type, GuiGraphicsExtractor guiGraphics, Font font, int itemPosX, int itemPosY) {
-        guiGraphics.pose().pushMatrix();
-        guiGraphics.text(font,
-                type.getString(),
-                itemPosX + 19 - 2 - type.getWidth(font),
-                itemPosY + 6 + 3,
-                type.getColor(),
-                true);
-        guiGraphics.pose().popMatrix();
     }
 
     public static void setSlotBeingRendered(@Nullable Slot slotBeingRendered) {

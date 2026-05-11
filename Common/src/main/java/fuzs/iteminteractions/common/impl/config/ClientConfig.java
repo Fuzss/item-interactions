@@ -12,7 +12,7 @@ public class ClientConfig implements ConfigCore {
             description = {"Expand container item tooltips to reveal their contents.", ACTIVATION_TYPE_MESSAGE})
     public VisualItemContents visualItemContents = VisualItemContents.ALWAYS;
     @Config(description = "Render a white overlay or the hotbar selected item frame over the slot the next item will be taken out of when right-clicking the container item.")
-    public SlotOverlay slotOverlay = SlotOverlay.HOVER;
+    public SlotHighlight slotHighlight = SlotHighlight.HIGHLIGHT;
     @Config(description = "Show an indicator on container items when the stack carried by the cursor can be added in your inventory.")
     public boolean containerItemIndicator = true;
     @Config(name = "precision_mode", description = {
@@ -23,9 +23,4 @@ public class ClientConfig implements ConfigCore {
     public boolean disableInteractionSounds = true;
     @Config(description = "Invert scroll wheel direction for extracting / inserting items from a container item in precision mode.")
     public boolean invertPrecisionModeScrolling = false;
-
-    public enum SlotOverlay {
-        HOTBAR,
-        HOVER
-    }
 }

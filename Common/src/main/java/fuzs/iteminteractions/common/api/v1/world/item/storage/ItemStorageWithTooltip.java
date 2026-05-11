@@ -9,6 +9,14 @@ import java.util.Optional;
 
 public interface ItemStorageWithTooltip extends ItemStorage {
 
+    int getGridWidth(int itemCount);
+
+    int getGridHeight(int itemCount);
+
+    default int getGridSize(int itemCount) {
+        return this.getGridWidth(itemCount) * this.getGridHeight(itemCount);
+    }
+
     @Override
     default boolean canProvideTooltipImage(ItemStack itemStack, Player player) {
         return this.hasContents(itemStack) && !this.getItemContainer(itemStack, player, false).isEmpty();
@@ -16,8 +24,12 @@ public interface ItemStorageWithTooltip extends ItemStorage {
 
     @Override
     default Optional<TooltipComponent> getTooltipImage(ItemStack itemStack, Player player) {
-        NonNullList<ItemStack> items = this.getItemContainer(itemStack, player, false).getItems();
+        NonNullList<ItemStack> items = this.getTooltipContents(itemStack, player);
         return Optional.of(this.createTooltipImageComponent(itemStack, player, items));
+    }
+
+    default NonNullList<ItemStack> getTooltipContents(ItemStack itemStack, Player player) {
+        return this.getItemContainer(itemStack, player, false).getItems();
     }
 
     TooltipComponent createTooltipImageComponent(ItemStack itemStack, Player player, NonNullList<ItemStack> items);

@@ -17,7 +17,7 @@ abstract class GuiGraphicsExtractorMixin {
             at = @At("TAIL"))
     public void itemDecorations(Font font, ItemStack itemStack, int x, int y, @Nullable String countText, CallbackInfo callback) {
         if (!itemStack.isEmpty()) {
-            ItemDecorationsHelper.renderItemDecorations(GuiGraphicsExtractor.class.cast(this), font, itemStack, x, y);
+            ItemDecorationsHelper.extractItemDecorations(GuiGraphicsExtractor.class.cast(this), font, itemStack, x, y);
         }
     }
 }

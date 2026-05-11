@@ -1,8 +1,10 @@
 package fuzs.iteminteractions.common.impl.world.inventory;
 
 import fuzs.iteminteractions.common.impl.init.ModRegistry;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BundleItem;
 import net.minecraft.world.item.ItemStack;
 
 public class ContainerSlotHelper {
@@ -32,14 +34,22 @@ public class ContainerSlotHelper {
     }
 
     public static int getSelectedItem(ItemStack itemStack) {
-        return itemStack.getOrDefault(ModRegistry.SELECTED_ITEM_DATA_COMPONENT_TYPE.value(), -1);
+        if (itemStack.has(DataComponents.BUNDLE_CONTENTS)) {
+            return BundleItem.getSelectedItemIndex(itemStack);
+        } else {
+            return itemStack.getOrDefault(ModRegistry.SELECTED_ITEM_DATA_COMPONENT_TYPE.value(), -1);
+        }
     }
 
     public static void setSelectedItem(ItemStack itemStack, int selectedItem) {
-        if (selectedItem != -1) {
-            itemStack.set(ModRegistry.SELECTED_ITEM_DATA_COMPONENT_TYPE.value(), selectedItem);
+        if (itemStack.has(DataComponents.BUNDLE_CONTENTS)) {
+            BundleItem.toggleSelectedItem(itemStack, selectedItem);
         } else {
-            itemStack.remove(ModRegistry.SELECTED_ITEM_DATA_COMPONENT_TYPE.value());
+            if (selectedItem != -1) {
+                itemStack.set(ModRegistry.SELECTED_ITEM_DATA_COMPONENT_TYPE.value(), selectedItem);
+            } else {
+                itemStack.remove(ModRegistry.SELECTED_ITEM_DATA_COMPONENT_TYPE.value());
+            }
         }
     }
 

@@ -3,8 +3,8 @@ package fuzs.iteminteractions.common.api.v1.world.item.storage;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import fuzs.iteminteractions.common.api.v1.world.item.DyeBackedColor;
 import fuzs.iteminteractions.common.api.v1.world.inventory.tooltip.ItemContentsTooltip;
+import fuzs.iteminteractions.common.api.v1.world.item.DyeBackedColor;
 import fuzs.iteminteractions.common.impl.init.ModRegistry;
 import fuzs.iteminteractions.common.impl.world.inventory.ContainerSlotHelper;
 import fuzs.puzzleslib.common.api.container.v1.ContainerMenuHelper;
@@ -26,8 +26,8 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.Optional;
 
-public class ContainerItemStorage extends ContentsBackedItemStorage {
-    public static final MapCodec<ContainerItemStorage> CODEC = RecordCodecBuilder.mapCodec(instance -> {
+public class ContainerStorage extends ComponentBackedStorage {
+    public static final MapCodec<ContainerStorage> CODEC = RecordCodecBuilder.mapCodec(instance -> {
         return instance.group(inventoryWidthCodec(),
                         inventoryHeightCodec(),
                         backgroundColorCodec(),
@@ -36,7 +36,7 @@ public class ContainerItemStorage extends ContentsBackedItemStorage {
                         equipmentSlotsCodec())
                 .apply(instance,
                         (Integer inventoryWidth, Integer inventoryHeight, Optional<DyeBackedColor> dyeColor, ItemContents itemContents, InteractionPermissions interactionPermissions, EquipmentSlotGroup equipmentSlots) -> {
-                            return new ContainerItemStorage(inventoryWidth,
+                            return new ContainerStorage(inventoryWidth,
                                     inventoryHeight,
                                     dyeColor.orElse(null)).itemContents(itemContents)
                                     .interactionPermissions(interactionPermissions)
@@ -44,60 +44,76 @@ public class ContainerItemStorage extends ContentsBackedItemStorage {
                         });
     });
     private static final EquipmentSlot[] EQUIPMENT_SLOTS = EquipmentSlot.values();
-
     final int inventoryWidth;
     final int inventoryHeight;
+    @Nullable
+    final DyeBackedColor dyeColor;
     InteractionPermissions interactionPermissions = InteractionPermissions.ALWAYS;
     EquipmentSlotGroup equipmentSlots = EquipmentSlotGroup.ANY;
 
-    public ContainerItemStorage(int inventoryWidth, int inventoryHeight) {
+    public ContainerStorage(int inventoryWidth, int inventoryHeight) {
         this(inventoryWidth, inventoryHeight, null);
     }
 
-    public ContainerItemStorage(int inventoryWidth, int inventoryHeight, @Nullable DyeBackedColor dyeColor) {
-        super(dyeColor);
+    public ContainerStorage(int inventoryWidth, int inventoryHeight, @Nullable DyeBackedColor dyeColor) {
         this.inventoryWidth = inventoryWidth;
         this.inventoryHeight = inventoryHeight;
+        this.dyeColor = dyeColor;
     }
 
-    protected static <T extends ContainerItemStorage> RecordCodecBuilder<T, Integer> inventoryWidthCodec() {
-        return ExtraCodecs.POSITIVE_INT.fieldOf("inventory_width").forGetter(ContainerItemStorage::getInventoryWidth);
+    protected static <T extends ContainerStorage> RecordCodecBuilder<T, Integer> inventoryWidthCodec() {
+        return ExtraCodecs.POSITIVE_INT.fieldOf("inventory_width").forGetter(ContainerStorage::getInventoryWidth);
     }
 
-    protected static <T extends ContainerItemStorage> RecordCodecBuilder<T, Integer> inventoryHeightCodec() {
-        return ExtraCodecs.POSITIVE_INT.fieldOf("inventory_height").forGetter(ContainerItemStorage::getInventoryHeight);
+    protected static <T extends ContainerStorage> RecordCodecBuilder<T, Integer> inventoryHeightCodec() {
+        return ExtraCodecs.POSITIVE_INT.fieldOf("inventory_height").forGetter(ContainerStorage::getInventoryHeight);
     }
 
-    protected static <T extends ContainerItemStorage> RecordCodecBuilder<T, InteractionPermissions> interactionPermissionsCodec() {
+    protected static <T extends ContainerStorage> RecordCodecBuilder<T, Optional<DyeBackedColor>> backgroundColorCodec() {
+        return DyeBackedColor.CODEC.optionalFieldOf("background_color")
+                .forGetter((T provider) -> Optional.ofNullable(provider.dyeColor));
+    }
+
+    protected static <T extends ContainerStorage> RecordCodecBuilder<T, InteractionPermissions> interactionPermissionsCodec() {
         return InteractionPermissions.CODEC.fieldOf("interaction_permissions")
                 .orElse(InteractionPermissions.ALWAYS)
                 .forGetter(provider -> provider.interactionPermissions);
     }
 
-    protected static <T extends ContainerItemStorage> RecordCodecBuilder<T, EquipmentSlotGroup> equipmentSlotsCodec() {
+    protected static <T extends ContainerStorage> RecordCodecBuilder<T, EquipmentSlotGroup> equipmentSlotsCodec() {
         return EquipmentSlotGroup.CODEC.fieldOf("equipment_slots")
                 .orElse(EquipmentSlotGroup.ANY)
                 .forGetter(provider -> provider.equipmentSlots);
     }
 
     @Override
-    protected ContainerItemStorage itemContents(ItemContents itemContents) {
-        return (ContainerItemStorage) super.itemContents(itemContents);
+    protected ContainerStorage itemContents(ItemContents itemContents) {
+        return (ContainerStorage) super.itemContents(itemContents);
     }
 
     @Override
-    public ContainerItemStorage filterContainerItems(boolean filterContainerItems) {
-        return (ContainerItemStorage) super.filterContainerItems(filterContainerItems);
+    public ContainerStorage filterContainerItems(boolean filterContainerItems) {
+        return (ContainerStorage) super.filterContainerItems(filterContainerItems);
     }
 
-    public ContainerItemStorage interactionPermissions(InteractionPermissions interactionPermissions) {
+    public ContainerStorage interactionPermissions(InteractionPermissions interactionPermissions) {
         this.interactionPermissions = interactionPermissions;
         return this;
     }
 
-    public ContainerItemStorage equipmentSlots(EquipmentSlotGroup equipmentSlots) {
+    public ContainerStorage equipmentSlots(EquipmentSlotGroup equipmentSlots) {
         this.equipmentSlots = equipmentSlots;
         return this;
+    }
+
+    @Override
+    public int getGridWidth(int itemCount) {
+        return this.getInventoryWidth();
+    }
+
+    @Override
+    public int getGridHeight(int itemCount) {
+        return this.getInventoryHeight();
     }
 
     protected int getInventoryWidth() {
@@ -141,10 +157,10 @@ public class ContainerItemStorage extends ContentsBackedItemStorage {
     public TooltipComponent createTooltipImageComponent(ItemStack itemStack, Player player, NonNullList<ItemStack> items) {
         int selectedItem = ContainerSlotHelper.getSelectedItem(itemStack);
         return new ItemContentsTooltip(items,
-                this.getInventoryWidth(),
-                this.getInventoryHeight(),
-                this.dyeColor,
-                selectedItem);
+                selectedItem,
+                this.getGridWidth(items.size()),
+                this.getGridHeight(items.size()),
+                this.dyeColor);
     }
 
     @Override

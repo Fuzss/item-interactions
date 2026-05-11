@@ -7,9 +7,9 @@ import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
 public record ItemContentsTooltip(NonNullList<ItemStack> items,
-                                  int gridSizeX,
-                                  int gridSizeY,
-                                  @Nullable DyeBackedColor dyeColor,
-                                  int selectedItem) implements TooltipComponent {
+                                  int selectedItem,
+                                  int gridWidth,
+                                  int gridHeight,
+                                  @Nullable DyeBackedColor dyeColor) implements TooltipComponent {
 
 }

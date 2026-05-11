@@ -12,8 +12,8 @@ import java.util.Optional;
 /**
  * A bare-bones implementation of {@link ItemStorage}.
  */
-public class DefaultItemStorage implements ItemStorage {
-    public static final ItemStorage INSTANCE = new DefaultItemStorage();
+public class VoidStorage implements ItemStorage {
+    public static final ItemStorage INSTANCE = new VoidStorage();
     public static final MapCodec<ItemStorage> CODEC = MapCodec.unit(INSTANCE);
 
     @Override

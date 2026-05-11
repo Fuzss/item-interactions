@@ -2,10 +2,10 @@ package fuzs.iteminteractions.common.impl.init;
 
 import com.mojang.serialization.MapCodec;
 import fuzs.iteminteractions.common.api.v1.world.item.storage.ItemStorage;
-import fuzs.iteminteractions.common.api.v1.world.item.storage.BundleItemStorage;
-import fuzs.iteminteractions.common.api.v1.world.item.storage.ContainerItemStorage;
-import fuzs.iteminteractions.common.api.v1.world.item.storage.DefaultItemStorage;
-import fuzs.iteminteractions.common.api.v1.world.item.storage.EnderChestItemStorage;
+import fuzs.iteminteractions.common.api.v1.world.item.storage.BundleContentsStorage;
+import fuzs.iteminteractions.common.api.v1.world.item.storage.ContainerStorage;
+import fuzs.iteminteractions.common.api.v1.world.item.storage.VoidStorage;
+import fuzs.iteminteractions.common.api.v1.world.item.storage.EnderChestStorage;
 import fuzs.iteminteractions.common.impl.ItemInteractions;
 import fuzs.puzzleslib.common.api.attachment.v4.DataAttachmentRegistry;
 import fuzs.puzzleslib.common.api.attachment.v4.DataAttachmentType;
@@ -25,19 +25,19 @@ public class ModRegistry {
     public static final Holder.Reference<ItemStorage.Type<?>> EMPTY_ITEM_CONTENTS_PROVIDER_TYPE = REGISTRIES.register(
             ItemStorage.REGISTRY_KEY,
             "empty",
-            () -> new ItemStorage.Type<>(DefaultItemStorage.CODEC));
+            () -> new ItemStorage.Type<>(VoidStorage.CODEC));
     public static final Holder.Reference<ItemStorage.Type<?>> CONTAINER_ITEM_CONTENTS_PROVIDER_TYPE = REGISTRIES.register(
             ItemStorage.REGISTRY_KEY,
             "container",
-            () -> new ItemStorage.Type<>(ContainerItemStorage.CODEC));
+            () -> new ItemStorage.Type<>(ContainerStorage.CODEC));
     public static final Holder.Reference<ItemStorage.Type<?>> ENDER_CHEST_ITEM_CONTENTS_PROVIDER_TYPE = REGISTRIES.register(
             ItemStorage.REGISTRY_KEY,
             "ender_chest",
-            () -> new ItemStorage.Type<>(EnderChestItemStorage.CODEC));
+            () -> new ItemStorage.Type<>(EnderChestStorage.CODEC));
     public static final Holder.Reference<ItemStorage.Type<?>> BUNDLE_ITEM_CONTENTS_PROVIDER_TYPE = REGISTRIES.register(
             ItemStorage.REGISTRY_KEY,
             "bundle",
-            () -> new ItemStorage.Type<>(BundleItemStorage.CODEC));
+            () -> new ItemStorage.Type<>(BundleContentsStorage.CODEC));
 
     public static final DataAttachmentType<Entity, Boolean> MOVE_SINGLE_ITEM_ATTACHMENT_TYPE = DataAttachmentRegistry.<Boolean>entityBuilder()
             .defaultValue(EntityType.PLAYER, Boolean.FALSE)

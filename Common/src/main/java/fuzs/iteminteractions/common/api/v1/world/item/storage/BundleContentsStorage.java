@@ -3,14 +3,13 @@ package fuzs.iteminteractions.common.api.v1.world.item.storage;
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import fuzs.iteminteractions.common.api.v1.world.item.DyeBackedColor;
 import fuzs.iteminteractions.common.api.v1.world.inventory.tooltip.BundleContentsTooltip;
 import fuzs.iteminteractions.common.impl.init.ModRegistry;
-import fuzs.iteminteractions.common.impl.world.inventory.ContainerSlotHelper;
 import fuzs.puzzleslib.common.api.container.v1.ContainerMenuHelper;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.util.ExtraCodecs;
+import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
@@ -20,45 +19,40 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.component.BundleContents;
 import org.apache.commons.lang3.math.Fraction;
-import org.jspecify.annotations.Nullable;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
-public class BundleItemStorage extends ContentsBackedItemStorage {
-    public static final MapCodec<BundleItemStorage> CODEC = RecordCodecBuilder.mapCodec(instance -> {
-        return instance.group(capacityMultiplierCodec(), backgroundColorCodec(), itemContentsCodec())
-                .apply(instance,
-                        (Integer capacityMultiplier, Optional<DyeBackedColor> dyeColor, ItemContents itemContents) -> {
-                            return new BundleItemStorage(capacityMultiplier, dyeColor.orElse(null)).itemContents(
-                                    itemContents);
-                        });
+public class BundleContentsStorage extends ComponentBackedStorage {
+    public static final MapCodec<BundleContentsStorage> CODEC = RecordCodecBuilder.mapCodec(instance -> {
+        return instance.group(capacityMultiplierCodec(), itemContentsCodec())
+                .apply(instance, (Integer capacityMultiplier, ItemContents itemContents) -> {
+                    return new BundleContentsStorage(capacityMultiplier).itemContents(itemContents);
+                });
     });
 
     final int capacityMultiplier;
 
-    public BundleItemStorage(@Nullable DyeBackedColor dyeColor) {
-        this(1, dyeColor);
+    public BundleContentsStorage() {
+        this(1);
     }
 
-    public BundleItemStorage(int capacityMultiplier, @Nullable DyeBackedColor dyeColor) {
-        super(dyeColor);
+    public BundleContentsStorage(int capacityMultiplier) {
         this.capacityMultiplier = capacityMultiplier;
     }
 
-    protected static <T extends BundleItemStorage> RecordCodecBuilder<T, Integer> capacityMultiplierCodec() {
+    protected static <T extends BundleContentsStorage> RecordCodecBuilder<T, Integer> capacityMultiplierCodec() {
         return ExtraCodecs.POSITIVE_INT.fieldOf("capacity_multiplier")
                 .forGetter(provider -> provider.capacityMultiplier);
     }
 
     @Override
-    protected BundleItemStorage itemContents(ItemContents itemContents) {
-        return (BundleItemStorage) super.itemContents(itemContents);
+    protected BundleContentsStorage itemContents(ItemContents itemContents) {
+        return (BundleContentsStorage) super.itemContents(itemContents);
     }
 
     @Override
-    public BundleItemStorage filterContainerItems(boolean filterContainerItems) {
-        return (BundleItemStorage) super.filterContainerItems(filterContainerItems);
+    public BundleContentsStorage filterContainerItems(boolean filterContainerItems) {
+        return (BundleContentsStorage) super.filterContainerItems(filterContainerItems);
     }
 
     public Fraction getCapacityMultiplier(ItemStack containerStack) {
@@ -78,9 +72,9 @@ public class BundleItemStorage extends ContentsBackedItemStorage {
                 .toArray(ItemStack[]::new);
         NonNullList<ItemStack> items = NonNullList.of(ItemStack.EMPTY, itemStacks);
         return ContainerMenuHelper.createListBackedContainer(items, allowSaving ? (Container container) -> {
-            BundleContents newContents;
+            BundleContents updatedContents;
             if (container.isEmpty()) {
-                newContents = BundleContents.EMPTY;
+                updatedContents = BundleContents.EMPTY;
             } else {
                 // empty stacks must not get in here, the codec will fail otherwise
                 ImmutableList.Builder<ItemStackTemplate> builder = ImmutableList.builder();
@@ -90,9 +84,10 @@ public class BundleItemStorage extends ContentsBackedItemStorage {
                     }
                 }
 
-                newContents = new BundleContents(builder.build());
+                updatedContents = new BundleContents(builder.build());
             }
-            containerStack.set(DataComponents.BUNDLE_CONTENTS, newContents);
+
+            containerStack.set(DataComponents.BUNDLE_CONTENTS, updatedContents);
         } : null);
     }
 
@@ -108,6 +103,16 @@ public class BundleItemStorage extends ContentsBackedItemStorage {
     }
 
     @Override
+    public int getGridWidth(int itemCount) {
+        return Math.max(4, Mth.ceil(Math.sqrt(itemCount)));
+    }
+
+    @Override
+    public int getGridHeight(int itemCount) {
+        return Mth.positiveCeilDiv(itemCount, this.getGridWidth(itemCount));
+    }
+
+    @Override
     public boolean canProvideTooltipImage(ItemStack itemStack, Player player) {
         return true;
     }
@@ -120,12 +125,15 @@ public class BundleItemStorage extends ContentsBackedItemStorage {
     }
 
     @Override
+    public NonNullList<ItemStack> getTooltipContents(ItemStack itemStack, Player player) {
+        BundleContents contents = itemStack.getOrDefault(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY);
+        return NonNullList.of(ItemStack.EMPTY, contents.itemCopyStream().toArray(ItemStack[]::new));
+    }
+
+    @Override
     public TooltipComponent createTooltipImageComponent(ItemStack itemStack, Player player, NonNullList<ItemStack> items) {
-        int selectedItem = ContainerSlotHelper.getSelectedItem(itemStack);
-        return new BundleContentsTooltip(items,
-                this.computeContentWeight(itemStack, player).divideBy(this.getCapacityMultiplier(itemStack)),
-                this.dyeColor,
-                selectedItem);
+        BundleContents contents = itemStack.getOrDefault(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY);
+        return new BundleContentsTooltip(contents, this.getGridWidth(items.size()), this.getGridHeight(items.size()));
     }
 
     public int getMaxAmountToAdd(ItemStack containerStack, ItemStack stackToAdd, Player player) {

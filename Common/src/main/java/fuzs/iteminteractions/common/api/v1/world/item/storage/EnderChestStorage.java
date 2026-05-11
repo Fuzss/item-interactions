@@ -1,8 +1,8 @@
 package fuzs.iteminteractions.common.api.v1.world.item.storage;
 
 import com.mojang.serialization.MapCodec;
-import fuzs.iteminteractions.common.api.v1.world.item.DyeBackedColor;
 import fuzs.iteminteractions.common.api.v1.world.inventory.tooltip.ItemContentsTooltip;
+import fuzs.iteminteractions.common.api.v1.world.item.DyeBackedColor;
 import fuzs.iteminteractions.common.impl.handler.EnderChestSyncHandler;
 import fuzs.iteminteractions.common.impl.init.ModRegistry;
 import fuzs.iteminteractions.common.impl.world.inventory.ContainerSlotHelper;
@@ -13,13 +13,12 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
 
-public class EnderChestItemStorage implements ItemStorageWithTooltip {
+public class EnderChestStorage implements ItemStorageWithTooltip {
     /**
      * Pretty ender color from <a href="https://www.curseforge.com/minecraft/mc-mods/tinted">Tinted mod</a>.
      */
     private static final DyeBackedColor DEFAULT_ENDER_CHEST_COLOR = DyeBackedColor.fromRgb(0X2A6255);
-    private static final int GRID_SIZE_X = 9;
-    public static final MapCodec<EnderChestItemStorage> CODEC = MapCodec.unit(EnderChestItemStorage::new);
+    public static final MapCodec<EnderChestStorage> CODEC = MapCodec.unit(EnderChestStorage::new);
 
     @Override
     public SimpleContainer getItemContainer(ItemStack containerStack, Player player, boolean allowSaving) {
@@ -32,22 +31,27 @@ public class EnderChestItemStorage implements ItemStorageWithTooltip {
     }
 
     @Override
-    public TooltipComponent createTooltipImageComponent(ItemStack itemStack, Player player, NonNullList<ItemStack> items) {
-        int selectedItem = ContainerSlotHelper.getSelectedItem(itemStack);
-        return new ItemContentsTooltip(items,
-                GRID_SIZE_X,
-                this.getGridSizeY(items),
-                DEFAULT_ENDER_CHEST_COLOR,
-                selectedItem);
+    public int getGridWidth(int itemCount) {
+        return 9;
     }
 
-    private int getGridSizeY(NonNullList<ItemStack> items) {
-        if (items.size() % GRID_SIZE_X == 0) {
-            // try support mods that add more ender chest rows, like Carpet mod
-            return items.size() / GRID_SIZE_X;
+    @Override
+    public int getGridHeight(int itemCount) {
+        int gridWidth = this.getGridWidth(itemCount);
+        // Attempt to support mods that add more ender chest rows, like the Carpet mod.
+        if (itemCount % gridWidth == 0) {
+            return itemCount / gridWidth;
         } else {
             return 3;
         }
+    }
+
+    @Override
+    public TooltipComponent createTooltipImageComponent(ItemStack itemStack, Player player, NonNullList<ItemStack> items) {
+        int selectedItem = ContainerSlotHelper.getSelectedItem(itemStack);
+        return new ItemContentsTooltip(items, selectedItem, this.getGridWidth(items.size()),
+                this.getGridHeight(items.size()),
+                DEFAULT_ENDER_CHEST_COLOR);
     }
 
     @Override
