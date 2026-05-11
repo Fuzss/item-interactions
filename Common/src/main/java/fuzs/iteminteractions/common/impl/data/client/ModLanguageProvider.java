@@ -1,6 +1,6 @@
 package fuzs.iteminteractions.common.impl.data.client;
 
-import fuzs.iteminteractions.common.api.v1.client.tooltip.CollapsibleClientTooltipComponent;
+import fuzs.iteminteractions.common.impl.client.gui.screens.inventory.tooltip.CollapsibleClientTooltipComponent;
 import fuzs.iteminteractions.common.impl.ItemInteractions;
 import fuzs.iteminteractions.common.impl.client.core.ActivationTypeProvider;
 import fuzs.iteminteractions.common.impl.config.VisualItemContents;

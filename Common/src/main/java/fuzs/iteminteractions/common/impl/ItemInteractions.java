@@ -1,6 +1,6 @@
 package fuzs.iteminteractions.common.impl;
 
-import fuzs.iteminteractions.common.api.v1.provider.ItemContentsProvider;
+import fuzs.iteminteractions.common.api.v1.world.item.storage.ItemStorage;
 import fuzs.iteminteractions.common.impl.config.ClientConfig;
 import fuzs.iteminteractions.common.impl.config.ServerConfig;
 import fuzs.iteminteractions.common.impl.data.DynamicItemContentsProvider;
@@ -11,6 +11,7 @@ import fuzs.iteminteractions.common.impl.network.ClientboundEnderChestSlotMessag
 import fuzs.iteminteractions.common.impl.network.ClientboundSyncItemContentsProviders;
 import fuzs.iteminteractions.common.impl.network.client.ServerboundContainerClientInputMessage;
 import fuzs.iteminteractions.common.impl.network.client.ServerboundEnderChestContentMessage;
+import fuzs.iteminteractions.common.impl.network.client.ServerboundSelectedItemMessage;
 import fuzs.iteminteractions.common.impl.world.item.container.ItemContentsProviders;
 import fuzs.puzzleslib.common.api.config.v3.ConfigHolder;
 import fuzs.puzzleslib.common.api.core.v1.ModConstructor;
@@ -63,6 +64,7 @@ public class ItemInteractions implements ModConstructor {
     public void onRegisterPayloadTypes(PayloadTypesContext context) {
         context.playToServer(ServerboundContainerClientInputMessage.class,
                 ServerboundContainerClientInputMessage.STREAM_CODEC);
+        context.playToServer(ServerboundSelectedItemMessage.class, ServerboundSelectedItemMessage.STREAM_CODEC);
         context.playToClient(ClientboundEnderChestContentMessage.class,
                 ClientboundEnderChestContentMessage.STREAM_CODEC);
         context.playToClient(ClientboundEnderChestSlotMessage.class, ClientboundEnderChestSlotMessage.STREAM_CODEC);
@@ -74,7 +76,7 @@ public class ItemInteractions implements ModConstructor {
 
     @Override
     public void onRegisterGameRegistries(GameRegistriesContext context) {
-        context.registerRegistry(ItemContentsProvider.REGISTRY);
+        context.registerRegistry(ItemStorage.REGISTRY);
     }
 
     @Override

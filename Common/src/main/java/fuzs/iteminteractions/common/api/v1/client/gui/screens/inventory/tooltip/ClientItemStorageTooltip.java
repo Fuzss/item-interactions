@@ -1,10 +1,8 @@
-package fuzs.iteminteractions.common.api.v1.client.tooltip;
+package fuzs.iteminteractions.common.api.v1.client.gui.screens.inventory.tooltip;
 
-import fuzs.iteminteractions.common.api.v1.DyeBackedColor;
+import fuzs.iteminteractions.common.api.v1.world.item.DyeBackedColor;
 import fuzs.iteminteractions.common.impl.ItemInteractions;
 import fuzs.iteminteractions.common.impl.config.ClientConfig;
-import fuzs.iteminteractions.common.impl.world.inventory.ContainerSlotHelper;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.ColorLerper;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -23,20 +21,21 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
-public abstract class AbstractClientItemContentsTooltip implements ClientTooltipComponent {
+public abstract class ClientItemStorageTooltip implements ClientTooltipComponent {
     private static final Identifier CONTAINER_SPRITE = ItemInteractions.id("container/container");
     private static final Identifier SLOT_BLOCKED_SPRITE = ItemInteractions.id("container/slot_blocked");
     private static final Identifier SLOT_SELECTION_SPRITE = ItemInteractions.id("container/slot_selection");
     protected static final int BORDER_SIZE = 7;
     protected static final int SLOT_SIZE = 18;
 
-    private final Minecraft minecraft = Minecraft.getInstance();
     protected final NonNullList<ItemStack> items;
     private final int backgroundColor;
+    private final int selectedItem;
 
-    public AbstractClientItemContentsTooltip(NonNullList<ItemStack> items, @Nullable DyeBackedColor dyeColor) {
+    public ClientItemStorageTooltip(NonNullList<ItemStack> items, @Nullable DyeBackedColor dyeColor, int selectedItem) {
         this.items = items;
         this.backgroundColor = getBackgroundColor(dyeColor);
+        this.selectedItem = selectedItem;
     }
 
     public static int getBackgroundColor(@Nullable DyeBackedColor color) {
@@ -115,10 +114,9 @@ public abstract class AbstractClientItemContentsTooltip implements ClientTooltip
     }
 
     private int getSelectedSlot() {
-        int currentContainerSlot = ContainerSlotHelper.getCurrentContainerSlot(this.minecraft.player);
-        if (currentContainerSlot != -1 && currentContainerSlot < this.items.size()) {
-            if (!this.items.get(currentContainerSlot).isEmpty()) {
-                return currentContainerSlot;
+        if (this.selectedItem != -1 && this.selectedItem < this.items.size()) {
+            if (!this.items.get(this.selectedItem).isEmpty()) {
+                return this.selectedItem;
             }
         }
 

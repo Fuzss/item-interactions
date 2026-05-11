@@ -1,6 +1,6 @@
-package fuzs.iteminteractions.common.api.v1.provider;
+package fuzs.iteminteractions.common.api.v1.world.item.storage;
 
-import fuzs.iteminteractions.common.api.v1.provider.impl.EmptyProvider;
+import fuzs.iteminteractions.common.impl.world.item.container.ItemContentsProviders;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
@@ -12,27 +12,32 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * A holder class for individual {@link ItemContentsProvider} instances, mainly to include additional checks when
- * calling various methods.
- * <p>
- * TODO rename and refactor as ItemStorageHolder
+ * A holder class for individual {@link ItemStorage} instances, mainly to include additional checks when calling various
+ * methods.
  *
- * @param provider the wrapped {@link ItemContentsProvider}
+ * @param storage the wrapped {@link ItemStorage}
  */
-public record ItemContentsBehavior(ItemContentsProvider provider) {
+public record ItemStorageHolder(ItemStorage storage) {
+    /**
+     * The empty instance.
+     */
+    public static final ItemStorageHolder EMPTY = new ItemStorageHolder(DefaultItemStorage.INSTANCE);
 
     /**
-     * @return new and possibly empty behavior instance
+     * Get a registered holder for an item.
+     *
+     * @param itemStack the item stack
+     * @return the holder that may be empty
      */
-    public static ItemContentsBehavior ofNullable(@Nullable ItemContentsProvider provider) {
-        return provider != null ? new ItemContentsBehavior(provider) : empty();
+    public static ItemStorageHolder ofItem(ItemStack itemStack) {
+        return ItemContentsProviders.get(itemStack);
     }
 
     /**
-     * @return new empty behavior instance
+     * @return the holder that may be empty
      */
-    public static ItemContentsBehavior empty() {
-        return new ItemContentsBehavior(EmptyProvider.INSTANCE);
+    public static ItemStorageHolder ofNullable(@Nullable ItemStorage storage) {
+        return storage != null ? new ItemStorageHolder(storage) : EMPTY;
     }
 
     /**
@@ -44,7 +49,7 @@ public record ItemContentsBehavior(ItemContentsProvider provider) {
      * @return are inventory interactions allowed (is a container present on this item)
      */
     public boolean allowsPlayerInteractions(ItemStack containerStack, Player player) {
-        return this.provider.allowsPlayerInteractions(containerStack, player);
+        return this.storage.allowsPlayerInteractions(containerStack, player);
     }
 
     /**
@@ -56,7 +61,7 @@ public record ItemContentsBehavior(ItemContentsProvider provider) {
      * @return is <code>stack</code> allowed to be added to the container
      */
     public boolean isItemAllowedInContainer(ItemStack stackToAdd) {
-        return this.provider.isItemAllowedInContainer(stackToAdd);
+        return this.storage.isItemAllowedInContainer(stackToAdd);
     }
 
     /**
@@ -72,7 +77,7 @@ public record ItemContentsBehavior(ItemContentsProvider provider) {
      * @return is adding any portion of <code>stackToAdd</code> to the container possible
      */
     public boolean canAddItem(ItemStack containerStack, ItemStack stackToAdd, Player player) {
-        return this.canAcceptItem(containerStack, stackToAdd, player) && this.provider.canAddItem(containerStack,
+        return this.canAcceptItem(containerStack, stackToAdd, player) && this.storage.canAddItem(containerStack,
                 stackToAdd,
                 player);
     }
@@ -85,7 +90,7 @@ public record ItemContentsBehavior(ItemContentsProvider provider) {
      * @return the provided container
      */
     public SimpleContainer getItemContainerView(ItemStack containerStack, Player player) {
-        SimpleContainer container = this.provider.getItemContainer(containerStack, player, false);
+        SimpleContainer container = this.storage.getItemContainer(containerStack, player, false);
         Objects.requireNonNull(container, "container is null");
         return container;
     }
@@ -100,7 +105,7 @@ public record ItemContentsBehavior(ItemContentsProvider provider) {
      * @return the provided container
      */
     public SimpleContainer getItemContainer(ItemStack containerStack, Player player) {
-        SimpleContainer container = this.provider.getItemContainer(containerStack, player, true);
+        SimpleContainer container = this.storage.getItemContainer(containerStack, player, true);
         Objects.requireNonNull(container, "container is null");
         return container;
     }
@@ -126,7 +131,7 @@ public record ItemContentsBehavior(ItemContentsProvider provider) {
      * How much space is available in the container provided by <code>containerStack</code> to add
      * <code>stackToAdd</code>.
      * <p>
-     * Mainly used by bundles, otherwise {@link ItemContentsProvider#canAddItem} should be enough.
+     * Mainly used by bundles, otherwise {@link ItemStorage#canAddItem} should be enough.
      * <p>
      * Before this is called {@link #allowsPlayerInteractions(ItemStack, Player)} and
      * {@link #isItemAllowedInContainer(ItemStack)} are checked.
@@ -138,7 +143,7 @@ public record ItemContentsBehavior(ItemContentsProvider provider) {
      */
     public int getAcceptableItemCount(ItemStack containerStack, ItemStack stackToAdd, Player player) {
         if (this.canAcceptItem(containerStack, stackToAdd, player)) {
-            return this.provider.getAcceptableItemCount(containerStack, stackToAdd, player);
+            return this.storage.getAcceptableItemCount(containerStack, stackToAdd, player);
         } else {
             return 0;
         }
@@ -169,7 +174,7 @@ public record ItemContentsBehavior(ItemContentsProvider provider) {
      * @return does <code>containerStack</code> provide a tooltip image
      */
     public boolean canProvideTooltipImage(ItemStack containerStack, Player player) {
-        return this.provider.canProvideTooltipImage(containerStack, player);
+        return this.storage.canProvideTooltipImage(containerStack, player);
     }
 
     /**
@@ -180,7 +185,7 @@ public record ItemContentsBehavior(ItemContentsProvider provider) {
      * @return the image tooltip provided by the item stack.
      */
     public Optional<TooltipComponent> getTooltipImage(ItemStack containerStack, Player player) {
-        Optional<TooltipComponent> tooltipImage = this.provider.getTooltipImage(containerStack, player);
+        Optional<TooltipComponent> tooltipImage = this.storage.getTooltipImage(containerStack, player);
         Objects.requireNonNull(tooltipImage, "tooltip image is null");
         return tooltipImage;
     }
@@ -188,14 +193,14 @@ public record ItemContentsBehavior(ItemContentsProvider provider) {
     /**
      * @return the item container provider type
      */
-    public ItemContentsProvider.Type<?> getType() {
-        return this.provider.getType();
+    public ItemStorage.Type<?> getType() {
+        return this.storage.getType();
     }
 
     /**
      * @return is this the empty behavior singleton instance
      */
     public boolean isEmpty() {
-        return this.provider == EmptyProvider.INSTANCE;
+        return this.storage == DefaultItemStorage.INSTANCE;
     }
 }

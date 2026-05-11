@@ -1,12 +1,12 @@
-package fuzs.iteminteractions.common.api.v1.provider.impl;
+package fuzs.iteminteractions.common.api.v1.world.item.storage;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import fuzs.iteminteractions.common.api.v1.DyeBackedColor;
-import fuzs.iteminteractions.common.api.v1.provider.AbstractProvider;
-import fuzs.iteminteractions.common.api.v1.tooltip.ItemContentsTooltip;
+import fuzs.iteminteractions.common.api.v1.world.item.DyeBackedColor;
+import fuzs.iteminteractions.common.api.v1.world.inventory.tooltip.ItemContentsTooltip;
 import fuzs.iteminteractions.common.impl.init.ModRegistry;
+import fuzs.iteminteractions.common.impl.world.inventory.ContainerSlotHelper;
 import fuzs.puzzleslib.common.api.container.v1.ContainerMenuHelper;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
@@ -26,8 +26,8 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.Optional;
 
-public class ContainerProvider extends AbstractProvider {
-    public static final MapCodec<ContainerProvider> CODEC = RecordCodecBuilder.mapCodec(instance -> {
+public class ContainerItemStorage extends ContentsBackedItemStorage {
+    public static final MapCodec<ContainerItemStorage> CODEC = RecordCodecBuilder.mapCodec(instance -> {
         return instance.group(inventoryWidthCodec(),
                         inventoryHeightCodec(),
                         backgroundColorCodec(),
@@ -36,7 +36,7 @@ public class ContainerProvider extends AbstractProvider {
                         equipmentSlotsCodec())
                 .apply(instance,
                         (Integer inventoryWidth, Integer inventoryHeight, Optional<DyeBackedColor> dyeColor, ItemContents itemContents, InteractionPermissions interactionPermissions, EquipmentSlotGroup equipmentSlots) -> {
-                            return new ContainerProvider(inventoryWidth,
+                            return new ContainerItemStorage(inventoryWidth,
                                     inventoryHeight,
                                     dyeColor.orElse(null)).itemContents(itemContents)
                                     .interactionPermissions(interactionPermissions)
@@ -50,52 +50,52 @@ public class ContainerProvider extends AbstractProvider {
     InteractionPermissions interactionPermissions = InteractionPermissions.ALWAYS;
     EquipmentSlotGroup equipmentSlots = EquipmentSlotGroup.ANY;
 
-    public ContainerProvider(int inventoryWidth, int inventoryHeight) {
+    public ContainerItemStorage(int inventoryWidth, int inventoryHeight) {
         this(inventoryWidth, inventoryHeight, null);
     }
 
-    public ContainerProvider(int inventoryWidth, int inventoryHeight, @Nullable DyeBackedColor dyeColor) {
+    public ContainerItemStorage(int inventoryWidth, int inventoryHeight, @Nullable DyeBackedColor dyeColor) {
         super(dyeColor);
         this.inventoryWidth = inventoryWidth;
         this.inventoryHeight = inventoryHeight;
     }
 
-    protected static <T extends ContainerProvider> RecordCodecBuilder<T, Integer> inventoryWidthCodec() {
-        return ExtraCodecs.POSITIVE_INT.fieldOf("inventory_width").forGetter(ContainerProvider::getInventoryWidth);
+    protected static <T extends ContainerItemStorage> RecordCodecBuilder<T, Integer> inventoryWidthCodec() {
+        return ExtraCodecs.POSITIVE_INT.fieldOf("inventory_width").forGetter(ContainerItemStorage::getInventoryWidth);
     }
 
-    protected static <T extends ContainerProvider> RecordCodecBuilder<T, Integer> inventoryHeightCodec() {
-        return ExtraCodecs.POSITIVE_INT.fieldOf("inventory_height").forGetter(ContainerProvider::getInventoryHeight);
+    protected static <T extends ContainerItemStorage> RecordCodecBuilder<T, Integer> inventoryHeightCodec() {
+        return ExtraCodecs.POSITIVE_INT.fieldOf("inventory_height").forGetter(ContainerItemStorage::getInventoryHeight);
     }
 
-    protected static <T extends ContainerProvider> RecordCodecBuilder<T, InteractionPermissions> interactionPermissionsCodec() {
+    protected static <T extends ContainerItemStorage> RecordCodecBuilder<T, InteractionPermissions> interactionPermissionsCodec() {
         return InteractionPermissions.CODEC.fieldOf("interaction_permissions")
                 .orElse(InteractionPermissions.ALWAYS)
                 .forGetter(provider -> provider.interactionPermissions);
     }
 
-    protected static <T extends ContainerProvider> RecordCodecBuilder<T, EquipmentSlotGroup> equipmentSlotsCodec() {
+    protected static <T extends ContainerItemStorage> RecordCodecBuilder<T, EquipmentSlotGroup> equipmentSlotsCodec() {
         return EquipmentSlotGroup.CODEC.fieldOf("equipment_slots")
                 .orElse(EquipmentSlotGroup.ANY)
                 .forGetter(provider -> provider.equipmentSlots);
     }
 
     @Override
-    protected ContainerProvider itemContents(ItemContents itemContents) {
-        return (ContainerProvider) super.itemContents(itemContents);
+    protected ContainerItemStorage itemContents(ItemContents itemContents) {
+        return (ContainerItemStorage) super.itemContents(itemContents);
     }
 
     @Override
-    public ContainerProvider filterContainerItems(boolean filterContainerItems) {
-        return (ContainerProvider) super.filterContainerItems(filterContainerItems);
+    public ContainerItemStorage filterContainerItems(boolean filterContainerItems) {
+        return (ContainerItemStorage) super.filterContainerItems(filterContainerItems);
     }
 
-    public ContainerProvider interactionPermissions(InteractionPermissions interactionPermissions) {
+    public ContainerItemStorage interactionPermissions(InteractionPermissions interactionPermissions) {
         this.interactionPermissions = interactionPermissions;
         return this;
     }
 
-    public ContainerProvider equipmentSlots(EquipmentSlotGroup equipmentSlots) {
+    public ContainerItemStorage equipmentSlots(EquipmentSlotGroup equipmentSlots) {
         this.equipmentSlots = equipmentSlots;
         return this;
     }
@@ -138,8 +138,13 @@ public class ContainerProvider extends AbstractProvider {
     }
 
     @Override
-    public TooltipComponent createTooltipImageComponent(ItemStack containerStack, Player player, NonNullList<ItemStack> items) {
-        return new ItemContentsTooltip(items, this.getInventoryWidth(), this.getInventoryHeight(), this.dyeColor);
+    public TooltipComponent createTooltipImageComponent(ItemStack itemStack, Player player, NonNullList<ItemStack> items) {
+        int selectedItem = ContainerSlotHelper.getSelectedItem(itemStack);
+        return new ItemContentsTooltip(items,
+                this.getInventoryWidth(),
+                this.getInventoryHeight(),
+                this.dyeColor,
+                selectedItem);
     }
 
     @Override

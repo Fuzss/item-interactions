@@ -1,4 +1,4 @@
-package fuzs.iteminteractions.common.api.v1.provider;
+package fuzs.iteminteractions.common.api.v1.world.item.storage;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
@@ -28,15 +28,13 @@ import java.util.Optional;
  * interactions (extracting and adding items via right-clicking on the item) and bundle-like tooltips.
  * <p>
  * A container does not necessarily need to provide both item interactions and tooltips, what is provided is defined by
- * implementing {@link ItemContentsProvider#allowsPlayerInteractions} and
- * {@link ItemContentsProvider#canProvideTooltipImage}.
+ * implementing {@link ItemStorage#allowsPlayerInteractions} and
+ * {@link ItemStorage#canProvideTooltipImage}.
  * <p>
  * This overrides any already implemented behavior (the default providers in Easy Shulker Boxes actually do this for
  * vanilla bundles).
- * <p>
- * TODO rename and refactor as ItemStorage
  */
-public interface ItemContentsProvider {
+public interface ItemStorage {
     /**
      * The {@link Type} registry key.
      */
@@ -48,12 +46,12 @@ public interface ItemContentsProvider {
     /**
      * Codec that additionally to the provider itself also includes the provider type.
      */
-    MapCodec<ItemContentsProvider> CODEC = REGISTRY.byNameCodec()
-            .dispatchMap(ItemContentsProvider::getType, Type::codec);
+    MapCodec<ItemStorage> CODEC = REGISTRY.byNameCodec()
+            .dispatchMap(ItemStorage::getType, Type::codec);
     /**
      * Codec that includes a list of supported items.
      */
-    Codec<Map.Entry<HolderSet<Item>, ItemContentsProvider>> WITH_ITEMS_CODEC = RecordCodecBuilder.create(instance -> {
+    Codec<Map.Entry<HolderSet<Item>, ItemStorage>> WITH_ITEMS_CODEC = RecordCodecBuilder.create(instance -> {
         return instance.group(Ingredient.NON_AIR_HOLDER_SET_CODEC.lenientOptionalFieldOf("supported_items",
                         HolderSet.empty()).forGetter(Map.Entry::getKey), CODEC.forGetter(Map.Entry::getValue))
                 .apply(instance, Map::entry);
@@ -61,9 +59,9 @@ public interface ItemContentsProvider {
     /**
      * Stream codec that additionally to the provider itself also includes the provider type.
      */
-    StreamCodec<RegistryFriendlyByteBuf, ItemContentsProvider> STREAM_CODEC = ByteBufCodecs.registry(
-                    ItemContentsProvider.REGISTRY_KEY)
-            .dispatch(ItemContentsProvider::getType, ItemContentsProvider.Type::streamCodec);
+    StreamCodec<RegistryFriendlyByteBuf, ItemStorage> STREAM_CODEC = ByteBufCodecs.registry(
+                    ItemStorage.REGISTRY_KEY)
+            .dispatch(ItemStorage::getType, ItemStorage.Type::streamCodec);
 
     /**
      * Does this provider support item inventory interactions (extracting and adding items) on the given
@@ -156,7 +154,7 @@ public interface ItemContentsProvider {
      * How much space is available in the container provided by <code>containerStack</code> to add
      * <code>stackToAdd</code>.
      * <p>
-     * Mainly used by bundles, otherwise {@link ItemContentsProvider#canAddItem} should be enough.
+     * Mainly used by bundles, otherwise {@link ItemStorage#canAddItem} should be enough.
      * <p>
      * Before this is called {@link #allowsPlayerInteractions(ItemStack, Player)} and
      * {@link #isItemAllowedInContainer(ItemStack)} are checked.
@@ -212,8 +210,8 @@ public interface ItemContentsProvider {
      *
      * @param codec the item container provider codec
      */
-    record Type<T extends ItemContentsProvider>(MapCodec<T> codec,
-                                                StreamCodec<? super RegistryFriendlyByteBuf, T> streamCodec) {
+    record Type<T extends ItemStorage>(MapCodec<T> codec,
+                                       StreamCodec<? super RegistryFriendlyByteBuf, T> streamCodec) {
 
         public Type(MapCodec<T> codec) {
             this(codec, ByteBufCodecs.fromCodecWithRegistries(codec.codec()));

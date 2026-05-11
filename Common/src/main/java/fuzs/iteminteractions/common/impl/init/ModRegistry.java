@@ -1,43 +1,47 @@
 package fuzs.iteminteractions.common.impl.init;
 
-import fuzs.iteminteractions.common.api.v1.provider.ItemContentsProvider;
-import fuzs.iteminteractions.common.api.v1.provider.impl.BundleProvider;
-import fuzs.iteminteractions.common.api.v1.provider.impl.ContainerProvider;
-import fuzs.iteminteractions.common.api.v1.provider.impl.EmptyProvider;
-import fuzs.iteminteractions.common.api.v1.provider.impl.EnderChestProvider;
+import com.mojang.serialization.MapCodec;
+import fuzs.iteminteractions.common.api.v1.world.item.storage.ItemStorage;
+import fuzs.iteminteractions.common.api.v1.world.item.storage.BundleItemStorage;
+import fuzs.iteminteractions.common.api.v1.world.item.storage.ContainerItemStorage;
+import fuzs.iteminteractions.common.api.v1.world.item.storage.DefaultItemStorage;
+import fuzs.iteminteractions.common.api.v1.world.item.storage.EnderChestItemStorage;
 import fuzs.iteminteractions.common.impl.ItemInteractions;
 import fuzs.puzzleslib.common.api.attachment.v4.DataAttachmentRegistry;
 import fuzs.puzzleslib.common.api.attachment.v4.DataAttachmentType;
 import fuzs.puzzleslib.common.api.init.v3.registry.RegistryManager;
 import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 
 public class ModRegistry {
     static final RegistryManager REGISTRIES = RegistryManager.from(ItemInteractions.MOD_ID);
-    public static final Holder.Reference<ItemContentsProvider.Type<?>> EMPTY_ITEM_CONTENTS_PROVIDER_TYPE = REGISTRIES.register(
-            ItemContentsProvider.REGISTRY_KEY,
+    public static final Holder.Reference<DataComponentType<Integer>> SELECTED_ITEM_DATA_COMPONENT_TYPE = REGISTRIES.registerDataComponentType(
+            "selected_item",
+            (DataComponentType.Builder<Integer> builder) -> builder.persistent(MapCodec.unitCodec(-1))
+                    .networkSynchronized(ByteBufCodecs.VAR_INT));
+    public static final Holder.Reference<ItemStorage.Type<?>> EMPTY_ITEM_CONTENTS_PROVIDER_TYPE = REGISTRIES.register(
+            ItemStorage.REGISTRY_KEY,
             "empty",
-            () -> new ItemContentsProvider.Type<>(EmptyProvider.CODEC));
-    public static final Holder.Reference<ItemContentsProvider.Type<?>> CONTAINER_ITEM_CONTENTS_PROVIDER_TYPE = REGISTRIES.register(
-            ItemContentsProvider.REGISTRY_KEY,
+            () -> new ItemStorage.Type<>(DefaultItemStorage.CODEC));
+    public static final Holder.Reference<ItemStorage.Type<?>> CONTAINER_ITEM_CONTENTS_PROVIDER_TYPE = REGISTRIES.register(
+            ItemStorage.REGISTRY_KEY,
             "container",
-            () -> new ItemContentsProvider.Type<>(ContainerProvider.CODEC));
-    public static final Holder.Reference<ItemContentsProvider.Type<?>> ENDER_CHEST_ITEM_CONTENTS_PROVIDER_TYPE = REGISTRIES.register(
-            ItemContentsProvider.REGISTRY_KEY,
+            () -> new ItemStorage.Type<>(ContainerItemStorage.CODEC));
+    public static final Holder.Reference<ItemStorage.Type<?>> ENDER_CHEST_ITEM_CONTENTS_PROVIDER_TYPE = REGISTRIES.register(
+            ItemStorage.REGISTRY_KEY,
             "ender_chest",
-            () -> new ItemContentsProvider.Type<>(EnderChestProvider.CODEC));
-    public static final Holder.Reference<ItemContentsProvider.Type<?>> BUNDLE_ITEM_CONTENTS_PROVIDER_TYPE = REGISTRIES.register(
-            ItemContentsProvider.REGISTRY_KEY,
+            () -> new ItemStorage.Type<>(EnderChestItemStorage.CODEC));
+    public static final Holder.Reference<ItemStorage.Type<?>> BUNDLE_ITEM_CONTENTS_PROVIDER_TYPE = REGISTRIES.register(
+            ItemStorage.REGISTRY_KEY,
             "bundle",
-            () -> new ItemContentsProvider.Type<>(BundleProvider.CODEC));
+            () -> new ItemStorage.Type<>(BundleItemStorage.CODEC));
 
-    public static final DataAttachmentType<Entity, Integer> CURRENT_CONTAINER_SLOT_ATTACHMENT_TYPE = DataAttachmentRegistry.<Integer>entityBuilder()
-            .defaultValue(EntityType.PLAYER, -1)
-            .build(ItemInteractions.id("current_container_slot"));
-    public static final DataAttachmentType<Entity, Boolean> SINGLE_ITEM_MODIFIER_ATTACHMENT_TYPE = DataAttachmentRegistry.<Boolean>entityBuilder()
-            .defaultValue(EntityType.PLAYER, false)
-            .build(ItemInteractions.id("single_item_modifier"));
+    public static final DataAttachmentType<Entity, Boolean> MOVE_SINGLE_ITEM_ATTACHMENT_TYPE = DataAttachmentRegistry.<Boolean>entityBuilder()
+            .defaultValue(EntityType.PLAYER, Boolean.FALSE)
+            .build(ItemInteractions.id("move_single_item"));
 
     public static void bootstrap() {
         // NO-OP

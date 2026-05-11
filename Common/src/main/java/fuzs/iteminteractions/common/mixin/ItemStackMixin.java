@@ -1,6 +1,6 @@
 package fuzs.iteminteractions.common.mixin;
 
-import fuzs.iteminteractions.common.api.v1.provider.ItemContentsBehavior;
+import fuzs.iteminteractions.common.api.v1.world.item.storage.ItemStorageHolder;
 import fuzs.iteminteractions.common.impl.world.item.container.ItemContentsProviders;
 import fuzs.iteminteractions.common.impl.world.item.container.ItemInteractionHelper;
 import fuzs.puzzleslib.common.api.util.v1.CommonHelper;
@@ -22,48 +22,58 @@ abstract class ItemStackMixin {
 
     @Inject(method = "overrideStackedOnOther", at = @At("HEAD"), cancellable = true)
     public void overrideStackedOnOther(Slot slot, ClickAction clickAction, Player player, CallbackInfoReturnable<Boolean> callback) {
-        ItemStack containerStack = ItemStack.class.cast(this);
-        ItemContentsBehavior behavior = ItemContentsProviders.get(containerStack);
-        if (behavior.allowsPlayerInteractions(containerStack, player)) {
-            boolean result = ItemInteractionHelper.overrideStackedOnOther(() -> behavior.getItemContainer(containerStack,
-                            player),
+        ItemStack itemStack = ItemStack.class.cast(this);
+        ItemStorageHolder holder = ItemContentsProviders.get(itemStack);
+        if (holder.allowsPlayerInteractions(itemStack, player)) {
+            boolean broadcastChanges = ItemInteractionHelper.overrideStackedOnOther(itemStack,
+                    () -> holder.getItemContainer(itemStack, player),
                     slot,
                     clickAction,
                     player,
-                    stack -> behavior.getAcceptableItemCount(containerStack, stack, player),
-                    behavior.provider()::getMaxStackSize);
-            if (result) behavior.provider().broadcastContainerChanges(containerStack, player);
-            callback.setReturnValue(result);
+                    (ItemStack item) -> {
+                        return holder.getAcceptableItemCount(itemStack, item, player);
+                    },
+                    holder.storage()::getMaxStackSize);
+            if (broadcastChanges) {
+                holder.storage().broadcastContainerChanges(itemStack, player);
+            }
+
+            callback.setReturnValue(broadcastChanges);
         }
     }
 
     @Inject(method = "overrideOtherStackedOnMe", at = @At("HEAD"), cancellable = true)
     public void overrideOtherStackedOnMe(ItemStack stackOnMe, Slot slot, ClickAction clickAction, Player player, SlotAccess slotAccess, CallbackInfoReturnable<Boolean> callback) {
-        ItemStack containerStack = ItemStack.class.cast(this);
-        ItemContentsBehavior behavior = ItemContentsProviders.get(containerStack);
-        if (behavior.allowsPlayerInteractions(containerStack, player)) {
-            boolean result = ItemInteractionHelper.overrideOtherStackedOnMe(() -> behavior.getItemContainer(
-                            containerStack,
-                            player),
+        ItemStack itemStack = ItemStack.class.cast(this);
+        ItemStorageHolder holder = ItemContentsProviders.get(itemStack);
+        if (holder.allowsPlayerInteractions(itemStack, player)) {
+            boolean broadcastChanges = ItemInteractionHelper.overrideOtherStackedOnMe(itemStack,
+                    () -> holder.getItemContainer(itemStack, player),
                     stackOnMe,
                     slot,
                     clickAction,
                     player,
                     slotAccess,
-                    stack -> behavior.getAcceptableItemCount(containerStack, stack, player),
-                    behavior.provider()::getMaxStackSize,
-                    () -> behavior.provider().onToggleSelectedItem(containerStack, 0, -1));
-            if (result) behavior.provider().broadcastContainerChanges(containerStack, player);
-            callback.setReturnValue(result);
+                    (ItemStack item) -> {
+                        return holder.getAcceptableItemCount(itemStack, item, player);
+                    },
+                    holder.storage()::getMaxStackSize,
+                    () -> holder.storage().onToggleSelectedItem(itemStack, 0, -1));
+            if (broadcastChanges) {
+                holder.storage().broadcastContainerChanges(itemStack, player);
+            }
+
+            callback.setReturnValue(broadcastChanges);
         }
     }
 
     @Inject(method = "getTooltipImage", at = @At("HEAD"), cancellable = true)
     public void getTooltipImage(CallbackInfoReturnable<Optional<TooltipComponent>> callback) {
-        ItemStack containerStack = ItemStack.class.cast(this);
-        ItemContentsBehavior behavior = ItemContentsProviders.get(containerStack);
-        if (behavior.canProvideTooltipImage(containerStack, CommonHelper.getClientPlayer())) {
-            callback.setReturnValue(behavior.getTooltipImage(containerStack, CommonHelper.getClientPlayer()));
+        ItemStack itemStack = ItemStack.class.cast(this);
+        ItemStorageHolder holder = ItemContentsProviders.get(itemStack);
+        Player player = CommonHelper.getClientPlayer();
+        if (holder.canProvideTooltipImage(itemStack, player)) {
+            callback.setReturnValue(holder.getTooltipImage(itemStack, player));
         }
     }
 }

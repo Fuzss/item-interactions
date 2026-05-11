@@ -1,6 +1,6 @@
-package fuzs.iteminteractions.common.api.v1.client.tooltip;
+package fuzs.iteminteractions.common.api.v1.client.gui.screens.inventory.tooltip;
 
-import fuzs.iteminteractions.common.api.v1.tooltip.BundleContentsTooltip;
+import fuzs.iteminteractions.common.api.v1.world.inventory.tooltip.BundleContentsTooltip;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -12,7 +12,7 @@ import org.apache.commons.lang3.math.Fraction;
 /**
  * @see net.minecraft.client.gui.screens.inventory.tooltip.ClientBundleTooltip
  */
-public class ClientBundleContentsTooltip extends AbstractClientItemContentsTooltip {
+public class ClientBundleContentsTooltip extends ClientItemStorageTooltip {
     private static final Identifier PROGRESSBAR_BORDER_SPRITE = Identifier.withDefaultNamespace(
             "container/bundle/bundle_progressbar_border");
     private static final Identifier PROGRESSBAR_FILL_SPRITE = Identifier.withDefaultNamespace(
@@ -28,7 +28,7 @@ public class ClientBundleContentsTooltip extends AbstractClientItemContentsToolt
     private final Fraction weight;
 
     public ClientBundleContentsTooltip(BundleContentsTooltip tooltip) {
-        super(tooltip.items(), tooltip.dyeColor());
+        super(tooltip.items(), tooltip.dyeColor(), tooltip.selectedItem());
         this.weight = tooltip.weight();
     }
 

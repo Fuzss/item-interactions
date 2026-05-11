@@ -8,18 +8,19 @@ import java.util.function.ToIntBiFunction;
 
 public class ItemMoveHelper {
 
-    public static Pair<ItemStack, Integer> addItem(Container container, ItemStack stack, int prioritizedSlot, ToIntBiFunction<Container, ItemStack> maxStackSize) {
-        ItemStack itemStack = stack.copy();
-        prioritizedSlot = moveItemToOccupiedSlotsWithSameType(container, itemStack, prioritizedSlot, maxStackSize);
-        if (itemStack.isEmpty()) {
-            itemStack = ItemStack.EMPTY;
+    public static Pair<ItemStack, Integer> addItem(Container container, ItemStack itemStack, int prioritizedSlot, ToIntBiFunction<Container, ItemStack> maxStackSize) {
+        ItemStack copiedItem = itemStack.copy();
+        prioritizedSlot = moveItemToOccupiedSlotsWithSameType(container, copiedItem, prioritizedSlot, maxStackSize);
+        if (copiedItem.isEmpty()) {
+            copiedItem = ItemStack.EMPTY;
         } else {
-            prioritizedSlot = moveItemToEmptySlots(container, itemStack, prioritizedSlot);
-            if (itemStack.isEmpty()) {
-                itemStack = ItemStack.EMPTY;
+            prioritizedSlot = moveItemToEmptySlots(container, copiedItem, prioritizedSlot);
+            if (copiedItem.isEmpty()) {
+                copiedItem = ItemStack.EMPTY;
             }
         }
-        return Pair.of(itemStack, prioritizedSlot);
+
+        return Pair.of(copiedItem, prioritizedSlot);
     }
 
     private static int moveItemToEmptySlots(Container container, ItemStack stack, int prioritizedSlot) {
@@ -27,8 +28,11 @@ public class ItemMoveHelper {
         if (prioritizedSlot != -1) return prioritizedSlot;
         for (int i = 0; i < container.getContainerSize(); ++i) {
             prioritizedSlot = setItemInSlot(container, stack, i);
-            if (prioritizedSlot != -1) return prioritizedSlot;
+            if (prioritizedSlot != -1) {
+                return prioritizedSlot;
+            }
         }
+
         return -1;
     }
 
@@ -41,25 +45,32 @@ public class ItemMoveHelper {
                 return slotIndex;
             }
         }
+
         return -1;
     }
 
-    private static int moveItemToOccupiedSlotsWithSameType(Container container, ItemStack stack, int prioritizedSlot, ToIntBiFunction<Container, ItemStack> maxStackSize) {
-        prioritizedSlot = addItemToSlot(container, stack, prioritizedSlot, maxStackSize);
-        if (prioritizedSlot != -1) return prioritizedSlot;
-        for (int i = 0; i < container.getContainerSize(); ++i) {
-            prioritizedSlot = addItemToSlot(container, stack, i, maxStackSize);
-            if (prioritizedSlot != -1) return prioritizedSlot;
+    private static int moveItemToOccupiedSlotsWithSameType(Container container, ItemStack itemStack, int prioritizedSlot, ToIntBiFunction<Container, ItemStack> maxStackSize) {
+        prioritizedSlot = addItemToSlot(container, itemStack, prioritizedSlot, maxStackSize);
+        if (prioritizedSlot != -1) {
+            return prioritizedSlot;
         }
+
+        for (int i = 0; i < container.getContainerSize(); ++i) {
+            prioritizedSlot = addItemToSlot(container, itemStack, i, maxStackSize);
+            if (prioritizedSlot != -1) {
+                return prioritizedSlot;
+            }
+        }
+
         return -1;
     }
 
-    private static int addItemToSlot(Container container, ItemStack stack, int slotIndex, ToIntBiFunction<Container, ItemStack> maxStackSize) {
+    private static int addItemToSlot(Container container, ItemStack itemStack, int slotIndex, ToIntBiFunction<Container, ItemStack> maxStackSize) {
         if (slotIndex != -1) {
-            ItemStack itemStack = container.getItem(slotIndex);
-            if (ItemStack.isSameItemSameComponents(itemStack, stack)) {
-                moveItemsBetweenStacks(container, stack, itemStack, maxStackSize);
-                if (stack.isEmpty()) {
+            ItemStack itemAtSlot = container.getItem(slotIndex);
+            if (ItemStack.isSameItemSameComponents(itemAtSlot, itemStack)) {
+                moveItemsBetweenStacks(container, itemStack, itemAtSlot, maxStackSize);
+                if (itemStack.isEmpty()) {
                     return slotIndex;
                 }
             }
@@ -67,12 +78,12 @@ public class ItemMoveHelper {
         return -1;
     }
 
-    private static void moveItemsBetweenStacks(Container container, ItemStack stack, ItemStack other, ToIntBiFunction<Container, ItemStack> maxStackSize) {
-        int i = Math.min(container.getMaxStackSize(), maxStackSize.applyAsInt(container, other));
-        int j = Math.min(stack.getCount(), i - other.getCount());
+    private static void moveItemsBetweenStacks(Container container, ItemStack itemStack, ItemStack otherItem, ToIntBiFunction<Container, ItemStack> maxStackSize) {
+        int i = Math.min(container.getMaxStackSize(), maxStackSize.applyAsInt(container, otherItem));
+        int j = Math.min(itemStack.getCount(), i - otherItem.getCount());
         if (j > 0) {
-            other.grow(j);
-            stack.shrink(j);
+            otherItem.grow(j);
+            itemStack.shrink(j);
             container.setChanged();
         }
     }

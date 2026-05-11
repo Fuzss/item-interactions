@@ -1,6 +1,6 @@
 package fuzs.iteminteractions.common.mixin.client;
 
-import fuzs.iteminteractions.common.impl.client.helper.ItemDecorationHelper;
+import fuzs.iteminteractions.common.impl.client.helper.ItemDecorationsHelper;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.world.item.ItemStack;
@@ -17,7 +17,7 @@ abstract class GuiGraphicsExtractorMixin {
             at = @At("TAIL"))
     public void itemDecorations(Font font, ItemStack itemStack, int x, int y, @Nullable String countText, CallbackInfo callback) {
         if (!itemStack.isEmpty()) {
-            ItemDecorationHelper.renderItemDecorations(GuiGraphicsExtractor.class.cast(this), font, itemStack, x, y);
+            ItemDecorationsHelper.renderItemDecorations(GuiGraphicsExtractor.class.cast(this), font, itemStack, x, y);
         }
     }
 }

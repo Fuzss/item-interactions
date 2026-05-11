@@ -1,6 +1,6 @@
 package fuzs.iteminteractions.common.impl.network;
 
-import fuzs.iteminteractions.common.api.v1.provider.ItemContentsProvider;
+import fuzs.iteminteractions.common.api.v1.world.item.storage.ItemStorage;
 import fuzs.iteminteractions.common.impl.world.item.container.ItemContentsProviders;
 import fuzs.puzzleslib.common.api.network.v4.message.MessageListener;
 import fuzs.puzzleslib.common.api.network.v4.message.play.ClientboundPlayMessage;
@@ -13,9 +13,9 @@ import net.minecraft.world.item.Item;
 import java.util.HashMap;
 import java.util.Map;
 
-public record ClientboundSyncItemContentsProviders(Map<Item, ItemContentsProvider> providers) implements ClientboundPlayMessage {
+public record ClientboundSyncItemContentsProviders(Map<Item, ItemStorage> providers) implements ClientboundPlayMessage {
     public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundSyncItemContentsProviders> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.map(HashMap::new, ByteBufCodecs.registry(Registries.ITEM), ItemContentsProvider.STREAM_CODEC),
+            ByteBufCodecs.map(HashMap::new, ByteBufCodecs.registry(Registries.ITEM), ItemStorage.STREAM_CODEC),
             ClientboundSyncItemContentsProviders::providers,
             ClientboundSyncItemContentsProviders::new);
 

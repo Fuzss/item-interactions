@@ -1,9 +1,9 @@
 package fuzs.iteminteractions.common.impl.client.handler;
 
-import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.InputConstants;
-import fuzs.iteminteractions.common.api.v1.provider.ItemContentsBehavior;
+import fuzs.iteminteractions.common.api.v1.world.item.storage.ItemStorageHolder;
 import fuzs.iteminteractions.common.impl.ItemInteractions;
+import fuzs.iteminteractions.common.impl.client.gui.ItemContentsMouseActions;
 import fuzs.iteminteractions.common.impl.config.ClientConfig;
 import fuzs.iteminteractions.common.impl.config.ServerConfig;
 import fuzs.iteminteractions.common.impl.world.item.container.ItemContentsProviders;
@@ -29,32 +29,26 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
 
+import java.util.HashSet;
 import java.util.Set;
 
 public class MouseDraggingHandler {
-    /**
-     * @see AbstractContainerScreen#SLOT_HIGHLIGHT_BACK_SPRITE
-     */
-    private static final Identifier SLOT_HIGHLIGHT_BACK_SPRITE = Identifier.withDefaultNamespace(
-            "container/slot_highlight_back");
-    /**
-     * @see AbstractContainerScreen#SLOT_HIGHLIGHT_FRONT_SPRITE
-     */
-    private static final Identifier SLOT_HIGHLIGHT_FRONT_SPRITE = Identifier.withDefaultNamespace(
-            "container/slot_highlight_front");
-    private static final Set<Slot> CONTAINER_DRAG_SLOTS = Sets.newHashSet();
+    private static final Set<Slot> CONTAINER_DRAG_SLOTS = new HashSet<>();
     @Nullable
     private static ContainerDragType containerDragType;
 
     public static EventResult onBeforeMousePressed(AbstractContainerScreen<?> screen, MouseButtonEvent mouseButtonEvent) {
-        if (!ItemInteractions.CONFIG.get(ServerConfig.class).allowMouseDragging) return EventResult.PASS;
+        if (!ItemInteractions.CONFIG.get(ServerConfig.class).allowMouseDragging) {
+            return EventResult.PASS;
+        }
+
         ItemStack carriedStack = screen.getMenu().getCarried();
         if (validMouseButton(mouseButtonEvent)) {
             if (ItemContentsProviders.get(carriedStack)
                     .allowsPlayerInteractions(carriedStack, screen.minecraft.player)) {
                 Slot slot = screen.getHoveredSlot(mouseButtonEvent.x(), mouseButtonEvent.y());
                 if (slot != null) {
-                    if (slot.hasItem() && !ClientInputActionHandler.precisionModeAllowedAndActive()) {
+                    if (slot.hasItem() && !ItemContentsMouseActions.extractSingleItemOnly()) {
                         containerDragType = ContainerDragType.INSERT;
                     } else {
                         containerDragType = ContainerDragType.REMOVE;
@@ -64,22 +58,27 @@ public class MouseDraggingHandler {
                 }
             }
         }
+
         containerDragType = null;
         return EventResult.PASS;
     }
 
     public static EventResult onBeforeMouseDragged(AbstractContainerScreen<?> screen, MouseButtonEvent mouseButtonEvent, double dragX, double dragY) {
-        if (!ItemInteractions.CONFIG.get(ServerConfig.class).allowMouseDragging) return EventResult.PASS;
+        if (!ItemInteractions.CONFIG.get(ServerConfig.class).allowMouseDragging) {
+            return EventResult.PASS;
+        }
+
         if (containerDragType != null) {
             AbstractContainerMenu menu = screen.getMenu();
             ItemStack carriedStack = menu.getCarried();
-            ItemContentsBehavior behavior = ItemContentsProviders.get(carriedStack);
+            ItemStorageHolder behavior = ItemContentsProviders.get(carriedStack);
             if (!validMouseButton(mouseButtonEvent) || !behavior.allowsPlayerInteractions(carriedStack,
                     screen.minecraft.player)) {
                 containerDragType = null;
                 CONTAINER_DRAG_SLOTS.clear();
                 return EventResult.PASS;
             }
+
             Slot slot = screen.getHoveredSlot(mouseButtonEvent.x(), mouseButtonEvent.y());
             if (slot != null && menu.canDragTo(slot) && !CONTAINER_DRAG_SLOTS.contains(slot)) {
                 boolean interact = false;
@@ -91,11 +90,11 @@ public class MouseDraggingHandler {
                     boolean normalInteraction =
                             mouseButtonEvent.button() == InputConstants.MOUSE_BUTTON_RIGHT && !slot.hasItem()
                                     && !behavior.getItemContainerView(carriedStack, screen.minecraft.player).isEmpty();
-                    if (normalInteraction
-                            || slot.hasItem() && ClientInputActionHandler.precisionModeAllowedAndActive()) {
+                    if (normalInteraction || slot.hasItem() && ItemContentsMouseActions.extractSingleItemOnly()) {
                         interact = true;
                     }
                 }
+
                 if (interact) {
                     screen.slotClicked(slot, slot.index, mouseButtonEvent.button(), ContainerInput.PICKUP);
                     CONTAINER_DRAG_SLOTS.add(slot);
@@ -103,11 +102,15 @@ public class MouseDraggingHandler {
                 }
             }
         }
+
         return EventResult.PASS;
     }
 
     public static EventResult onBeforeMouseRelease(AbstractContainerScreen<?> screen, MouseButtonEvent mouseButtonEvent) {
-        if (!ItemInteractions.CONFIG.get(ServerConfig.class).allowMouseDragging) return EventResult.PASS;
+        if (!ItemInteractions.CONFIG.get(ServerConfig.class).allowMouseDragging) {
+            return EventResult.PASS;
+        }
+
         if (containerDragType != null) {
             if (validMouseButton(mouseButtonEvent) && !CONTAINER_DRAG_SLOTS.isEmpty()) {
                 if (!ItemInteractions.CONFIG.get(ClientConfig.class).disableInteractionSounds) {
@@ -117,30 +120,43 @@ public class MouseDraggingHandler {
                             0.8F + SoundInstance.createUnseededRandom().nextFloat() * 0.4F);
                     screen.minecraft.getSoundManager().play(sound);
                 }
+
                 containerDragType = null;
                 CONTAINER_DRAG_SLOTS.clear();
                 return EventResult.INTERRUPT;
             }
+
             containerDragType = null;
         }
+
         CONTAINER_DRAG_SLOTS.clear();
         return EventResult.PASS;
     }
 
     private static boolean validMouseButton(MouseButtonEvent mouseButtonEvent) {
         if (mouseButtonEvent.button() == InputConstants.MOUSE_BUTTON_LEFT) {
-            return ClientInputActionHandler.precisionModeAllowedAndActive();
+            return ItemContentsMouseActions.extractSingleItemOnly();
         } else {
             return mouseButtonEvent.button() == InputConstants.MOUSE_BUTTON_RIGHT;
         }
     }
 
     public static void onAfterBackground(AbstractContainerScreen<?> screen, GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
-        renderDragSlotsHighlight(screen, guiGraphics, mouseX, mouseY, SLOT_HIGHLIGHT_BACK_SPRITE, true);
+        renderDragSlotsHighlight(screen,
+                guiGraphics,
+                mouseX,
+                mouseY,
+                AbstractContainerScreen.SLOT_HIGHLIGHT_BACK_SPRITE,
+                true);
     }
 
     public static void onRenderContainerScreenContents(AbstractContainerScreen<?> screen, GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY) {
-        renderDragSlotsHighlight(screen, guiGraphics, mouseX, mouseY, SLOT_HIGHLIGHT_FRONT_SPRITE, false);
+        renderDragSlotsHighlight(screen,
+                guiGraphics,
+                mouseX,
+                mouseY,
+                AbstractContainerScreen.SLOT_HIGHLIGHT_FRONT_SPRITE,
+                false);
     }
 
     private static void renderDragSlotsHighlight(AbstractContainerScreen<?> screen, GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, Identifier identifier, boolean applyTranslation) {

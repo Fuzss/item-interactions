@@ -1,7 +1,6 @@
-package fuzs.iteminteractions.common.api.v1.provider.impl;
+package fuzs.iteminteractions.common.api.v1.world.item.storage;
 
 import com.mojang.serialization.MapCodec;
-import fuzs.iteminteractions.common.api.v1.provider.ItemContentsProvider;
 import fuzs.iteminteractions.common.impl.init.ModRegistry;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
@@ -11,11 +10,11 @@ import net.minecraft.world.item.ItemStack;
 import java.util.Optional;
 
 /**
- * A bare-bones implementation of {@link ItemContentsProvider}.
+ * A bare-bones implementation of {@link ItemStorage}.
  */
-public class EmptyProvider implements ItemContentsProvider {
-    public static final ItemContentsProvider INSTANCE = new EmptyProvider();
-    public static final MapCodec<ItemContentsProvider> CODEC = MapCodec.unit(INSTANCE);
+public class DefaultItemStorage implements ItemStorage {
+    public static final ItemStorage INSTANCE = new DefaultItemStorage();
+    public static final MapCodec<ItemStorage> CODEC = MapCodec.unit(INSTANCE);
 
     @Override
     public boolean allowsPlayerInteractions(ItemStack containerStack, Player player) {
@@ -59,7 +58,7 @@ public class EmptyProvider implements ItemContentsProvider {
     }
 
     @Override
-    public Type getType() {
+    public Type<?> getType() {
         return ModRegistry.EMPTY_ITEM_CONTENTS_PROVIDER_TYPE.value();
     }
 }

@@ -2,8 +2,11 @@ package fuzs.iteminteractions.common.impl.handler;
 
 import fuzs.iteminteractions.common.impl.network.ClientboundEnderChestContentMessage;
 import fuzs.iteminteractions.common.impl.network.ClientboundEnderChestSlotMessage;
+import fuzs.iteminteractions.common.impl.network.client.ServerboundEnderChestContentMessage;
 import fuzs.puzzleslib.common.api.network.v4.MessageSender;
 import fuzs.puzzleslib.common.api.network.v4.PlayerSet;
+import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
+import net.minecraft.core.NonNullList;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -27,8 +30,8 @@ public class EnderChestSyncHandler {
     }
 
     public static void onContainerOpen(ServerPlayer serverPlayer, AbstractContainerMenu container) {
-        if (container instanceof ChestMenu chestMenu &&
-                chestMenu.getContainer() == serverPlayer.getEnderChestInventory()) {
+        if (container instanceof ChestMenu chestMenu
+                && chestMenu.getContainer() == serverPlayer.getEnderChestInventory()) {
             broadcastFullState(serverPlayer);
             chestMenu.addSlotListener(new ContainerListener() {
                 @Override
@@ -47,6 +50,15 @@ public class EnderChestSyncHandler {
                     // NO-OP
                 }
             });
+        }
+    }
+
+    public static void broadcastCreativeState(Player player, NonNullList<ItemStack> items) {
+        // this is only required for the creative mode inventory, as it doesn't sync contents using default menu packets,
+        // instead it uses custom packets which do not work for item interactions in a menu
+        if (player.hasInfiniteMaterials()
+                && player.containerMenu instanceof CreativeModeInventoryScreen.ItemPickerMenu) {
+            MessageSender.broadcast(new ServerboundEnderChestContentMessage(items));
         }
     }
 

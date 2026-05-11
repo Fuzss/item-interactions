@@ -1,4 +1,4 @@
-package fuzs.iteminteractions.common.api.v1;
+package fuzs.iteminteractions.common.api.v1.world.item;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;

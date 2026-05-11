@@ -1,12 +1,13 @@
 package fuzs.iteminteractions.common.impl.client;
 
 import com.google.common.collect.ImmutableMap;
-import fuzs.iteminteractions.common.api.v1.client.tooltip.ClientBundleContentsTooltip;
-import fuzs.iteminteractions.common.api.v1.client.tooltip.ClientItemContentsTooltip;
-import fuzs.iteminteractions.common.api.v1.client.tooltip.CollapsibleClientTooltipComponent;
-import fuzs.iteminteractions.common.api.v1.tooltip.BundleContentsTooltip;
-import fuzs.iteminteractions.common.api.v1.tooltip.ItemContentsTooltip;
-import fuzs.iteminteractions.common.impl.client.handler.ClientInputActionHandler;
+import fuzs.iteminteractions.common.api.v1.client.gui.screens.inventory.tooltip.ClientBundleContentsTooltip;
+import fuzs.iteminteractions.common.api.v1.client.gui.screens.inventory.tooltip.ClientItemContentsTooltip;
+import fuzs.iteminteractions.common.impl.client.gui.screens.inventory.tooltip.CollapsibleClientTooltipComponent;
+import fuzs.iteminteractions.common.api.v1.world.inventory.tooltip.BundleContentsTooltip;
+import fuzs.iteminteractions.common.api.v1.world.inventory.tooltip.ItemContentsTooltip;
+import fuzs.iteminteractions.common.impl.client.gui.ItemContentsMouseActions;
+import fuzs.iteminteractions.common.impl.client.handler.InteractionSoundsHandler;
 import fuzs.iteminteractions.common.impl.client.handler.MouseDraggingHandler;
 import fuzs.iteminteractions.common.impl.config.ExtractSingleItem;
 import fuzs.iteminteractions.common.impl.config.VisualItemContents;
@@ -36,28 +37,20 @@ public class ItemInteractionsClient implements ClientModConstructor {
 
     private static void registerEventHandlers() {
         ScreenMouseEvents.beforeMouseClick(AbstractContainerScreen.class)
-                .register(EventPhase.BEFORE, ClientInputActionHandler::onBeforeMousePressed);
-        ScreenKeyboardEvents.beforeKeyPress(AbstractContainerScreen.class)
-                .register(EventPhase.BEFORE, ClientInputActionHandler::onBeforeKeyPressed);
-        ScreenMouseEvents.beforeMouseClick(AbstractContainerScreen.class)
                 .register(EventPhase.BEFORE, MouseDraggingHandler::onBeforeMousePressed);
         ScreenMouseEvents.beforeMouseRelease(AbstractContainerScreen.class)
                 .register(EventPhase.BEFORE, MouseDraggingHandler::onBeforeMouseRelease);
-        ScreenMouseEvents.beforeMouseRelease(AbstractContainerScreen.class)
-                .register(EventPhase.BEFORE, ClientInputActionHandler::onBeforeMouseRelease);
-        ScreenMouseEvents.beforeMouseScroll(AbstractContainerScreen.class)
-                .register(EventPhase.BEFORE, ClientInputActionHandler::onBeforeMouseScroll);
         ScreenMouseEvents.beforeMouseDrag(AbstractContainerScreen.class)
                 .register(EventPhase.BEFORE, MouseDraggingHandler::onBeforeMouseDragged);
         ScreenKeyboardEvents.beforeKeyPress(AbstractContainerScreen.class)
                 .register(ExtractSingleItem::onBeforeKeyPressed);
         ScreenKeyboardEvents.beforeKeyPress(AbstractContainerScreen.class)
                 .register(VisualItemContents::onBeforeKeyPressed);
-        ScreenEvents.afterInit(AbstractContainerScreen.class).register(ClientInputActionHandler::onAfterInit);
+        ScreenEvents.afterInit(AbstractContainerScreen.class).register(ItemContentsMouseActions::onAfterInit);
         ScreenEvents.afterBackground(AbstractContainerScreen.class).register(MouseDraggingHandler::onAfterBackground);
         RenderContainerScreenContentsCallback.EVENT.register(MouseDraggingHandler::onRenderContainerScreenContents);
         PlaySoundEvents.AT_ENTITY.register(MouseDraggingHandler::onPlaySoundAtEntity);
-        PlaySoundEvents.AT_ENTITY.register(ClientInputActionHandler::onPlaySoundAtEntity);
+        PlaySoundEvents.AT_ENTITY.register(InteractionSoundsHandler::onPlaySoundAtEntity);
         ClientPlayerNetworkEvents.LEAVE.register((LocalPlayer player, MultiPlayerGameMode multiPlayerGameMode, Connection connection) -> {
             ItemContentsProviders.setItemContainerProviders(ImmutableMap.of());
         });

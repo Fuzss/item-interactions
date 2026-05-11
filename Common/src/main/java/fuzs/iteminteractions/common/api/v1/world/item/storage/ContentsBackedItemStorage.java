@@ -1,8 +1,8 @@
-package fuzs.iteminteractions.common.api.v1.provider;
+package fuzs.iteminteractions.common.api.v1.world.item.storage;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import fuzs.iteminteractions.common.api.v1.DyeBackedColor;
+import fuzs.iteminteractions.common.api.v1.world.item.DyeBackedColor;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.RegistryCodecs;
 import net.minecraft.core.registries.Registries;
@@ -12,30 +12,30 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 
-public abstract class AbstractProvider implements TooltipProvider {
+public abstract class ContentsBackedItemStorage implements ItemStorageWithTooltip {
     @Nullable protected final DyeBackedColor dyeColor;
     ItemContents itemContents = ItemContents.EMPTY;
 
-    protected AbstractProvider(@Nullable DyeBackedColor dyeColor) {
+    protected ContentsBackedItemStorage(@Nullable DyeBackedColor dyeColor) {
         this.dyeColor = dyeColor;
     }
 
-    protected static <T extends AbstractProvider> RecordCodecBuilder<T, Optional<DyeBackedColor>> backgroundColorCodec() {
+    protected static <T extends ContentsBackedItemStorage> RecordCodecBuilder<T, Optional<DyeBackedColor>> backgroundColorCodec() {
         return DyeBackedColor.CODEC.optionalFieldOf("background_color")
                 .forGetter((T provider) -> Optional.ofNullable(provider.dyeColor));
     }
 
-    protected static <T extends AbstractProvider> RecordCodecBuilder<T, ItemContents> itemContentsCodec() {
+    protected static <T extends ContentsBackedItemStorage> RecordCodecBuilder<T, ItemContents> itemContentsCodec() {
         return ItemContents.CODEC.lenientOptionalFieldOf("item_contents", ItemContents.EMPTY)
                 .forGetter((T provider) -> provider.itemContents);
     }
 
-    protected AbstractProvider itemContents(ItemContents itemContents) {
+    protected ContentsBackedItemStorage itemContents(ItemContents itemContents) {
         this.itemContents = itemContents;
         return this;
     }
 
-    public AbstractProvider filterContainerItems(boolean filterContainerItems) {
+    public ContentsBackedItemStorage filterContainerItems(boolean filterContainerItems) {
         return this.itemContents(this.itemContents.filterContainerItems(filterContainerItems));
     }
 

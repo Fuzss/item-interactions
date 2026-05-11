@@ -1,4 +1,5 @@
 classTweaker    v2  official
+accessible  field   net/minecraft/client/gui/screens/inventory/AbstractContainerScreen  itemSlotMouseActions    Ljava/util/List;
 accessible  field   net/minecraft/client/gui/screens/inventory/AbstractContainerScreen  doubleclick Z
 accessible  method  net/minecraft/client/gui/screens/inventory/AbstractContainerScreen  slotClicked (Lnet/minecraft/world/inventory/Slot;IILnet/minecraft/world/inventory/ContainerInput;)V
 accessible  class   net/minecraft/client/gui/screens/inventory/CreativeModeInventoryScreen$CustomCreativeSlot
@@ -7,3 +8,6 @@ accessible  method  net/minecraft/world/item/component/BundleContents   computeC
 accessible  field   net/minecraft/server/packs/resources/SimpleJsonResourceReloadListener   ops Lcom/mojang/serialization/DynamicOps;
 accessible  field   net/minecraft/server/packs/resources/SimpleJsonResourceReloadListener   codec   Lcom/mojang/serialization/Codec;
 accessible  field   net/minecraft/server/packs/resources/SimpleJsonResourceReloadListener   lister  Lnet/minecraft/resources/FileToIdConverter;
+accessible	field	net/minecraft/client/gui/BundleMouseActions	minecraft	Lnet/minecraft/client/Minecraft;
+accessible	field	net/minecraft/client/gui/BundleMouseActions	scrollWheelHandler	Lnet/minecraft/client/ScrollWheelHandler;
+extendable  method	net/minecraft/client/gui/BundleMouseActions	toggleSelectedBundleItem	(Lnet/minecraft/world/item/ItemStack;II)V

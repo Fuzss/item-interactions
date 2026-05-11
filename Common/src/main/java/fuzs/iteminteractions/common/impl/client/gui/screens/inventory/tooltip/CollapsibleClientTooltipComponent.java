@@ -1,4 +1,4 @@
-package fuzs.iteminteractions.common.api.v1.client.tooltip;
+package fuzs.iteminteractions.common.impl.client.gui.screens.inventory.tooltip;
 
 import fuzs.iteminteractions.common.impl.ItemInteractions;
 import fuzs.iteminteractions.common.impl.client.core.ActivationTypeProvider;

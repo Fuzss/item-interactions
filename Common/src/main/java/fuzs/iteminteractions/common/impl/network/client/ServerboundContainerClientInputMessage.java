@@ -10,11 +10,8 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 
-public record ServerboundContainerClientInputMessage(int currentSlot,
-                                                     boolean extractSingleItem) implements ServerboundPlayMessage {
+public record ServerboundContainerClientInputMessage(boolean extractSingleItem) implements ServerboundPlayMessage {
     public static final StreamCodec<ByteBuf, ServerboundContainerClientInputMessage> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.SHORT.map(Short::intValue, Integer::shortValue),
-            ServerboundContainerClientInputMessage::currentSlot,
             ByteBufCodecs.BOOL,
             ServerboundContainerClientInputMessage::extractSingleItem,
             ServerboundContainerClientInputMessage::new);
@@ -30,12 +27,7 @@ public record ServerboundContainerClientInputMessage(int currentSlot,
                     ItemInteractions.LOGGER.debug("Player {} interacted with invalid menu {}", player, containerMenu);
                     return;
                 }
-                if (ServerboundContainerClientInputMessage.this.currentSlot >= -1) {
-                    ContainerSlotHelper.setCurrentContainerSlot(player,
-                            ServerboundContainerClientInputMessage.this.currentSlot);
-                } else {
-                    ItemInteractions.LOGGER.warn("{} tried to set an invalid current container item slot", player);
-                }
+
                 ContainerSlotHelper.extractSingleItem(player,
                         ServerboundContainerClientInputMessage.this.extractSingleItem);
             }
