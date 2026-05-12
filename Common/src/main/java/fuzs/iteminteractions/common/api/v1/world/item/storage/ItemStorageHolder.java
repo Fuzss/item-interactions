@@ -1,7 +1,8 @@
 package fuzs.iteminteractions.common.api.v1.world.item.storage;
 
-import fuzs.iteminteractions.common.impl.world.item.container.ItemContentsProviders;
-import net.minecraft.core.component.DataComponents;
+import fuzs.iteminteractions.common.impl.world.item.container.ItemInteractionHelper;
+import fuzs.iteminteractions.common.impl.world.item.container.ItemStorageManager;
+import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Player;
@@ -10,7 +11,6 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.BundleContents;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
@@ -34,7 +34,7 @@ public record ItemStorageHolder(ItemStorage storage) {
      * @return the holder that may be empty
      */
     public static ItemStorageHolder ofItem(ItemStack itemStack) {
-        return ItemContentsProviders.get(itemStack);
+        return itemStack.isEmpty() ? EMPTY : ItemStorageManager.get(itemStack);
     }
 
     /**
@@ -45,45 +45,48 @@ public record ItemStorageHolder(ItemStorage storage) {
     }
 
     public boolean overrideStackedOnOther(ItemStack itemStack, Slot slot, ClickAction clickAction, Player player) {
-        if (this.storage().canPlayerInteractWith(itemStack, player)) {
-            ItemStack other = slot.getItem();
-            BundleContents initialContents = itemStack.getOrDefault(DataComponents.BUNDLE_CONTENTS,
-                    BundleContents.EMPTY);
-            BundleContents.Mutable contents = new BundleContents.Mutable(initialContents);
-            if (clickAction == ClickAction.PRIMARY && !other.isEmpty()) {
-                if (contents.tryTransfer(slot, player) > 0) {
-//                    playInsertSound(player);
-                } else {
-//                    playInsertFailSound(player);
-                }
-
-                itemStack.set(DataComponents.BUNDLE_CONTENTS, contents.toImmutable());
-                this.broadcastChangesOnContainerMenu(player);
-                return true;
-            } else if (clickAction == ClickAction.SECONDARY && other.isEmpty()) {
-                ItemStack removedItem = contents.removeOne();
-                if (removedItem != null) {
-                    ItemStack remainder = slot.safeInsert(removedItem);
-                    if (remainder.getCount() > 0) {
-                        contents.tryInsert(remainder);
-                    } else {
-//                        playRemoveOneSound(player);
-                    }
-                }
-
-                itemStack.set(DataComponents.BUNDLE_CONTENTS, contents.toImmutable());
-                this.broadcastChangesOnContainerMenu(player);
-                return true;
-            } else {
-                return false;
+        if (this.allowsPlayerInteractions(itemStack, player)) {
+            boolean broadcastChanges = ItemInteractionHelper.overrideStackedOnOther(itemStack,
+                    () -> this.getMutableContainer(itemStack, player),
+                    slot,
+                    clickAction,
+                    player,
+                    (ItemStack item) -> {
+                        return this.getAcceptableItemCount(itemStack, item, player);
+                    },
+                    (Container container, ItemStack item) -> this.storage().getMaxStackSize(container, -1, item));
+            if (broadcastChanges) {
+                this.storage().broadcastChangesOnContainerMenu(itemStack, player);
             }
+
+            return broadcastChanges;
         } else {
             return false;
         }
     }
 
     public boolean overrideOtherStackedOnMe(ItemStack itemStack, ItemStack itemHeldByCursor, Slot slot, ClickAction clickAction, Player player, SlotAccess slotHeldByCursor) {
-        return false;
+        if (this.allowsPlayerInteractions(itemStack, player)) {
+            boolean broadcastChanges = ItemInteractionHelper.overrideOtherStackedOnMe(itemStack,
+                    () -> this.getMutableContainer(itemStack, player),
+                    itemHeldByCursor,
+                    slot,
+                    clickAction,
+                    player,
+                    slotHeldByCursor,
+                    (ItemStack item) -> {
+                        return this.getAcceptableItemCount(itemStack, item, player);
+                    },
+                    (Container container, ItemStack item) -> this.storage().getMaxStackSize(container, -1, item),
+                    () -> this.storage().onToggleSelectedItem(itemStack, 0, -1));
+            if (broadcastChanges) {
+                this.storage().broadcastChangesOnContainerMenu(itemStack, player);
+            }
+
+            return broadcastChanges;
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -172,8 +175,8 @@ public record ItemStorageHolder(ItemStorage storage) {
      * @return is any item of the same type as <code>stackToAdd</code> already in the container
      */
     public boolean hasAnyOf(ItemStack containerStack, ItemStack stackToAdd, Player player) {
-        return this.canAcceptItem(containerStack, stackToAdd, player) && this.getContainerView(containerStack,
-                player).hasAnyMatching((ItemStack item) -> ItemStack.isSameItem(item, stackToAdd));
+        return this.canAcceptItem(containerStack, stackToAdd, player) && this.getContainerView(containerStack, player)
+                .hasAnyMatching((ItemStack item) -> ItemStack.isSameItem(item, stackToAdd));
     }
 
     /**

@@ -2,7 +2,7 @@ package fuzs.iteminteractions.common.api.v1.data;
 
 import com.google.common.collect.Maps;
 import fuzs.iteminteractions.common.api.v1.world.item.storage.ItemStorage;
-import fuzs.iteminteractions.common.impl.world.item.container.ItemContentsProviders;
+import fuzs.iteminteractions.common.impl.world.item.container.ItemStorageManager;
 import fuzs.puzzleslib.common.api.data.v2.core.DataProviderContext;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
@@ -33,7 +33,7 @@ public abstract class AbstractItemContentsProvider implements DataProvider {
 
     public AbstractItemContentsProvider(String modId, PackOutput packOutput, CompletableFuture<HolderLookup.Provider> registries) {
         this.modId = modId;
-        this.pathProvider = packOutput.createRegistryElementsPathProvider(ItemContentsProviders.REGISTRY_KEY);
+        this.pathProvider = packOutput.createRegistryElementsPathProvider(ItemStorageManager.REGISTRY_KEY);
         this.registries = registries;
     }
 

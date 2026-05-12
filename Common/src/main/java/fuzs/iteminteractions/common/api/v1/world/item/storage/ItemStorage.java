@@ -4,7 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import fuzs.iteminteractions.common.impl.ItemInteractions;
-import fuzs.iteminteractions.common.impl.world.item.container.ItemContentsProviders;
+import fuzs.iteminteractions.common.impl.world.item.container.ItemStorageManager;
 import fuzs.puzzleslib.common.api.init.v3.registry.RegistryFactory;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
@@ -37,7 +37,7 @@ public interface ItemStorage {
     /**
      * The {@link ItemStorageType} registry key.
      */
-    ResourceKey<Registry<ItemStorageType<?>>> REGISTRY_KEY = ResourceKey.createRegistryKey(ItemContentsProviders.REGISTRY_KEY.identifier());
+    ResourceKey<Registry<ItemStorageType<?>>> REGISTRY_KEY = ResourceKey.createRegistryKey(ItemStorageManager.REGISTRY_KEY.identifier());
     /**
      * The {@link ItemStorageType} registry.
      */

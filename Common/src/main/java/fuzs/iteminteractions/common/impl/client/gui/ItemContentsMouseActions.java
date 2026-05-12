@@ -8,7 +8,6 @@ import fuzs.iteminteractions.common.impl.config.ServerConfig;
 import fuzs.iteminteractions.common.impl.network.client.ServerboundContainerClientInputMessage;
 import fuzs.iteminteractions.common.impl.network.client.ServerboundSelectedItemMessage;
 import fuzs.iteminteractions.common.impl.world.inventory.ContainerSlotHelper;
-import fuzs.iteminteractions.common.impl.world.item.container.ItemContentsProviders;
 import fuzs.puzzleslib.common.api.network.v4.MessageSender;
 import fuzs.puzzleslib.common.api.util.v1.CommonHelper;
 import net.minecraft.client.gui.BundleMouseActions;
@@ -48,7 +47,7 @@ public class ItemContentsMouseActions extends BundleMouseActions {
 
     @Override
     public boolean matches(Slot slot) {
-        return !ItemContentsProviders.get(slot.getItem()).isEmpty();
+        return !ItemStorageHolder.ofItem(slot.getItem()).isEmpty();
     }
 
     @Override
@@ -72,7 +71,7 @@ public class ItemContentsMouseActions extends BundleMouseActions {
             return true;
         }
 
-        ItemStorageHolder holder = ItemContentsProviders.get(itemStack);
+        ItemStorageHolder holder = ItemStorageHolder.ofItem(itemStack);
         if (holder.storage().hasContents(itemStack)) {
             Vector2i wheelXY = this.scrollWheelHandler.onMouseScroll(scrollX, scrollY);
             int wheel = wheelXY.y == 0 ? -wheelXY.x : wheelXY.y;
@@ -116,7 +115,7 @@ public class ItemContentsMouseActions extends BundleMouseActions {
     public void toggleSelectedBundleItem(ItemStack bundleItem, int slotIndex, int updatedSelectedItem) {
         int previousSelectedItem = ContainerSlotHelper.getSelectedItem(bundleItem);
         ContainerSlotHelper.setSelectedItem(bundleItem, updatedSelectedItem);
-        ItemStorageHolder holder = ItemContentsProviders.get(bundleItem);
+        ItemStorageHolder holder = ItemStorageHolder.ofItem(bundleItem);
         holder.storage().onToggleSelectedItem(bundleItem, previousSelectedItem, updatedSelectedItem);
         MessageSender.broadcast(new ServerboundSelectedItemMessage(slotIndex, updatedSelectedItem));
     }

@@ -1,8 +1,10 @@
 package fuzs.iteminteractions.common.impl.world.inventory;
 
+import it.unimi.dsi.fastutil.ints.IntLinkedOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
+import it.unimi.dsi.fastutil.ints.IntSets;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.function.ToIntBiFunction;
 
@@ -11,49 +13,34 @@ public class ItemMoveHelper {
     /**
      * @see net.minecraft.world.SimpleContainer#addItem(ItemStack)
      */
-    public static Pair<ItemStack, Integer> addItem(Container container, ItemStack itemStack, int prioritizedSlot, ToIntBiFunction<Container, ItemStack> maxStackSize) {
+    public static ItemSlot addItem(Container container, ItemStack itemStack, int prioritizedSlot, ToIntBiFunction<Container, ItemStack> maxStackSize) {
         ItemStack remainingItems = itemStack.copy();
-        prioritizedSlot = moveItemToOccupiedSlotsWithSameType(container, remainingItems, prioritizedSlot, maxStackSize);
+        int slotNum = moveItemToOccupiedSlotsWithSameType(container, remainingItems, prioritizedSlot, maxStackSize);
         if (remainingItems.isEmpty()) {
-            remainingItems = ItemStack.EMPTY;
+            return new ItemSlot(slotNum);
         } else {
-            prioritizedSlot = moveItemToEmptySlots(container, remainingItems, prioritizedSlot);
+            slotNum = moveItemToEmptySlots(container, remainingItems, slotNum);
             if (remainingItems.isEmpty()) {
-                remainingItems = ItemStack.EMPTY;
+                return new ItemSlot(slotNum);
+            } else {
+                return new ItemSlot(slotNum, remainingItems);
             }
         }
-
-        return Pair.of(remainingItems, prioritizedSlot);
     }
 
     /**
      * @see net.minecraft.world.SimpleContainer#moveItemToEmptySlots(ItemStack)
      */
     private static int moveItemToEmptySlots(Container container, ItemStack sourceStack, int prioritizedSlot) {
-        prioritizedSlot = setItemInSlot(container, sourceStack, prioritizedSlot);
-        if (prioritizedSlot != -1) {
-            return prioritizedSlot;
-        }
-
-        for (int i = 0; i < container.getContainerSize(); ++i) {
-            prioritizedSlot = setItemInSlot(container, sourceStack, i);
-            if (prioritizedSlot != -1) {
-                return prioritizedSlot;
-            }
-        }
-
-        return -1;
-    }
-
-    /**
-     * @see net.minecraft.world.SimpleContainer#moveItemToEmptySlots(ItemStack)
-     */
-    private static int setItemInSlot(Container container, ItemStack sourceStack, int slotIndex) {
-        if (slotIndex != -1) {
-            ItemStack targetStack = container.getItem(slotIndex);
-            if (targetStack.isEmpty()) {
-                container.setItem(slotIndex, sourceStack.copyAndClear());
-                return slotIndex;
+        IntSet slotNums = IntLinkedOpenHashSet.of(prioritizedSlot);
+        slotNums.addAll(IntSets.fromTo(0, container.getContainerSize()));
+        for (int slotNum : slotNums.toIntArray()) {
+            if (slotNum >= 0 && slotNum < container.getContainerSize()) {
+                ItemStack targetStack = container.getItem(slotNum);
+                if (targetStack.isEmpty()) {
+                    container.setItem(slotNum, sourceStack.copyAndClear());
+                    return slotNum;
+                }
             }
         }
 
@@ -64,34 +51,20 @@ public class ItemMoveHelper {
      * @see net.minecraft.world.SimpleContainer#moveItemToOccupiedSlotsWithSameType(ItemStack)
      */
     private static int moveItemToOccupiedSlotsWithSameType(Container container, ItemStack sourceStack, int prioritizedSlot, ToIntBiFunction<Container, ItemStack> maxStackSize) {
-        prioritizedSlot = addItemToSlot(container, sourceStack, prioritizedSlot, maxStackSize);
-        if (prioritizedSlot != -1) {
-            return prioritizedSlot;
-        }
-
-        for (int i = 0; i < container.getContainerSize(); ++i) {
-            prioritizedSlot = addItemToSlot(container, sourceStack, i, maxStackSize);
-            if (prioritizedSlot != -1) {
-                return prioritizedSlot;
-            }
-        }
-
-        return -1;
-    }
-
-    /**
-     * @see net.minecraft.world.SimpleContainer#moveItemToOccupiedSlotsWithSameType(ItemStack)
-     */
-    private static int addItemToSlot(Container container, ItemStack sourceStack, int slotIndex, ToIntBiFunction<Container, ItemStack> maxStackSize) {
-        if (slotIndex != -1) {
-            ItemStack targetStack = container.getItem(slotIndex);
-            if (ItemStack.isSameItemSameComponents(targetStack, sourceStack)) {
-                moveItemsBetweenStacks(container, sourceStack, targetStack, maxStackSize);
-                if (sourceStack.isEmpty()) {
-                    return slotIndex;
+        IntSet slotNums = IntLinkedOpenHashSet.of(prioritizedSlot);
+        slotNums.addAll(IntSets.fromTo(0, container.getContainerSize()));
+        for (int slotNum : slotNums.toIntArray()) {
+            if (slotNum >= 0 && slotNum < container.getContainerSize()) {
+                ItemStack targetStack = container.getItem(slotNum);
+                if (ItemStack.isSameItemSameComponents(targetStack, sourceStack)) {
+                    moveItemsBetweenStacks(container, sourceStack, targetStack, maxStackSize);
+                    if (sourceStack.isEmpty()) {
+                        return slotNum;
+                    }
                 }
             }
         }
+
         return -1;
     }
 

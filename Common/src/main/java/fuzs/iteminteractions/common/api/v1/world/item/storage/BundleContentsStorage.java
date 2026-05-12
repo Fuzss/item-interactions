@@ -65,9 +65,9 @@ public class BundleContentsStorage extends ComponentBackedStorage {
     }
 
     @Override
-    public SimpleContainer getItemContainer(ItemStack containerStack, Player player, boolean isMutable) {
-        BundleContents contents = containerStack.getOrDefault(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY);
-        // TODO make this add in fron again
+    public SimpleContainer getItemContainer(ItemStack itemStack, Player player, boolean isMutable) {
+        BundleContents contents = itemStack.getOrDefault(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY);
+        // TODO make this add in front again
         // Add one additional slot at the front, so we can add items in the inventory.
         // Adding items at the front is consistent with vanilla behavior.
         ItemStack[] itemStacks = Stream.concat(contents.itemCopyStream(), Stream.of(ItemStack.EMPTY))
@@ -93,7 +93,7 @@ public class BundleContentsStorage extends ComponentBackedStorage {
                 updatedContents = new BundleContents(builder.build());
             }
 
-            containerStack.set(DataComponents.BUNDLE_CONTENTS, updatedContents);
+            itemStack.set(DataComponents.BUNDLE_CONTENTS, updatedContents);
         });
     }
 
@@ -106,26 +106,6 @@ public class BundleContentsStorage extends ComponentBackedStorage {
     public int getAcceptableItemCount(ItemStack itemStack, ItemStack stackToAdd, Player player) {
         return Math.min(this.getMaxAmountToAdd(itemStack, stackToAdd, player),
                 super.getAcceptableItemCount(itemStack, stackToAdd, player));
-    }
-
-    private int getMaxAmountToAdd(ItemStack itemStack, ItemStack stackToAdd) {
-        // TODO remove unused
-        BundleContents contents = itemStack.getOrDefault(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY);
-        Fraction bundleWeight = contents.weight().result().orElse(Fraction.ZERO);
-        Fraction itemWeight = this.getItemWeight(stackToAdd);
-        return this.getMaxAmountToAdd(bundleWeight, itemWeight);
-    }
-
-    private Fraction getItemWeight(ItemStack itemStack) {
-        return BundleContents.getWeight(itemStack).result().orElse(Fraction.ZERO);
-    }
-
-    /**
-     * @see BundleContents.Mutable#getMaxAmountToAdd(Fraction)
-     */
-    private int getMaxAmountToAdd(Fraction bundleWeight, Fraction itemWeight) {
-        Fraction remainingWeight = Fraction.ONE.subtract(bundleWeight);
-        return Math.max(remainingWeight.divideBy(itemWeight).intValue(), 0);
     }
 
     @Override

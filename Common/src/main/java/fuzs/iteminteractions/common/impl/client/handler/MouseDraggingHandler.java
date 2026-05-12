@@ -5,7 +5,6 @@ import fuzs.iteminteractions.common.api.v1.world.item.storage.ItemStorageHolder;
 import fuzs.iteminteractions.common.impl.ItemInteractions;
 import fuzs.iteminteractions.common.impl.client.gui.ItemContentsMouseActions;
 import fuzs.iteminteractions.common.impl.config.ServerConfig;
-import fuzs.iteminteractions.common.impl.world.item.container.ItemContentsProviders;
 import fuzs.puzzleslib.common.api.event.v1.core.EventResult;
 import fuzs.puzzleslib.common.api.event.v1.data.MutableFloat;
 import fuzs.puzzleslib.common.api.event.v1.data.MutableValue;
@@ -43,7 +42,7 @@ public class MouseDraggingHandler {
 
         ItemStack carriedStack = screen.getMenu().getCarried();
         if (validMouseButton(mouseButtonEvent)) {
-            if (ItemContentsProviders.get(carriedStack)
+            if (ItemStorageHolder.ofItem(carriedStack)
                     .allowsPlayerInteractions(carriedStack, screen.minecraft.player)) {
                 Slot slot = screen.getHoveredSlot(mouseButtonEvent.x(), mouseButtonEvent.y());
                 if (slot != null) {
@@ -70,7 +69,7 @@ public class MouseDraggingHandler {
         if (containerDragType != null) {
             AbstractContainerMenu menu = screen.getMenu();
             ItemStack carriedStack = menu.getCarried();
-            ItemStorageHolder behavior = ItemContentsProviders.get(carriedStack);
+            ItemStorageHolder behavior = ItemStorageHolder.ofItem(carriedStack);
             if (!validMouseButton(mouseButtonEvent) || !behavior.allowsPlayerInteractions(carriedStack,
                     screen.minecraft.player)) {
                 containerDragType = null;

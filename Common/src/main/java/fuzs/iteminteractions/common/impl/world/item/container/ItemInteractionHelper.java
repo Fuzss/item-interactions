@@ -2,6 +2,7 @@ package fuzs.iteminteractions.common.impl.world.item.container;
 
 import fuzs.iteminteractions.common.impl.world.inventory.ContainerSlotHelper;
 import fuzs.iteminteractions.common.impl.world.inventory.ItemMoveHelper;
+import fuzs.iteminteractions.common.impl.world.inventory.ItemSlot;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
@@ -10,7 +11,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.OptionalInt;
 import java.util.function.*;
@@ -104,10 +104,10 @@ public class ItemInteractionHelper {
             return stackOnMe.isEmpty() || (ItemStack.isSameItemSameComponents(stackOnMe, stackInSlot)
                     && stackOnMe.getCount() < maxStackSize.applyAsInt(container, stackOnMe));
         };
-        Pair<ItemStack, Integer> result = removeLastStack(container, itemStack, itemFilter, amountToRemove);
-        ItemStack stackToAdd = result.getLeft();
+        ItemSlot result = removeLastStack(container, itemStack, itemFilter, amountToRemove);
+        ItemStack stackToAdd = result.item();
         if (!stackToAdd.isEmpty()) {
-            addToSlot.accept(stackToAdd, result.getRight());
+            addToSlot.accept(stackToAdd, result.slotNum());
             if (!extractSingleItemOnly) {
                 player.playSound(SoundEvents.BUNDLE_REMOVE_ONE,
                         0.8F,
@@ -155,20 +155,20 @@ public class ItemInteractionHelper {
             return 0;
         }
 
-        Pair<ItemStack, Integer> result = ItemMoveHelper.addItem(container, stackToAdd, prioritizedSlot, maxStackSize);
-        ContainerSlotHelper.setSelectedItem(itemStack, result.getRight());
-        return stackToAdd.getCount() - result.getLeft().getCount();
+        ItemSlot result = ItemMoveHelper.addItem(container, stackToAdd, prioritizedSlot, maxStackSize);
+        ContainerSlotHelper.setSelectedItem(itemStack, result.slotNum());
+        return stackToAdd.getCount() - result.item().getCount();
     }
 
-    private static Pair<ItemStack, Integer> removeLastStack(Container container, ItemStack itemStack, Predicate<ItemStack> itemFilter, ToIntFunction<ItemStack> amountToRemove) {
+    private static ItemSlot removeLastStack(Container container, ItemStack itemStack, Predicate<ItemStack> itemFilter, ToIntFunction<ItemStack> amountToRemove) {
         OptionalInt slotWithContent = findSlotWithContent(container, itemStack, itemFilter, amountToRemove);
         if (slotWithContent.isPresent()) {
             int index = slotWithContent.getAsInt();
             int amount = amountToRemove.applyAsInt(container.getItem(index));
-            return Pair.of(container.removeItem(index, amount), index);
+            return new ItemSlot(index, container.removeItem(index, amount));
+        } else {
+            return ItemSlot.EMPTY;
         }
-
-        return Pair.of(ItemStack.EMPTY, -1);
     }
 
     private static OptionalInt findSlotWithContent(Container container, ItemStack itemStack, Predicate<ItemStack> itemFilter, ToIntFunction<ItemStack> amountToRemove) {

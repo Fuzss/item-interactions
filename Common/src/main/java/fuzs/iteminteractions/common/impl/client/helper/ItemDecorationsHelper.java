@@ -3,7 +3,6 @@ package fuzs.iteminteractions.common.impl.client.helper;
 import fuzs.iteminteractions.common.api.v1.world.item.storage.ItemStorageHolder;
 import fuzs.iteminteractions.common.impl.ItemInteractions;
 import fuzs.iteminteractions.common.impl.config.ClientConfig;
-import fuzs.iteminteractions.common.impl.world.item.container.ItemContentsProviders;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -31,7 +30,7 @@ public class ItemDecorationsHelper {
             return;
         }
 
-        ItemStorageHolder holder = ItemContentsProviders.get(itemStack);
+        ItemStorageHolder holder = ItemStorageHolder.ofItem(itemStack);
         if (!holder.isEmpty() && isValidSlot(slotBeingRendered, itemStack, minecraft.player)) {
             ItemStack itemHeldByCursor = screen.getMenu().getCarried();
             if (itemStack != itemHeldByCursor) {

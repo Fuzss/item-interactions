@@ -2,7 +2,6 @@ package fuzs.iteminteractions.common.impl.network.client;
 
 import fuzs.iteminteractions.common.api.v1.world.item.storage.ItemStorageHolder;
 import fuzs.iteminteractions.common.impl.world.inventory.ContainerSlotHelper;
-import fuzs.iteminteractions.common.impl.world.item.container.ItemContentsProviders;
 import fuzs.puzzleslib.common.api.network.v4.message.MessageListener;
 import fuzs.puzzleslib.common.api.network.v4.message.play.ServerboundPlayMessage;
 import net.minecraft.network.FriendlyByteBuf;
@@ -42,7 +41,7 @@ public record ServerboundSelectedItemMessage(int slotId, int selectedItemIndex) 
                     int previousSelectedItem = ContainerSlotHelper.getSelectedItem(itemStack);
                     ContainerSlotHelper.setSelectedItem(itemStack,
                             ServerboundSelectedItemMessage.this.selectedItemIndex);
-                    ItemStorageHolder holder = ItemContentsProviders.get(itemStack);
+                    ItemStorageHolder holder = ItemStorageHolder.ofItem(itemStack);
                     holder.storage()
                             .onToggleSelectedItem(itemStack,
                                     previousSelectedItem,

@@ -1,7 +1,7 @@
 package fuzs.iteminteractions.common.impl.network;
 
 import fuzs.iteminteractions.common.api.v1.world.item.storage.ItemStorage;
-import fuzs.iteminteractions.common.impl.world.item.container.ItemContentsProviders;
+import fuzs.iteminteractions.common.impl.world.item.container.ItemStorageManager;
 import fuzs.puzzleslib.common.api.network.v4.message.MessageListener;
 import fuzs.puzzleslib.common.api.network.v4.message.play.ClientboundPlayMessage;
 import net.minecraft.core.registries.Registries;
@@ -24,7 +24,7 @@ public record ClientboundSyncItemContentsProviders(Map<Item, ItemStorage> provid
         return new MessageListener<Context>() {
             @Override
             public void accept(Context context) {
-                ItemContentsProviders.setItemContainerProviders(ClientboundSyncItemContentsProviders.this.providers);
+                ItemStorageManager.setItemContainerProviders(ClientboundSyncItemContentsProviders.this.providers);
             }
         };
     }

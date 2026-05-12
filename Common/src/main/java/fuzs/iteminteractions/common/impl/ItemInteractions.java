@@ -14,7 +14,7 @@ import fuzs.iteminteractions.common.impl.network.ClientboundSyncItemContentsProv
 import fuzs.iteminteractions.common.impl.network.client.ServerboundContainerClientInputMessage;
 import fuzs.iteminteractions.common.impl.network.client.ServerboundEnderChestContentMessage;
 import fuzs.iteminteractions.common.impl.network.client.ServerboundSelectedItemMessage;
-import fuzs.iteminteractions.common.impl.world.item.container.ItemContentsProviders;
+import fuzs.iteminteractions.common.impl.world.item.container.ItemStorageManager;
 import fuzs.puzzleslib.common.api.config.v3.ConfigHolder;
 import fuzs.puzzleslib.common.api.core.v1.ModConstructor;
 import fuzs.puzzleslib.common.api.core.v1.ModLoaderEnvironment;
@@ -54,13 +54,13 @@ public class ItemInteractions implements ModConstructor {
     }
 
     private static void registerEventHandlers() {
-//        ItemClickedInMenuCallback.EVENT.register(ContainerClickInputHandler::onContainerItemClick);
+        SyncDataPackContentsCallback.EVENT.register(ItemStorageManager::onSyncDataPackContents);
+        TagsUpdatedCallback.EVENT.register(ItemStorageManager::onTagsUpdated);
+        ItemClickedInMenuCallback.EVENT.register(ContainerClickInputHandler::onContainerItemClick);
         ContainerEvents.OPEN.register(EnderChestSyncHandler::onContainerOpen);
-        SyncDataPackContentsCallback.EVENT.register(ItemContentsProviders::onSyncDataPackContents);
         PlayerNetworkEvents.JOIN.register(EnderChestSyncHandler::onPlayerJoin);
         AfterChangeDimensionCallback.EVENT.register(EnderChestSyncHandler::onAfterChangeDimension);
         PlayerCopyEvents.RESPAWN.register(EnderChestSyncHandler::onRespawn);
-        TagsUpdatedCallback.EVENT.register(ItemContentsProviders::onTagsUpdated);
     }
 
     @Override
@@ -88,16 +88,16 @@ public class ItemInteractions implements ModConstructor {
             return;
         }
 
-        context.registerRepositorySource(PackResourcesHelper.buildServerPack(id("test_item_interactions"),
+        context.registerRepositorySource(PackResourcesHelper.buildServerPack(id("item_storage"),
                 DynamicPackResources.create(DynamicItemContentsProvider::new),
                 true));
     }
 
     @Override
     public void onAddDataPackReloadListeners(DataPackReloadListenersContext context) {
-        context.registerReloadListener(ItemContentsProviders.REGISTRY_KEY.identifier(),
+        context.registerReloadListener(ItemStorageManager.REGISTRY_KEY.identifier(),
                 (DataPackReloadListenersContext.PreparableReloadListenerFactory) (ReloadableServerResources serverResources, HolderLookup.Provider lookupWithUpdatedTags) -> {
-                    return new ItemContentsProviders(lookupWithUpdatedTags);
+                    return new ItemStorageManager(lookupWithUpdatedTags);
                 });
     }
 

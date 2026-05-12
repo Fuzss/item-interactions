@@ -2,8 +2,8 @@ package fuzs.iteminteractions.common.impl.world.item.container;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import fuzs.iteminteractions.common.api.v1.world.item.storage.ItemStorageHolder;
 import fuzs.iteminteractions.common.api.v1.world.item.storage.ItemStorage;
+import fuzs.iteminteractions.common.api.v1.world.item.storage.ItemStorageHolder;
 import fuzs.iteminteractions.common.impl.ItemInteractions;
 import fuzs.iteminteractions.common.impl.network.ClientboundSyncItemContentsProviders;
 import fuzs.puzzleslib.common.api.network.v4.MessageSender;
@@ -25,7 +25,7 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
-public final class ItemContentsProviders extends UnconditionalSimpleJsonResourceReloadListener<Map.Entry<HolderSet<Item>, ItemStorage>> {
+public final class ItemStorageManager extends UnconditionalSimpleJsonResourceReloadListener<Map.Entry<HolderSet<Item>, ItemStorage>> {
     public static final ResourceKey<Registry<Map.Entry<HolderSet<Item>, ItemStorage>>> REGISTRY_KEY = ResourceKey.createRegistryKey(
             ItemInteractions.id("item_contents_provider"));
 
@@ -33,7 +33,7 @@ public final class ItemContentsProviders extends UnconditionalSimpleJsonResource
     private static List<Map.Entry<HolderSet<Item>, ItemStorage>> unresolvedProviders;
     private static Map<Item, ItemStorage> resolvedProviders = ImmutableMap.of();
 
-    public ItemContentsProviders(HolderLookup.Provider registries) {
+    public ItemStorageManager(HolderLookup.Provider registries) {
         super(registries, ItemStorage.WITH_ITEMS_CODEC, REGISTRY_KEY);
     }
 
@@ -44,15 +44,11 @@ public final class ItemContentsProviders extends UnconditionalSimpleJsonResource
     }
 
     public static ItemStorageHolder get(ItemStack itemStack) {
-        if (itemStack.isEmpty()) {
-            return ItemStorageHolder.EMPTY;
-        } else {
-            return ItemStorageHolder.ofNullable(resolvedProviders.get(itemStack.getItem()));
-        }
+        return ItemStorageHolder.ofNullable(resolvedProviders.get(itemStack.getItem()));
     }
 
     public static void setItemContainerProviders(Map<Item, ItemStorage> providers) {
-        ItemContentsProviders.resolvedProviders = ImmutableMap.copyOf(providers);
+        ItemStorageManager.resolvedProviders = ImmutableMap.copyOf(providers);
     }
 
     public static void onTagsUpdated(HolderLookup.Provider registries, boolean client) {
