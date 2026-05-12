@@ -3,7 +3,7 @@ package fuzs.iteminteractions.common.impl.client.handler;
 import com.mojang.blaze3d.platform.InputConstants;
 import fuzs.iteminteractions.common.api.v1.world.item.storage.ItemStorageHolder;
 import fuzs.iteminteractions.common.impl.ItemInteractions;
-import fuzs.iteminteractions.common.impl.client.gui.ItemContentsMouseActions;
+import fuzs.iteminteractions.common.impl.client.gui.ItemStorageMouseActions;
 import fuzs.iteminteractions.common.impl.config.ServerConfig;
 import fuzs.puzzleslib.common.api.event.v1.core.EventResult;
 import fuzs.puzzleslib.common.api.event.v1.data.MutableFloat;
@@ -46,7 +46,7 @@ public class MouseDraggingHandler {
                     .allowsPlayerInteractions(carriedStack, screen.minecraft.player)) {
                 Slot slot = screen.getHoveredSlot(mouseButtonEvent.x(), mouseButtonEvent.y());
                 if (slot != null) {
-                    if (slot.hasItem() && !ItemContentsMouseActions.extractSingleItemOnly()) {
+                    if (slot.hasItem() && !ItemStorageMouseActions.extractSingleItemOnly()) {
                         containerDragType = ContainerDragType.INSERT;
                     } else {
                         containerDragType = ContainerDragType.REMOVE;
@@ -88,7 +88,7 @@ public class MouseDraggingHandler {
                     boolean normalInteraction =
                             mouseButtonEvent.button() == InputConstants.MOUSE_BUTTON_RIGHT && !slot.hasItem()
                                     && !behavior.getContainerView(carriedStack, screen.minecraft.player).isEmpty();
-                    if (normalInteraction || slot.hasItem() && ItemContentsMouseActions.extractSingleItemOnly()) {
+                    if (normalInteraction || slot.hasItem() && ItemStorageMouseActions.extractSingleItemOnly()) {
                         interact = true;
                     }
                 }
@@ -130,7 +130,7 @@ public class MouseDraggingHandler {
 
     private static boolean validMouseButton(MouseButtonEvent mouseButtonEvent) {
         if (mouseButtonEvent.button() == InputConstants.MOUSE_BUTTON_LEFT) {
-            return ItemContentsMouseActions.extractSingleItemOnly();
+            return ItemStorageMouseActions.extractSingleItemOnly();
         } else {
             return mouseButtonEvent.button() == InputConstants.MOUSE_BUTTON_RIGHT;
         }

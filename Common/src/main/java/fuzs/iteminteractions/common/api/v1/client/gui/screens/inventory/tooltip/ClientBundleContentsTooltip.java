@@ -1,6 +1,8 @@
 package fuzs.iteminteractions.common.api.v1.client.gui.screens.inventory.tooltip;
 
 import fuzs.iteminteractions.common.api.v1.world.inventory.tooltip.BundleContentsTooltip;
+import fuzs.iteminteractions.common.impl.ItemInteractions;
+import fuzs.iteminteractions.common.impl.config.ClientConfig;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientBundleTooltip;
@@ -46,6 +48,11 @@ public class ClientBundleContentsTooltip extends ClientBundleTooltip {
     @Override
     public int slotCount() {
         return this.contents.size();
+    }
+
+    @Override
+    public boolean showTooltipWithItemInHand() {
+        return !ItemInteractions.CONFIG.get(ClientConfig.class).carriedItemTooltips.isActive();
     }
 
     @Override

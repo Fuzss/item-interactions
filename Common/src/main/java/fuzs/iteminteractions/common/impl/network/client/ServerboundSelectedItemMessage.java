@@ -5,27 +5,32 @@ import fuzs.iteminteractions.common.impl.world.inventory.ContainerSlotHelper;
 import fuzs.puzzleslib.common.api.network.v4.message.MessageListener;
 import fuzs.puzzleslib.common.api.network.v4.message.play.ServerboundPlayMessage;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
+import org.jspecify.annotations.NonNull;
+
+import java.util.OptionalInt;
 
 /**
  * @see net.minecraft.network.protocol.game.ServerboundSelectBundleItemPacket
  */
-public record ServerboundSelectedItemMessage(int slotId, int selectedItemIndex) implements ServerboundPlayMessage {
+public record ServerboundSelectedItemMessage(OptionalInt slotId,
+                                             int selectedItemIndex) implements ServerboundPlayMessage {
     public static final StreamCodec<FriendlyByteBuf, ServerboundSelectedItemMessage> STREAM_CODEC = StreamCodec.ofMember(
             ServerboundSelectedItemMessage::write,
             ServerboundSelectedItemMessage::new);
 
     private ServerboundSelectedItemMessage(FriendlyByteBuf input) {
-        this(input.readVarInt(), input.readVarInt());
+        this(ByteBufCodecs.OPTIONAL_VAR_INT.decode(input), input.readVarInt());
         if (this.selectedItemIndex < 0 && this.selectedItemIndex != -1) {
             throw new IllegalArgumentException("Invalid selectedItemIndex: " + this.selectedItemIndex);
         }
     }
 
     private void write(FriendlyByteBuf output) {
-        output.writeVarInt(this.slotId);
+        ByteBufCodecs.OPTIONAL_VAR_INT.encode(output, this.slotId);
         output.writeVarInt(this.selectedItemIndex);
     }
 
@@ -34,10 +39,8 @@ public record ServerboundSelectedItemMessage(int slotId, int selectedItemIndex) 
         return new MessageListener<Context>() {
             @Override
             public void accept(Context context) {
-                int slotIndex = ServerboundSelectedItemMessage.this.slotId;
-                AbstractContainerMenu menu = context.player().containerMenu;
-                if (slotIndex >= 0 && slotIndex < menu.slots.size()) {
-                    ItemStack itemStack = menu.slots.get(slotIndex).getItem();
+                ItemStack itemStack = this.getContainerItem(context.player().containerMenu);
+                if (!itemStack.isEmpty()) {
                     int previousSelectedItem = ContainerSlotHelper.getSelectedItem(itemStack);
                     ContainerSlotHelper.setSelectedItem(itemStack,
                             ServerboundSelectedItemMessage.this.selectedItemIndex);
@@ -46,6 +49,19 @@ public record ServerboundSelectedItemMessage(int slotId, int selectedItemIndex) 
                             .onToggleSelectedItem(itemStack,
                                     previousSelectedItem,
                                     ServerboundSelectedItemMessage.this.selectedItemIndex);
+                }
+            }
+
+            private @NonNull ItemStack getContainerItem(AbstractContainerMenu menu) {
+                OptionalInt slotIndex = ServerboundSelectedItemMessage.this.slotId;
+                if (slotIndex.isPresent()) {
+                    if (slotIndex.getAsInt() >= 0 && slotIndex.getAsInt() < menu.slots.size()) {
+                        return menu.slots.get(slotIndex.getAsInt()).getItem();
+                    } else {
+                        return ItemStack.EMPTY;
+                    }
+                } else {
+                    return menu.getCarried();
                 }
             }
         };

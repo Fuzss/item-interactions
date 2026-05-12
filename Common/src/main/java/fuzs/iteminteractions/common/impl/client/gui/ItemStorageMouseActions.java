@@ -21,23 +21,23 @@ import net.minecraft.world.item.ItemStack;
 import org.joml.Vector2i;
 
 import java.util.List;
-import java.util.Objects;
+import java.util.OptionalInt;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
 /**
  * @see BundleMouseActions
  */
-public class ItemContentsMouseActions extends BundleMouseActions {
+public class ItemStorageMouseActions extends BundleMouseActions implements CustomItemSlotMouseAction {
     private final AbstractContainerScreen<?> screen;
 
-    public ItemContentsMouseActions(AbstractContainerScreen<?> screen) {
+    public ItemStorageMouseActions(AbstractContainerScreen<?> screen) {
         super(screen.minecraft);
         this.screen = screen;
     }
 
     public static void onAfterInit(AbstractContainerScreen<?> screen, int screenWidth, int screenHeight, List<AbstractWidget> widgets, UnaryOperator<AbstractWidget> addWidget, Consumer<AbstractWidget> removeWidget) {
-        screen.itemSlotMouseActions.addFirst(new ItemContentsMouseActions(screen));
+        screen.itemSlotMouseActions.addFirst(new ItemStorageMouseActions(screen));
     }
 
     public static boolean extractSingleItemOnly() {
@@ -47,21 +47,30 @@ public class ItemContentsMouseActions extends BundleMouseActions {
 
     @Override
     public boolean matches(Slot slot) {
-        return !ItemStorageHolder.ofItem(slot.getItem()).isEmpty();
+        return CustomItemSlotMouseAction.super.matches(slot);
+    }
+
+    @Override
+    public boolean matches(ItemStack itemStack) {
+        return !ItemStorageHolder.ofItem(itemStack).isEmpty();
     }
 
     @Override
     public boolean onMouseScrolled(double scrollX, double scrollY, int slotIndex, ItemStack itemStack) {
+        return CustomItemSlotMouseAction.super.onMouseScrolled(scrollX, scrollY, slotIndex, itemStack);
+    }
+
+    @Override
+    public boolean onMouseScrolled(double scrollX, double scrollY, OptionalInt slotIndex, ItemStack itemStack) {
         if (!ItemInteractions.CONFIG.get(ClientConfig.class).visualItemContents.isActive()) {
             return false;
         }
 
-        if (extractSingleItemOnly()) {
+        if (this.screen.hoveredSlot != null && extractSingleItemOnly()) {
             Vector2i wheelXY = this.scrollWheelHandler.onMouseScroll(scrollX, scrollY);
             int wheel = wheelXY.y == 0 ? -wheelXY.x : wheelXY.y;
             if (wheel != 0) {
                 Slot slot = this.screen.hoveredSlot;
-                Objects.requireNonNull(slot, "hovered slot is null");
                 int buttonNum = this.getMouseButtonFromWheel(wheel);
                 this.setSingleItemOnly(true);
                 this.screen.slotClicked(slot, slot.index, buttonNum, ContainerInput.PICKUP);
@@ -69,6 +78,11 @@ public class ItemContentsMouseActions extends BundleMouseActions {
             }
 
             return true;
+        }
+
+        if (itemStack == this.screen.getMenu().getCarried()
+                && !ItemInteractions.CONFIG.get(ClientConfig.class).carriedItemTooltips.isActive()) {
+            return false;
         }
 
         ItemStorageHolder holder = ItemStorageHolder.ofItem(itemStack);
@@ -113,6 +127,10 @@ public class ItemContentsMouseActions extends BundleMouseActions {
 
     @Override
     public void toggleSelectedBundleItem(ItemStack bundleItem, int slotIndex, int updatedSelectedItem) {
+        this.toggleSelectedBundleItem(bundleItem, OptionalInt.of(slotIndex), updatedSelectedItem);
+    }
+
+    private void toggleSelectedBundleItem(ItemStack bundleItem, OptionalInt slotIndex, int updatedSelectedItem) {
         int previousSelectedItem = ContainerSlotHelper.getSelectedItem(bundleItem);
         ContainerSlotHelper.setSelectedItem(bundleItem, updatedSelectedItem);
         ItemStorageHolder holder = ItemStorageHolder.ofItem(bundleItem);

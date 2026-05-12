@@ -5,9 +5,12 @@ import fuzs.iteminteractions.common.api.v1.client.gui.screens.inventory.tooltip.
 import fuzs.iteminteractions.common.api.v1.client.gui.screens.inventory.tooltip.ClientItemContentsTooltip;
 import fuzs.iteminteractions.common.api.v1.world.inventory.tooltip.BundleContentsTooltip;
 import fuzs.iteminteractions.common.api.v1.world.inventory.tooltip.ItemContentsTooltip;
-import fuzs.iteminteractions.common.impl.client.gui.ItemContentsMouseActions;
+import fuzs.iteminteractions.common.impl.client.gui.CustomItemSlotMouseAction;
+import fuzs.iteminteractions.common.impl.client.gui.ItemStorageMouseActions;
 import fuzs.iteminteractions.common.impl.client.gui.screens.inventory.tooltip.CollapsibleClientTooltipComponent;
+import fuzs.iteminteractions.common.impl.client.handler.ItemTooltipRenderingHandler;
 import fuzs.iteminteractions.common.impl.client.handler.MouseDraggingHandler;
+import fuzs.iteminteractions.common.impl.config.CarriedItemTooltips;
 import fuzs.iteminteractions.common.impl.config.ExtractSingleItem;
 import fuzs.iteminteractions.common.impl.config.VisualItemContents;
 import fuzs.iteminteractions.common.impl.world.item.container.ItemStorageManager;
@@ -42,10 +45,16 @@ public class ItemInteractionsClient implements ClientModConstructor {
         ScreenMouseEvents.beforeMouseDrag(AbstractContainerScreen.class)
                 .register(EventPhase.BEFORE, MouseDraggingHandler::onBeforeMouseDragged);
         ScreenKeyboardEvents.beforeKeyPress(AbstractContainerScreen.class)
+                .register(CarriedItemTooltips::onBeforeKeyPressed);
+        ScreenKeyboardEvents.beforeKeyPress(AbstractContainerScreen.class)
                 .register(ExtractSingleItem::onBeforeKeyPressed);
         ScreenKeyboardEvents.beforeKeyPress(AbstractContainerScreen.class)
                 .register(VisualItemContents::onBeforeKeyPressed);
-        ScreenEvents.afterInit(AbstractContainerScreen.class).register(ItemContentsMouseActions::onAfterInit);
+        ScreenMouseEvents.beforeMouseScroll(AbstractContainerScreen.class)
+                .register(CustomItemSlotMouseAction::onBeforeMouseScroll);
+        ScreenEvents.afterInit(AbstractContainerScreen.class).register(ItemStorageMouseActions::onAfterInit);
+        ScreenEvents.afterBackground(AbstractContainerScreen.class)
+                .register(ItemTooltipRenderingHandler::onAfterBackground);
         ScreenEvents.afterBackground(AbstractContainerScreen.class).register(MouseDraggingHandler::onAfterBackground);
         RenderContainerScreenContentsCallback.EVENT.register(MouseDraggingHandler::onRenderContainerScreenContents);
         PlaySoundEvents.AT_ENTITY.register(MouseDraggingHandler::onPlaySoundAtEntity);
@@ -57,6 +66,7 @@ public class ItemInteractionsClient implements ClientModConstructor {
     @Override
     public void onRegisterKeyMappings(KeyMappingsContext context) {
         context.registerKeyMapping(VisualItemContents.KEY_MAPPING, KeyActivationContext.SCREEN);
+        context.registerKeyMapping(CarriedItemTooltips.KEY_MAPPING, KeyActivationContext.SCREEN);
     }
 
     @Override
