@@ -4,7 +4,6 @@ import com.mojang.blaze3d.platform.InputConstants;
 import fuzs.iteminteractions.common.api.v1.world.item.storage.ItemStorageHolder;
 import fuzs.iteminteractions.common.impl.ItemInteractions;
 import fuzs.iteminteractions.common.impl.client.gui.ItemContentsMouseActions;
-import fuzs.iteminteractions.common.impl.config.ClientConfig;
 import fuzs.iteminteractions.common.impl.config.ServerConfig;
 import fuzs.iteminteractions.common.impl.world.item.container.ItemContentsProviders;
 import fuzs.puzzleslib.common.api.event.v1.core.EventResult;
@@ -89,7 +88,7 @@ public class MouseDraggingHandler {
                 } else if (containerDragType == ContainerDragType.REMOVE) {
                     boolean normalInteraction =
                             mouseButtonEvent.button() == InputConstants.MOUSE_BUTTON_RIGHT && !slot.hasItem()
-                                    && !behavior.getItemContainerView(carriedStack, screen.minecraft.player).isEmpty();
+                                    && !behavior.getContainerView(carriedStack, screen.minecraft.player).isEmpty();
                     if (normalInteraction || slot.hasItem() && ItemContentsMouseActions.extractSingleItemOnly()) {
                         interact = true;
                     }
@@ -113,14 +112,11 @@ public class MouseDraggingHandler {
 
         if (containerDragType != null) {
             if (validMouseButton(mouseButtonEvent) && !CONTAINER_DRAG_SLOTS.isEmpty()) {
-                if (!ItemInteractions.CONFIG.get(ClientConfig.class).disableInteractionSounds) {
-                    // play this manually at the end; we suppress all interaction sounds played while dragging
-                    SimpleSoundInstance sound = SimpleSoundInstance.forUI(containerDragType.sound,
-                            0.8F,
-                            0.8F + SoundInstance.createUnseededRandom().nextFloat() * 0.4F);
-                    screen.minecraft.getSoundManager().play(sound);
-                }
-
+                // play this manually at the end; we suppress all interaction sounds played while dragging
+                SimpleSoundInstance sound = SimpleSoundInstance.forUI(containerDragType.sound,
+                        0.8F,
+                        0.8F + SoundInstance.createUnseededRandom().nextFloat() * 0.4F);
+                screen.minecraft.getSoundManager().play(sound);
                 containerDragType = null;
                 CONTAINER_DRAG_SLOTS.clear();
                 return EventResult.INTERRUPT;

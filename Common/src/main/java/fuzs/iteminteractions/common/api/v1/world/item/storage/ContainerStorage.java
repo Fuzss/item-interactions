@@ -35,10 +35,10 @@ public class ContainerStorage extends ComponentBackedStorage {
                         interactionPermissionsCodec(),
                         equipmentSlotsCodec())
                 .apply(instance,
-                        (Integer inventoryWidth, Integer inventoryHeight, Optional<DyeBackedColor> dyeColor, ItemContents itemContents, InteractionPermissions interactionPermissions, EquipmentSlotGroup equipmentSlots) -> {
+                        (Integer inventoryWidth, Integer inventoryHeight, Optional<DyeBackedColor> dyeColor, StorageOptions storageOptions, InteractionPermissions interactionPermissions, EquipmentSlotGroup equipmentSlots) -> {
                             return new ContainerStorage(inventoryWidth,
                                     inventoryHeight,
-                                    dyeColor.orElse(null)).itemContents(itemContents)
+                                    dyeColor.orElse(null)).storageOptions(storageOptions)
                                     .interactionPermissions(interactionPermissions)
                                     .equipmentSlots(equipmentSlots);
                         });
@@ -87,8 +87,8 @@ public class ContainerStorage extends ComponentBackedStorage {
     }
 
     @Override
-    protected ContainerStorage itemContents(ItemContents itemContents) {
-        return (ContainerStorage) super.itemContents(itemContents);
+    protected ContainerStorage storageOptions(StorageOptions storageOptions) {
+        return (ContainerStorage) super.storageOptions(storageOptions);
     }
 
     @Override
@@ -129,42 +129,46 @@ public class ContainerStorage extends ComponentBackedStorage {
     }
 
     @Override
-    public boolean hasContents(ItemStack containerStack) {
-        return containerStack.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY)
+    public boolean hasContents(ItemStack itemStack) {
+        return itemStack.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY)
                 != ItemContainerContents.EMPTY;
     }
 
     @Override
-    public boolean allowsPlayerInteractions(ItemStack containerStack, Player player) {
-        return super.allowsPlayerInteractions(containerStack, player)
-                && this.interactionPermissions.allowsPlayerInteractions(player) && (player.getAbilities().instabuild
-                || this.equipmentSlots == EquipmentSlotGroup.ANY || Arrays.stream(EQUIPMENT_SLOTS)
+    public boolean canPlayerInteractWith(ItemStack itemStack, Player player) {
+        return super.canPlayerInteractWith(itemStack, player) && this.interactionPermissions.allowsPlayerInteractions(
+                player) && (player.getAbilities().instabuild || this.equipmentSlots == EquipmentSlotGroup.ANY
+                || Arrays.stream(EQUIPMENT_SLOTS)
                 .filter(this.equipmentSlots::test)
                 .map(player::getItemBySlot)
-                .anyMatch((ItemStack itemStack) -> itemStack == containerStack));
+                .anyMatch((ItemStack item) -> item == itemStack));
     }
 
     @Override
-    public SimpleContainer getItemContainer(ItemStack containerStack, Player player, boolean allowSaving) {
-        NonNullList<ItemStack> items = NonNullList.withSize(this.getInventorySize(), ItemStack.EMPTY);
-        containerStack.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).copyInto(items);
-        return ContainerMenuHelper.createListBackedContainer(items, allowSaving ? (Container container) -> {
-            containerStack.set(DataComponents.CONTAINER, ItemContainerContents.fromItems(items));
-        } : null);
+    public SimpleContainer getItemContainer(ItemStack itemStack, Player player, boolean isMutable) {
+        NonNullList<ItemStack> itemList = NonNullList.withSize(this.getInventorySize(), ItemStack.EMPTY);
+        itemStack.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).copyInto(itemList);
+        return ContainerMenuHelper.createListBackedContainer(itemList, (Container container) -> {
+            if (isMutable) {
+                itemStack.set(DataComponents.CONTAINER, ItemContainerContents.fromItems(itemList));
+            } else {
+                throw new UnsupportedOperationException();
+            }
+        });
     }
 
     @Override
-    public TooltipComponent createTooltipImageComponent(ItemStack itemStack, Player player, NonNullList<ItemStack> items) {
+    public TooltipComponent createTooltipImageComponent(ItemStack itemStack, Player player, NonNullList<ItemStack> itemList) {
         int selectedItem = ContainerSlotHelper.getSelectedItem(itemStack);
-        return new ItemContentsTooltip(items,
+        return new ItemContentsTooltip(itemList,
                 selectedItem,
-                this.getGridWidth(items.size()),
-                this.getGridHeight(items.size()),
+                this.getGridWidth(itemList.size()),
+                this.getGridHeight(itemList.size()),
                 this.dyeColor);
     }
 
     @Override
-    public Type<?> getType() {
+    public ItemStorageType<?> getType() {
         return ModRegistry.CONTAINER_ITEM_CONTENTS_PROVIDER_TYPE.value();
     }
 

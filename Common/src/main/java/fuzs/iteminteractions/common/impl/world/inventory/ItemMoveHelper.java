@@ -8,26 +8,35 @@ import java.util.function.ToIntBiFunction;
 
 public class ItemMoveHelper {
 
+    /**
+     * @see net.minecraft.world.SimpleContainer#addItem(ItemStack)
+     */
     public static Pair<ItemStack, Integer> addItem(Container container, ItemStack itemStack, int prioritizedSlot, ToIntBiFunction<Container, ItemStack> maxStackSize) {
-        ItemStack copiedItem = itemStack.copy();
-        prioritizedSlot = moveItemToOccupiedSlotsWithSameType(container, copiedItem, prioritizedSlot, maxStackSize);
-        if (copiedItem.isEmpty()) {
-            copiedItem = ItemStack.EMPTY;
+        ItemStack remainingItems = itemStack.copy();
+        prioritizedSlot = moveItemToOccupiedSlotsWithSameType(container, remainingItems, prioritizedSlot, maxStackSize);
+        if (remainingItems.isEmpty()) {
+            remainingItems = ItemStack.EMPTY;
         } else {
-            prioritizedSlot = moveItemToEmptySlots(container, copiedItem, prioritizedSlot);
-            if (copiedItem.isEmpty()) {
-                copiedItem = ItemStack.EMPTY;
+            prioritizedSlot = moveItemToEmptySlots(container, remainingItems, prioritizedSlot);
+            if (remainingItems.isEmpty()) {
+                remainingItems = ItemStack.EMPTY;
             }
         }
 
-        return Pair.of(copiedItem, prioritizedSlot);
+        return Pair.of(remainingItems, prioritizedSlot);
     }
 
-    private static int moveItemToEmptySlots(Container container, ItemStack stack, int prioritizedSlot) {
-        prioritizedSlot = setItemInSlot(container, stack, prioritizedSlot);
-        if (prioritizedSlot != -1) return prioritizedSlot;
+    /**
+     * @see net.minecraft.world.SimpleContainer#moveItemToEmptySlots(ItemStack)
+     */
+    private static int moveItemToEmptySlots(Container container, ItemStack sourceStack, int prioritizedSlot) {
+        prioritizedSlot = setItemInSlot(container, sourceStack, prioritizedSlot);
+        if (prioritizedSlot != -1) {
+            return prioritizedSlot;
+        }
+
         for (int i = 0; i < container.getContainerSize(); ++i) {
-            prioritizedSlot = setItemInSlot(container, stack, i);
+            prioritizedSlot = setItemInSlot(container, sourceStack, i);
             if (prioritizedSlot != -1) {
                 return prioritizedSlot;
             }
@@ -36,12 +45,14 @@ public class ItemMoveHelper {
         return -1;
     }
 
-    private static int setItemInSlot(Container container, ItemStack stack, int slotIndex) {
+    /**
+     * @see net.minecraft.world.SimpleContainer#moveItemToEmptySlots(ItemStack)
+     */
+    private static int setItemInSlot(Container container, ItemStack sourceStack, int slotIndex) {
         if (slotIndex != -1) {
-            ItemStack itemStack = container.getItem(slotIndex);
-            if (itemStack.isEmpty()) {
-                container.setItem(slotIndex, stack.copy());
-                stack.setCount(0);
+            ItemStack targetStack = container.getItem(slotIndex);
+            if (targetStack.isEmpty()) {
+                container.setItem(slotIndex, sourceStack.copyAndClear());
                 return slotIndex;
             }
         }
@@ -49,14 +60,17 @@ public class ItemMoveHelper {
         return -1;
     }
 
-    private static int moveItemToOccupiedSlotsWithSameType(Container container, ItemStack itemStack, int prioritizedSlot, ToIntBiFunction<Container, ItemStack> maxStackSize) {
-        prioritizedSlot = addItemToSlot(container, itemStack, prioritizedSlot, maxStackSize);
+    /**
+     * @see net.minecraft.world.SimpleContainer#moveItemToOccupiedSlotsWithSameType(ItemStack)
+     */
+    private static int moveItemToOccupiedSlotsWithSameType(Container container, ItemStack sourceStack, int prioritizedSlot, ToIntBiFunction<Container, ItemStack> maxStackSize) {
+        prioritizedSlot = addItemToSlot(container, sourceStack, prioritizedSlot, maxStackSize);
         if (prioritizedSlot != -1) {
             return prioritizedSlot;
         }
 
         for (int i = 0; i < container.getContainerSize(); ++i) {
-            prioritizedSlot = addItemToSlot(container, itemStack, i, maxStackSize);
+            prioritizedSlot = addItemToSlot(container, sourceStack, i, maxStackSize);
             if (prioritizedSlot != -1) {
                 return prioritizedSlot;
             }
@@ -65,12 +79,15 @@ public class ItemMoveHelper {
         return -1;
     }
 
-    private static int addItemToSlot(Container container, ItemStack itemStack, int slotIndex, ToIntBiFunction<Container, ItemStack> maxStackSize) {
+    /**
+     * @see net.minecraft.world.SimpleContainer#moveItemToOccupiedSlotsWithSameType(ItemStack)
+     */
+    private static int addItemToSlot(Container container, ItemStack sourceStack, int slotIndex, ToIntBiFunction<Container, ItemStack> maxStackSize) {
         if (slotIndex != -1) {
-            ItemStack itemAtSlot = container.getItem(slotIndex);
-            if (ItemStack.isSameItemSameComponents(itemAtSlot, itemStack)) {
-                moveItemsBetweenStacks(container, itemStack, itemAtSlot, maxStackSize);
-                if (itemStack.isEmpty()) {
+            ItemStack targetStack = container.getItem(slotIndex);
+            if (ItemStack.isSameItemSameComponents(targetStack, sourceStack)) {
+                moveItemsBetweenStacks(container, sourceStack, targetStack, maxStackSize);
+                if (sourceStack.isEmpty()) {
                     return slotIndex;
                 }
             }
@@ -78,12 +95,15 @@ public class ItemMoveHelper {
         return -1;
     }
 
-    private static void moveItemsBetweenStacks(Container container, ItemStack itemStack, ItemStack otherItem, ToIntBiFunction<Container, ItemStack> maxStackSize) {
-        int i = Math.min(container.getMaxStackSize(), maxStackSize.applyAsInt(container, otherItem));
-        int j = Math.min(itemStack.getCount(), i - otherItem.getCount());
-        if (j > 0) {
-            otherItem.grow(j);
-            itemStack.shrink(j);
+    /**
+     * @see net.minecraft.world.SimpleContainer#moveItemsBetweenStacks(ItemStack, ItemStack)
+     */
+    private static void moveItemsBetweenStacks(Container container, ItemStack sourceStack, ItemStack targetStack, ToIntBiFunction<Container, ItemStack> maxStackSize) {
+        int maxCount = Math.min(container.getMaxStackSize(), maxStackSize.applyAsInt(container, targetStack));
+        int diff = Math.min(sourceStack.getCount(), maxCount - targetStack.getCount());
+        if (diff > 0) {
+            targetStack.grow(diff);
+            sourceStack.shrink(diff);
             container.setChanged();
         }
     }

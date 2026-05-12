@@ -1,14 +1,18 @@
 package fuzs.iteminteractions.common.api.v1.world.item.storage;
 
 import fuzs.iteminteractions.common.impl.world.item.container.ItemContentsProviders;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.ClickAction;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.BundleContents;
 import org.jspecify.annotations.Nullable;
 
-import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -40,6 +44,55 @@ public record ItemStorageHolder(ItemStorage storage) {
         return storage != null ? new ItemStorageHolder(storage) : EMPTY;
     }
 
+    public boolean overrideStackedOnOther(ItemStack itemStack, Slot slot, ClickAction clickAction, Player player) {
+        if (this.storage().canPlayerInteractWith(itemStack, player)) {
+            ItemStack other = slot.getItem();
+            BundleContents initialContents = itemStack.getOrDefault(DataComponents.BUNDLE_CONTENTS,
+                    BundleContents.EMPTY);
+            BundleContents.Mutable contents = new BundleContents.Mutable(initialContents);
+            if (clickAction == ClickAction.PRIMARY && !other.isEmpty()) {
+                if (contents.tryTransfer(slot, player) > 0) {
+//                    playInsertSound(player);
+                } else {
+//                    playInsertFailSound(player);
+                }
+
+                itemStack.set(DataComponents.BUNDLE_CONTENTS, contents.toImmutable());
+                this.broadcastChangesOnContainerMenu(player);
+                return true;
+            } else if (clickAction == ClickAction.SECONDARY && other.isEmpty()) {
+                ItemStack removedItem = contents.removeOne();
+                if (removedItem != null) {
+                    ItemStack remainder = slot.safeInsert(removedItem);
+                    if (remainder.getCount() > 0) {
+                        contents.tryInsert(remainder);
+                    } else {
+//                        playRemoveOneSound(player);
+                    }
+                }
+
+                itemStack.set(DataComponents.BUNDLE_CONTENTS, contents.toImmutable());
+                this.broadcastChangesOnContainerMenu(player);
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    public boolean overrideOtherStackedOnMe(ItemStack itemStack, ItemStack itemHeldByCursor, Slot slot, ClickAction clickAction, Player player, SlotAccess slotHeldByCursor) {
+        return false;
+    }
+
+    /**
+     * @see net.minecraft.world.item.BundleItem#broadcastChangesOnContainerMenu(Player)
+     */
+    private void broadcastChangesOnContainerMenu(Player player) {
+        player.containerMenu.slotsChanged(player.getInventory());
+    }
+
     /**
      * Does this provider support item inventory interactions (extracting and adding items) on the given
      * <code>containterStack</code>.
@@ -49,7 +102,7 @@ public record ItemStorageHolder(ItemStorage storage) {
      * @return are inventory interactions allowed (is a container present on this item)
      */
     public boolean allowsPlayerInteractions(ItemStack containerStack, Player player) {
-        return this.storage.allowsPlayerInteractions(containerStack, player);
+        return this.storage.canPlayerInteractWith(containerStack, player);
     }
 
     /**
@@ -89,10 +142,8 @@ public record ItemStorageHolder(ItemStorage storage) {
      * @param player         player involved in the interaction
      * @return the provided container
      */
-    public SimpleContainer getItemContainerView(ItemStack containerStack, Player player) {
-        SimpleContainer container = this.storage.getItemContainer(containerStack, player, false);
-        Objects.requireNonNull(container, "container is null");
-        return container;
+    public SimpleContainer getContainerView(ItemStack containerStack, Player player) {
+        return this.storage.getItemContainer(containerStack, player, false);
     }
 
     /**
@@ -104,10 +155,8 @@ public record ItemStorageHolder(ItemStorage storage) {
      * @param player         player involved in the interaction
      * @return the provided container
      */
-    public SimpleContainer getItemContainer(ItemStack containerStack, Player player) {
-        SimpleContainer container = this.storage.getItemContainer(containerStack, player, true);
-        Objects.requireNonNull(container, "container is null");
-        return container;
+    public SimpleContainer getMutableContainer(ItemStack containerStack, Player player) {
+        return this.storage.getItemContainer(containerStack, player, true);
     }
 
     /**
@@ -123,8 +172,8 @@ public record ItemStorageHolder(ItemStorage storage) {
      * @return is any item of the same type as <code>stackToAdd</code> already in the container
      */
     public boolean hasAnyOf(ItemStack containerStack, ItemStack stackToAdd, Player player) {
-        return this.canAcceptItem(containerStack, stackToAdd, player) && this.getItemContainerView(containerStack,
-                player).hasAnyMatching(stack -> ItemStack.isSameItem(stack, stackToAdd));
+        return this.canAcceptItem(containerStack, stackToAdd, player) && this.getContainerView(containerStack,
+                player).hasAnyMatching((ItemStack item) -> ItemStack.isSameItem(item, stackToAdd));
     }
 
     /**
@@ -185,15 +234,13 @@ public record ItemStorageHolder(ItemStorage storage) {
      * @return the image tooltip provided by the item stack.
      */
     public Optional<TooltipComponent> getTooltipImage(ItemStack containerStack, Player player) {
-        Optional<TooltipComponent> tooltipImage = this.storage.getTooltipImage(containerStack, player);
-        Objects.requireNonNull(tooltipImage, "tooltip image is null");
-        return tooltipImage;
+        return this.storage.getTooltipImage(containerStack, player);
     }
 
     /**
      * @return the item container provider type
      */
-    public ItemStorage.Type<?> getType() {
+    public ItemStorageType<?> getType() {
         return this.storage.getType();
     }
 

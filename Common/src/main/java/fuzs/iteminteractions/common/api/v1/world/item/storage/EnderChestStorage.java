@@ -15,19 +15,14 @@ import net.minecraft.world.item.ItemStack;
 
 public class EnderChestStorage implements ItemStorageWithTooltip {
     /**
-     * Pretty ender color from <a href="https://www.curseforge.com/minecraft/mc-mods/tinted">Tinted mod</a>.
+     * Pretty ender color from the <a href="https://www.curseforge.com/minecraft/mc-mods/tinted">Tinted</a> mod.
      */
     private static final DyeBackedColor DEFAULT_ENDER_CHEST_COLOR = DyeBackedColor.fromRgb(0X2A6255);
     public static final MapCodec<EnderChestStorage> CODEC = MapCodec.unit(EnderChestStorage::new);
 
     @Override
-    public SimpleContainer getItemContainer(ItemStack containerStack, Player player, boolean allowSaving) {
+    public SimpleContainer getItemContainer(ItemStack itemStack, Player player, boolean isMutable) {
         return player.getEnderChestInventory();
-    }
-
-    @Override
-    public boolean hasContents(ItemStack containerStack) {
-        return true;
     }
 
     @Override
@@ -47,28 +42,30 @@ public class EnderChestStorage implements ItemStorageWithTooltip {
     }
 
     @Override
-    public TooltipComponent createTooltipImageComponent(ItemStack itemStack, Player player, NonNullList<ItemStack> items) {
+    public TooltipComponent createTooltipImageComponent(ItemStack itemStack, Player player, NonNullList<ItemStack> itemList) {
         int selectedItem = ContainerSlotHelper.getSelectedItem(itemStack);
-        return new ItemContentsTooltip(items, selectedItem, this.getGridWidth(items.size()),
-                this.getGridHeight(items.size()),
+        return new ItemContentsTooltip(itemList,
+                selectedItem,
+                this.getGridWidth(itemList.size()),
+                this.getGridHeight(itemList.size()),
                 DEFAULT_ENDER_CHEST_COLOR);
     }
 
     @Override
-    public void broadcastContainerChanges(ItemStack containerStack, Player player) {
+    public void broadcastChangesOnContainerMenu(ItemStack itemStack, Player player) {
         if (player.level().isClientSide()) {
-            // will only actually broadcast when in the creative menu as that menu needs manual syncing
-            NonNullList<ItemStack> items = this.getItemContainer(containerStack, player, false).getItems();
-            EnderChestSyncHandler.broadcastCreativeState(player, items);
+            // Will only actually broadcast when in the creative menu as that menu needs manual syncing.
+            NonNullList<ItemStack> itemList = this.getItemContainer(itemStack, player, false).getItems();
+            EnderChestSyncHandler.broadcastCreativeState(player, itemList);
         } else {
-            // sync full state, the client ender chest will otherwise likely be messed up when using item interactions
-            // for the ender chest inside the ender chest menu due to packet spam and corresponding delays
+            // Sync the full state, the client ender chest will otherwise likely be messed up.
+            // Useful for nested ender chests when paired with packet spam and latency.
             EnderChestSyncHandler.broadcastFullState((ServerPlayer) player);
         }
     }
 
     @Override
-    public Type<?> getType() {
+    public ItemStorageType<?> getType() {
         return ModRegistry.ENDER_CHEST_ITEM_CONTENTS_PROVIDER_TYPE.value();
     }
 }

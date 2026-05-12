@@ -24,13 +24,13 @@ public interface ItemStorageWithTooltip extends ItemStorage {
 
     @Override
     default Optional<TooltipComponent> getTooltipImage(ItemStack itemStack, Player player) {
-        NonNullList<ItemStack> items = this.getTooltipContents(itemStack, player);
-        return Optional.of(this.createTooltipImageComponent(itemStack, player, items));
+        NonNullList<ItemStack> itemList = this.getTooltipContents(itemStack, player);
+        return Optional.of(this.createTooltipImageComponent(itemStack, player, itemList));
     }
 
     default NonNullList<ItemStack> getTooltipContents(ItemStack itemStack, Player player) {
         return this.getItemContainer(itemStack, player, false).getItems();
     }
 
-    TooltipComponent createTooltipImageComponent(ItemStack itemStack, Player player, NonNullList<ItemStack> items);
+    TooltipComponent createTooltipImageComponent(ItemStack itemStack, Player player, NonNullList<ItemStack> itemList);
 }

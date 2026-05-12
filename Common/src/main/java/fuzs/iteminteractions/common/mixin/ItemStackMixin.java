@@ -4,6 +4,7 @@ import fuzs.iteminteractions.common.api.v1.world.item.storage.ItemStorageHolder;
 import fuzs.iteminteractions.common.impl.world.item.container.ItemContentsProviders;
 import fuzs.iteminteractions.common.impl.world.item.container.ItemInteractionHelper;
 import fuzs.puzzleslib.common.api.util.v1.CommonHelper;
+import net.minecraft.world.Container;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickAction;
@@ -26,16 +27,16 @@ abstract class ItemStackMixin {
         ItemStorageHolder holder = ItemContentsProviders.get(itemStack);
         if (holder.allowsPlayerInteractions(itemStack, player)) {
             boolean broadcastChanges = ItemInteractionHelper.overrideStackedOnOther(itemStack,
-                    () -> holder.getItemContainer(itemStack, player),
+                    () -> holder.getMutableContainer(itemStack, player),
                     slot,
                     clickAction,
                     player,
                     (ItemStack item) -> {
                         return holder.getAcceptableItemCount(itemStack, item, player);
                     },
-                    holder.storage()::getMaxStackSize);
+                    (Container container, ItemStack item) -> holder.storage().getMaxStackSize(container, -1, item));
             if (broadcastChanges) {
-                holder.storage().broadcastContainerChanges(itemStack, player);
+                holder.storage().broadcastChangesOnContainerMenu(itemStack, player);
             }
 
             callback.setReturnValue(broadcastChanges);
@@ -43,24 +44,24 @@ abstract class ItemStackMixin {
     }
 
     @Inject(method = "overrideOtherStackedOnMe", at = @At("HEAD"), cancellable = true)
-    public void overrideOtherStackedOnMe(ItemStack stackOnMe, Slot slot, ClickAction clickAction, Player player, SlotAccess slotAccess, CallbackInfoReturnable<Boolean> callback) {
+    public void overrideOtherStackedOnMe(ItemStack other, Slot slot, ClickAction clickAction, Player player, SlotAccess carriedItem, CallbackInfoReturnable<Boolean> callback) {
         ItemStack itemStack = ItemStack.class.cast(this);
         ItemStorageHolder holder = ItemContentsProviders.get(itemStack);
         if (holder.allowsPlayerInteractions(itemStack, player)) {
             boolean broadcastChanges = ItemInteractionHelper.overrideOtherStackedOnMe(itemStack,
-                    () -> holder.getItemContainer(itemStack, player),
-                    stackOnMe,
+                    () -> holder.getMutableContainer(itemStack, player),
+                    other,
                     slot,
                     clickAction,
                     player,
-                    slotAccess,
+                    carriedItem,
                     (ItemStack item) -> {
                         return holder.getAcceptableItemCount(itemStack, item, player);
                     },
-                    holder.storage()::getMaxStackSize,
+                    (Container container, ItemStack item) -> holder.storage().getMaxStackSize(container, -1, item),
                     () -> holder.storage().onToggleSelectedItem(itemStack, 0, -1));
             if (broadcastChanges) {
-                holder.storage().broadcastContainerChanges(itemStack, player);
+                holder.storage().broadcastChangesOnContainerMenu(itemStack, player);
             }
 
             callback.setReturnValue(broadcastChanges);

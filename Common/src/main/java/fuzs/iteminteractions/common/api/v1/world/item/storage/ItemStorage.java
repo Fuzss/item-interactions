@@ -28,26 +28,25 @@ import java.util.Optional;
  * interactions (extracting and adding items via right-clicking on the item) and bundle-like tooltips.
  * <p>
  * A container does not necessarily need to provide both item interactions and tooltips, what is provided is defined by
- * implementing {@link ItemStorage#allowsPlayerInteractions} and
- * {@link ItemStorage#canProvideTooltipImage}.
+ * implementing {@link ItemStorage#canPlayerInteractWith} and {@link ItemStorage#canProvideTooltipImage}.
  * <p>
  * This overrides any already implemented behavior (the default providers in Easy Shulker Boxes actually do this for
  * vanilla bundles).
  */
 public interface ItemStorage {
     /**
-     * The {@link Type} registry key.
+     * The {@link ItemStorageType} registry key.
      */
-    ResourceKey<Registry<Type<?>>> REGISTRY_KEY = ResourceKey.createRegistryKey(ItemContentsProviders.REGISTRY_KEY.identifier());
+    ResourceKey<Registry<ItemStorageType<?>>> REGISTRY_KEY = ResourceKey.createRegistryKey(ItemContentsProviders.REGISTRY_KEY.identifier());
     /**
-     * The {@link Type} registry.
+     * The {@link ItemStorageType} registry.
      */
-    Registry<Type<?>> REGISTRY = RegistryFactory.INSTANCE.createSynced(REGISTRY_KEY, ItemInteractions.id("empty"));
+    Registry<ItemStorageType<?>> REGISTRY = RegistryFactory.INSTANCE.createSynced(REGISTRY_KEY,
+            ItemInteractions.id("empty"));
     /**
      * Codec that additionally to the provider itself also includes the provider type.
      */
-    MapCodec<ItemStorage> CODEC = REGISTRY.byNameCodec()
-            .dispatchMap(ItemStorage::getType, Type::codec);
+    MapCodec<ItemStorage> CODEC = REGISTRY.byNameCodec().dispatchMap(ItemStorage::getType, ItemStorageType::codec);
     /**
      * Codec that includes a list of supported items.
      */
@@ -59,20 +58,18 @@ public interface ItemStorage {
     /**
      * Stream codec that additionally to the provider itself also includes the provider type.
      */
-    StreamCodec<RegistryFriendlyByteBuf, ItemStorage> STREAM_CODEC = ByteBufCodecs.registry(
-                    ItemStorage.REGISTRY_KEY)
-            .dispatch(ItemStorage::getType, ItemStorage.Type::streamCodec);
+    StreamCodec<RegistryFriendlyByteBuf, ItemStorage> STREAM_CODEC = ByteBufCodecs.registry(ItemStorage.REGISTRY_KEY)
+            .dispatch(ItemStorage::getType, ItemStorageType::streamCodec);
 
     /**
-     * Does this provider support item inventory interactions (extracting and adding items) on the given
-     * <code>containterStack</code>.
+     * Returns whether extracting and adding items is supported.
      *
-     * @param containerStack the container stack
-     * @param player         the player performing the interaction
-     * @return are inventory interactions allowed (is a container present on this item)
+     * @param itemStack the item stack providing the storage
+     * @param player    the player performing the interaction
+     * @return are inventory interactions allowed?
      */
-    default boolean allowsPlayerInteractions(ItemStack containerStack, Player player) {
-        return containerStack.getCount() == 1;
+    default boolean canPlayerInteractWith(ItemStack itemStack, Player player) {
+        return itemStack.getCount() == 1;
     }
 
     /**
@@ -81,11 +78,12 @@ public interface ItemStorage {
      * Allows supporting containers with custom max stack sizes such as our Limitless Container library.
      *
      * @param container current container
+     * @param slotIndex the menu slot index
      * @param itemStack item stack to retrieve stack size for
      * @return supported max stack size
      */
-    default int getMaxStackSize(Container container, ItemStack itemStack) {
-        return itemStack.getMaxStackSize();
+    default int getMaxStackSize(Container container, int slotIndex, ItemStack itemStack) {
+        return container.getMaxStackSize(itemStack);
     }
 
     /**
@@ -93,21 +91,22 @@ public interface ItemStorage {
      * <p>an easy check if the corresponding container is empty without having to create a container instance
      * <p>mainly used by tooltip image and client-side mouse scroll handler
      *
-     * @param containerStack the container stack
+     * @param itemStack the container stack
      * @return is the item stack tag with stored item data present
      */
-    boolean hasContents(ItemStack containerStack);
+    default boolean hasContents(ItemStack itemStack) {
+        return true;
+    }
 
     /**
-     * called on the client-side to sync changes made during inventory item interactions back to the server
-     * <p>this only works in the creative inventory, as any other menu does not allow the client to sync changes
-     * <p>only really need for ender chests right now
+     * Used to synchronize item storage changes.
      *
-     * @param containerStack item stack providing the container
-     * @param player         the player performing the item interaction
+     * @param itemStack the item stack providing the storage
+     * @param player    the player performing the interaction
+     * @see net.minecraft.world.item.BundleItem#broadcastChangesOnContainerMenu(Player)
      */
-    default void broadcastContainerChanges(ItemStack containerStack, Player player) {
-        // NO-OP
+    default void broadcastChangesOnContainerMenu(ItemStack itemStack, Player player) {
+        player.containerMenu.slotsChanged(player.getInventory());
     }
 
     /**
@@ -126,29 +125,29 @@ public interface ItemStorage {
      * Is there enough space in the container provided by <code>containerStack</code> to add <code>stack</code> (not
      * necessarily the full stack).
      * <p>
-     * Before this is called {@link #allowsPlayerInteractions(ItemStack, Player)} and
+     * Before this is called {@link #canPlayerInteractWith(ItemStack, Player)} and
      * {@link #isItemAllowedInContainer(ItemStack)} are checked.
      *
-     * @param containerStack the item stack providing the container to add <code>stack</code> to
-     * @param stackToAdd     the stack to be added to the container
-     * @param player         the player interacting with both items
+     * @param itemStack  the item stack providing the container to add <code>stack</code> to
+     * @param stackToAdd the stack to be added to the container
+     * @param player     the player interacting with both items
      * @return is adding any portion of <code>stackToAdd</code> to the container possible
      */
-    default boolean canAddItem(ItemStack containerStack, ItemStack stackToAdd, Player player) {
-        return this.getItemContainer(containerStack, player, false).canAddItem(stackToAdd);
+    default boolean canAddItem(ItemStack itemStack, ItemStack stackToAdd, Player player) {
+        return this.getItemContainer(itemStack, player, false).canAddItem(stackToAdd);
     }
 
     /**
      * Get the container implementation provided by <code>containerStack</code> as a {@link SimpleContainer}, must not
      * return <code>null</code>.
      *
-     * @param containerStack item stack providing the container
-     * @param player         player involved in the interaction
-     * @param allowSaving    attach a saving listener to the container (this is set to <code>false</code> when creating
-     *                       a container e.g. for rendering a tooltip)
+     * @param itemStack item stack providing the container
+     * @param player    player involved in the interaction
+     * @param isMutable attach a saving listener to the container (this is set to <code>false</code> when creating a
+     *                  container e.g. for rendering a tooltip)
      * @return the provided container
      */
-    SimpleContainer getItemContainer(ItemStack containerStack, Player player, boolean allowSaving);
+    SimpleContainer getItemContainer(ItemStack itemStack, Player player, boolean isMutable);
 
     /**
      * How much space is available in the container provided by <code>containerStack</code> to add
@@ -156,15 +155,15 @@ public interface ItemStorage {
      * <p>
      * Mainly used by bundles, otherwise {@link ItemStorage#canAddItem} should be enough.
      * <p>
-     * Before this is called {@link #allowsPlayerInteractions(ItemStack, Player)} and
+     * Before this is called {@link #canPlayerInteractWith(ItemStack, Player)} and
      * {@link #isItemAllowedInContainer(ItemStack)} are checked.
      *
-     * @param containerStack the item stack providing the container to add <code>stackToAdd</code> to
-     * @param stackToAdd     the stack to be added to the container
-     * @param player         the player interacting with both item stacks
+     * @param itemStack  the item stack providing the container to add <code>stackToAdd</code> to
+     * @param stackToAdd the stack to be added to the container
+     * @param player     the player interacting with both item stacks
      * @return the portion of <code>stackToAdd</code> that can be added to the container
      */
-    default int getAcceptableItemCount(ItemStack containerStack, ItemStack stackToAdd, Player player) {
+    default int getAcceptableItemCount(ItemStack itemStack, ItemStack stackToAdd, Player player) {
         return stackToAdd.getCount();
     }
 
@@ -192,29 +191,16 @@ public interface ItemStorage {
     /**
      * Called when the selected item index for a container item changes from the player scrolling through the tooltip.
      *
-     * @param containerStack  the item stack providing the container
-     * @param oldSelectedItem the previous selected slot inside the container item
-     * @param newSelectedItem the next selected slot inside the container item
+     * @param itemStack            the item stack providing the container
+     * @param previousSelectedItem the previous selected slot inside the container item
+     * @param updatedSelectedItem  the next selected slot inside the container item
      */
-    default void onToggleSelectedItem(ItemStack containerStack, int oldSelectedItem, int newSelectedItem) {
+    default void onToggleSelectedItem(ItemStack itemStack, int previousSelectedItem, int updatedSelectedItem) {
         // NO-OP
     }
 
     /**
      * @return the item container provider type
      */
-    Type<?> getType();
-
-    /**
-     * A type for identifying and serializing item container provider implementations.
-     *
-     * @param codec the item container provider codec
-     */
-    record Type<T extends ItemStorage>(MapCodec<T> codec,
-                                       StreamCodec<? super RegistryFriendlyByteBuf, T> streamCodec) {
-
-        public Type(MapCodec<T> codec) {
-            this(codec, ByteBufCodecs.fromCodecWithRegistries(codec.codec()));
-        }
-    }
+    ItemStorageType<?> getType();
 }

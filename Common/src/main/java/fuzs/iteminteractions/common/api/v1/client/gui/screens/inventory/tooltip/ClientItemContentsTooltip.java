@@ -29,14 +29,14 @@ public class ClientItemContentsTooltip implements ClientTooltipComponent {
     private static final int BORDER_SIZE = 7;
     private static final int SLOT_SIZE = 18;
 
-    private final NonNullList<ItemStack> items;
+    private final NonNullList<ItemStack> itemList;
     private final int selectedItem;
     private final int gridWidth;
     private final int gridHeight;
     private final int backgroundColor;
 
     public ClientItemContentsTooltip(ItemContentsTooltip tooltip) {
-        this.items = tooltip.items();
+        this.itemList = tooltip.itemList();
         this.selectedItem = tooltip.selectedItem();
         this.gridWidth = tooltip.gridWidth();
         this.gridHeight = tooltip.gridHeight();
@@ -113,32 +113,15 @@ public class ClientItemContentsTooltip implements ClientTooltipComponent {
     }
 
     private void extractSlots(Font font, GuiGraphicsExtractor guiGraphics, int x, int y, SlotRenderer slotRenderer) {
-        int isSelectedSlot = this.getSelectedSlot();
         int slotIndex = 0;
         for (int gridY = 0; gridY < this.gridSizeY(); ++gridY) {
             for (int gridX = 0; gridX < this.gridSizeX(); ++gridX) {
                 int posX = x + gridX * SLOT_SIZE + BORDER_SIZE;
                 int posY = y + gridY * SLOT_SIZE + BORDER_SIZE;
-                slotRenderer.extractSlot(font, guiGraphics, posX, posY, slotIndex, slotIndex == isSelectedSlot);
+                slotRenderer.extractSlot(font, guiGraphics, posX, posY, slotIndex, slotIndex == this.selectedItem);
                 slotIndex++;
             }
         }
-    }
-
-    private int getSelectedSlot() {
-        if (this.selectedItem != -1 && this.selectedItem < this.items.size()) {
-            if (!this.items.get(this.selectedItem).isEmpty()) {
-                return this.selectedItem;
-            }
-        }
-
-        for (int i = this.items.size() - 1; i >= 0; i--) {
-            if (!this.items.get(i).isEmpty()) {
-                return i;
-            }
-        }
-
-        return -1;
     }
 
     private void extractSlotContents(Font font, GuiGraphicsExtractor guiGraphics, int posX, int posY, int slotIndex, boolean isHighlightSlot) {
@@ -148,8 +131,8 @@ public class ClientItemContentsTooltip implements ClientTooltipComponent {
     }
 
     private void extractSlot(Font font, GuiGraphicsExtractor guiGraphics, int posX, int posY, int slotIndex) {
-        if (slotIndex < this.items.size()) {
-            ItemStack itemstack = this.items.get(slotIndex);
+        if (slotIndex < this.itemList.size()) {
+            ItemStack itemstack = this.itemList.get(slotIndex);
             guiGraphics.item(itemstack, posX + 1, posY + 1, slotIndex);
             guiGraphics.itemDecorations(font, itemstack, posX + 1, posY + 1);
         }
@@ -184,9 +167,8 @@ public class ClientItemContentsTooltip implements ClientTooltipComponent {
     }
 
     private ItemStack getSelectedItem() {
-        int isSelectedSlot = this.getSelectedSlot();
-        if (isSelectedSlot >= 0 && isSelectedSlot < this.items.size()) {
-            return this.items.get(isSelectedSlot);
+        if (this.selectedItem >= 0 && this.selectedItem < this.itemList.size()) {
+            return this.itemList.get(this.selectedItem);
         } else {
             return ItemStack.EMPTY;
         }

@@ -1,9 +1,11 @@
 package fuzs.iteminteractions.common.impl;
 
+import fuzs.iteminteractions.common.api.v1.world.inventory.ItemClickedInMenuCallback;
 import fuzs.iteminteractions.common.api.v1.world.item.storage.ItemStorage;
 import fuzs.iteminteractions.common.impl.config.ClientConfig;
 import fuzs.iteminteractions.common.impl.config.ServerConfig;
 import fuzs.iteminteractions.common.impl.data.DynamicItemContentsProvider;
+import fuzs.iteminteractions.common.impl.handler.ContainerClickInputHandler;
 import fuzs.iteminteractions.common.impl.handler.EnderChestSyncHandler;
 import fuzs.iteminteractions.common.impl.init.ModRegistry;
 import fuzs.iteminteractions.common.impl.network.ClientboundEnderChestContentMessage;
@@ -52,6 +54,7 @@ public class ItemInteractions implements ModConstructor {
     }
 
     private static void registerEventHandlers() {
+//        ItemClickedInMenuCallback.EVENT.register(ContainerClickInputHandler::onContainerItemClick);
         ContainerEvents.OPEN.register(EnderChestSyncHandler::onContainerOpen);
         SyncDataPackContentsCallback.EVENT.register(ItemContentsProviders::onSyncDataPackContents);
         PlayerNetworkEvents.JOIN.register(EnderChestSyncHandler::onPlayerJoin);
@@ -87,7 +90,7 @@ public class ItemInteractions implements ModConstructor {
 
         context.registerRepositorySource(PackResourcesHelper.buildServerPack(id("test_item_interactions"),
                 DynamicPackResources.create(DynamicItemContentsProvider::new),
-                false));
+                true));
     }
 
     @Override

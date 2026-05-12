@@ -17,12 +17,12 @@ public class VoidStorage implements ItemStorage {
     public static final MapCodec<ItemStorage> CODEC = MapCodec.unit(INSTANCE);
 
     @Override
-    public boolean allowsPlayerInteractions(ItemStack containerStack, Player player) {
+    public boolean canPlayerInteractWith(ItemStack itemStack, Player player) {
         return false;
     }
 
     @Override
-    public boolean hasContents(ItemStack containerStack) {
+    public boolean hasContents(ItemStack itemStack) {
         return false;
     }
 
@@ -32,33 +32,32 @@ public class VoidStorage implements ItemStorage {
     }
 
     @Override
-    public boolean canAddItem(ItemStack containerStack, ItemStack stackToAdd, Player player) {
+    public boolean canAddItem(ItemStack itemStack, ItemStack stackToAdd, Player player) {
         return false;
     }
 
     @Override
-    public SimpleContainer getItemContainer(ItemStack containerStack, Player player, boolean allowSaving) {
-        // should never be able to reach here
-        throw new UnsupportedOperationException();
+    public SimpleContainer getItemContainer(ItemStack itemStack, Player player, boolean isMutable) {
+        return new SimpleContainer();
     }
 
     @Override
-    public int getAcceptableItemCount(ItemStack containerStack, ItemStack stackToAdd, Player player) {
+    public int getAcceptableItemCount(ItemStack itemStack, ItemStack stackToAdd, Player player) {
         return 0;
     }
 
     @Override
-    public boolean canProvideTooltipImage(ItemStack containerStack, Player player) {
+    public boolean canProvideTooltipImage(ItemStack itemStack, Player player) {
         return false;
     }
 
     @Override
-    public Optional<TooltipComponent> getTooltipImage(ItemStack containerStack, Player player) {
+    public Optional<TooltipComponent> getTooltipImage(ItemStack itemStack, Player player) {
         return Optional.empty();
     }
 
     @Override
-    public Type<?> getType() {
+    public ItemStorageType<?> getType() {
         return ModRegistry.EMPTY_ITEM_CONTENTS_PROVIDER_TYPE.value();
     }
 }

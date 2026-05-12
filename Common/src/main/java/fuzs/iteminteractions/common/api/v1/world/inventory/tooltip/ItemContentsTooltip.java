@@ -6,7 +6,7 @@ import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
-public record ItemContentsTooltip(NonNullList<ItemStack> items,
+public record ItemContentsTooltip(NonNullList<ItemStack> itemList,
                                   int selectedItem,
                                   int gridWidth,
                                   int gridHeight,

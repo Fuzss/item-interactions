@@ -10,7 +10,6 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
@@ -58,10 +57,6 @@ public class ItemDecorationsHelper {
             return false;
         } else if (slot instanceof CreativeModeInventoryScreen.CustomCreativeSlot) {
             // filter out creative mode inventory slots on the client
-            return false;
-        } else if (slot.container instanceof CraftingContainer) {
-            // do not allow interactions in the crafting grid, the crafting result will not update,
-            // so players can remove items and get them back from the crafted item
             return false;
         } else {
             return true;

@@ -19,8 +19,6 @@ public class ClientConfig implements ConfigCore {
             "Select a modifier key required to be held to use precision mode.", ServerConfig.PRECISION_MODE_MESSAGE
     })
     public ExtractSingleItem extractSingleItem = ExtractSingleItem.CONTROL;
-    @Config(description = "Disable sounds from inserting and extracting items from playing, as they trigger quite often with all the new interactions.")
-    public boolean disableInteractionSounds = true;
     @Config(description = "Invert scroll wheel direction for extracting / inserting items from a container item in precision mode.")
     public boolean invertPrecisionModeScrolling = false;
 }

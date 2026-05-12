@@ -78,7 +78,7 @@ public class ItemContentsMouseActions extends BundleMouseActions {
             int wheel = wheelXY.y == 0 ? -wheelXY.x : wheelXY.y;
             if (wheel != 0) {
                 int selectedItem = ContainerSlotHelper.getSelectedItem(itemStack);
-                Container container = holder.getItemContainerView(itemStack, this.minecraft.player);
+                Container container = holder.getContainerView(itemStack, this.minecraft.player);
                 int updatedSelectedItem = ContainerSlotHelper.findClosestSlotWithContent(container,
                         selectedItem,
                         wheel < 0,
@@ -103,19 +103,21 @@ public class ItemContentsMouseActions extends BundleMouseActions {
     }
 
     /**
+     * Important to call before click actions (notably in the creative menu).
+     *
      * @see MultiPlayerGameMode#ensureHasSentCarriedItem()
      */
     private void setSingleItemOnly(boolean singleItemOnly) {
-        // This sets the value on the client, so it's important to call before click actions (notably in the creative menu).
         ContainerSlotHelper.extractSingleItem(this.minecraft.player, singleItemOnly);
         MessageSender.broadcast(new ServerboundContainerClientInputMessage(singleItemOnly));
     }
 
     @Override
-    public void toggleSelectedBundleItem(ItemStack itemStack, int slotIndex, int selectedItem) {
-        ContainerSlotHelper.setSelectedItem(itemStack, selectedItem);
-        ItemStorageHolder holder = ItemContentsProviders.get(itemStack);
-        holder.storage().onToggleSelectedItem(itemStack, selectedItem, selectedItem);
-        MessageSender.broadcast(new ServerboundSelectedItemMessage(slotIndex, selectedItem));
+    public void toggleSelectedBundleItem(ItemStack bundleItem, int slotIndex, int updatedSelectedItem) {
+        int previousSelectedItem = ContainerSlotHelper.getSelectedItem(bundleItem);
+        ContainerSlotHelper.setSelectedItem(bundleItem, updatedSelectedItem);
+        ItemStorageHolder holder = ItemContentsProviders.get(bundleItem);
+        holder.storage().onToggleSelectedItem(bundleItem, previousSelectedItem, updatedSelectedItem);
+        MessageSender.broadcast(new ServerboundSelectedItemMessage(slotIndex, updatedSelectedItem));
     }
 }

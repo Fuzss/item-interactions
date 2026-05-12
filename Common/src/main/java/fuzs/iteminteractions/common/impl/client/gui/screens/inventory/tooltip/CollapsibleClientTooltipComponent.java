@@ -17,7 +17,7 @@ public record CollapsibleClientTooltipComponent(ClientTooltipComponent component
             .toLanguageKey(Registries.elementsDirPath(Registries.ITEM), "tooltip.reveal_contents");
 
     public static <T extends TooltipComponent> Function<? super T, CollapsibleClientTooltipComponent> wrapFactory(Function<? super T, ? extends ClientTooltipComponent> factory) {
-        return (T t) -> new CollapsibleClientTooltipComponent(factory.apply(t));
+        return (T tooltipComponent) -> new CollapsibleClientTooltipComponent(factory.apply(tooltipComponent));
     }
 
     @Override

@@ -7,7 +7,6 @@ import fuzs.iteminteractions.common.api.v1.world.inventory.tooltip.BundleContent
 import fuzs.iteminteractions.common.api.v1.world.inventory.tooltip.ItemContentsTooltip;
 import fuzs.iteminteractions.common.impl.client.gui.ItemContentsMouseActions;
 import fuzs.iteminteractions.common.impl.client.gui.screens.inventory.tooltip.CollapsibleClientTooltipComponent;
-import fuzs.iteminteractions.common.impl.client.handler.InteractionSoundsHandler;
 import fuzs.iteminteractions.common.impl.client.handler.MouseDraggingHandler;
 import fuzs.iteminteractions.common.impl.config.ExtractSingleItem;
 import fuzs.iteminteractions.common.impl.config.VisualItemContents;
@@ -50,7 +49,6 @@ public class ItemInteractionsClient implements ClientModConstructor {
         ScreenEvents.afterBackground(AbstractContainerScreen.class).register(MouseDraggingHandler::onAfterBackground);
         RenderContainerScreenContentsCallback.EVENT.register(MouseDraggingHandler::onRenderContainerScreenContents);
         PlaySoundEvents.AT_ENTITY.register(MouseDraggingHandler::onPlaySoundAtEntity);
-        PlaySoundEvents.AT_ENTITY.register(InteractionSoundsHandler::onPlaySoundAtEntity);
         ClientPlayerNetworkEvents.LEAVE.register((LocalPlayer player, MultiPlayerGameMode multiPlayerGameMode, Connection connection) -> {
             ItemContentsProviders.setItemContainerProviders(ImmutableMap.of());
         });

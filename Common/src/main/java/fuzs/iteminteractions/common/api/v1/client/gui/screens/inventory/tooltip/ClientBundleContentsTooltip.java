@@ -24,7 +24,7 @@ public class ClientBundleContentsTooltip extends ClientBundleTooltip {
 
     @Override
     public int getWidth(Font font) {
-        return this.gridSizeX() * SLOT_SIZE;
+        return this.contents.isEmpty() ? super.getWidth(font) : this.gridSizeX() * SLOT_SIZE;
     }
 
     /**

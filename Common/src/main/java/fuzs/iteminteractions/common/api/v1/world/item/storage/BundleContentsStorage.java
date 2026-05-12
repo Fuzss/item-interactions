@@ -25,8 +25,8 @@ import java.util.stream.Stream;
 public class BundleContentsStorage extends ComponentBackedStorage {
     public static final MapCodec<BundleContentsStorage> CODEC = RecordCodecBuilder.mapCodec(instance -> {
         return instance.group(capacityMultiplierCodec(), itemContentsCodec())
-                .apply(instance, (Integer capacityMultiplier, ItemContents itemContents) -> {
-                    return new BundleContentsStorage(capacityMultiplier).itemContents(itemContents);
+                .apply(instance, (Integer capacityMultiplier, StorageOptions storageOptions) -> {
+                    return new BundleContentsStorage(capacityMultiplier).storageOptions(storageOptions);
                 });
     });
 
@@ -46,8 +46,8 @@ public class BundleContentsStorage extends ComponentBackedStorage {
     }
 
     @Override
-    protected BundleContentsStorage itemContents(ItemContents itemContents) {
-        return (BundleContentsStorage) super.itemContents(itemContents);
+    protected BundleContentsStorage storageOptions(StorageOptions storageOptions) {
+        return (BundleContentsStorage) super.storageOptions(storageOptions);
     }
 
     @Override
@@ -55,32 +55,38 @@ public class BundleContentsStorage extends ComponentBackedStorage {
         return (BundleContentsStorage) super.filterContainerItems(filterContainerItems);
     }
 
-    public Fraction getCapacityMultiplier(ItemStack containerStack) {
+    public Fraction getCapacityMultiplier(ItemStack itemStack) {
         return Fraction.getFraction(this.capacityMultiplier, 1);
     }
 
     @Override
-    public boolean hasContents(ItemStack containerStack) {
-        return !containerStack.getOrDefault(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY).isEmpty();
+    public boolean hasContents(ItemStack itemStack) {
+        return !itemStack.getOrDefault(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY).isEmpty();
     }
 
     @Override
-    public SimpleContainer getItemContainer(ItemStack containerStack, Player player, boolean allowSaving) {
+    public SimpleContainer getItemContainer(ItemStack containerStack, Player player, boolean isMutable) {
         BundleContents contents = containerStack.getOrDefault(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY);
-        // add one additional slot, so we can add items in the inventory
+        // TODO make this add in fron again
+        // Add one additional slot at the front, so we can add items in the inventory.
+        // Adding items at the front is consistent with vanilla behavior.
         ItemStack[] itemStacks = Stream.concat(contents.itemCopyStream(), Stream.of(ItemStack.EMPTY))
                 .toArray(ItemStack[]::new);
-        NonNullList<ItemStack> items = NonNullList.of(ItemStack.EMPTY, itemStacks);
-        return ContainerMenuHelper.createListBackedContainer(items, allowSaving ? (Container container) -> {
+        NonNullList<ItemStack> itemList = NonNullList.of(ItemStack.EMPTY, itemStacks);
+        return ContainerMenuHelper.createListBackedContainer(itemList, (Container container) -> {
+            if (!isMutable) {
+                throw new UnsupportedOperationException();
+            }
+
             BundleContents updatedContents;
             if (container.isEmpty()) {
                 updatedContents = BundleContents.EMPTY;
             } else {
                 // empty stacks must not get in here, the codec will fail otherwise
                 ImmutableList.Builder<ItemStackTemplate> builder = ImmutableList.builder();
-                for (ItemStack itemStack : items) {
-                    if (!itemStack.isEmpty()) {
-                        builder.add(ItemStackTemplate.fromNonEmptyStack(itemStack));
+                for (ItemStack item : itemList) {
+                    if (!item.isEmpty()) {
+                        builder.add(ItemStackTemplate.fromNonEmptyStack(item));
                     }
                 }
 
@@ -88,23 +94,43 @@ public class BundleContentsStorage extends ComponentBackedStorage {
             }
 
             containerStack.set(DataComponents.BUNDLE_CONTENTS, updatedContents);
-        } : null);
+        });
     }
 
     @Override
-    public boolean canAddItem(ItemStack containerStack, ItemStack stackToAdd, Player player) {
-        return this.getMaxAmountToAdd(containerStack, stackToAdd, player) > 0;
+    public boolean canAddItem(ItemStack itemStack, ItemStack stackToAdd, Player player) {
+        return this.getMaxAmountToAdd(itemStack, stackToAdd, player) > 0;
     }
 
     @Override
-    public int getAcceptableItemCount(ItemStack containerStack, ItemStack stackToAdd, Player player) {
-        return Math.min(this.getMaxAmountToAdd(containerStack, stackToAdd, player),
-                super.getAcceptableItemCount(containerStack, stackToAdd, player));
+    public int getAcceptableItemCount(ItemStack itemStack, ItemStack stackToAdd, Player player) {
+        return Math.min(this.getMaxAmountToAdd(itemStack, stackToAdd, player),
+                super.getAcceptableItemCount(itemStack, stackToAdd, player));
+    }
+
+    private int getMaxAmountToAdd(ItemStack itemStack, ItemStack stackToAdd) {
+        // TODO remove unused
+        BundleContents contents = itemStack.getOrDefault(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY);
+        Fraction bundleWeight = contents.weight().result().orElse(Fraction.ZERO);
+        Fraction itemWeight = this.getItemWeight(stackToAdd);
+        return this.getMaxAmountToAdd(bundleWeight, itemWeight);
+    }
+
+    private Fraction getItemWeight(ItemStack itemStack) {
+        return BundleContents.getWeight(itemStack).result().orElse(Fraction.ZERO);
+    }
+
+    /**
+     * @see BundleContents.Mutable#getMaxAmountToAdd(Fraction)
+     */
+    private int getMaxAmountToAdd(Fraction bundleWeight, Fraction itemWeight) {
+        Fraction remainingWeight = Fraction.ONE.subtract(bundleWeight);
+        return Math.max(remainingWeight.divideBy(itemWeight).intValue(), 0);
     }
 
     @Override
     public int getGridWidth(int itemCount) {
-        return Math.max(4, Mth.ceil(Math.sqrt(itemCount)));
+        return Math.max(1, Mth.ceil(Math.sqrt(itemCount)));
     }
 
     @Override
@@ -118,37 +144,41 @@ public class BundleContentsStorage extends ComponentBackedStorage {
     }
 
     @Override
-    public void onToggleSelectedItem(ItemStack containerStack, int oldSelectedItem, int newSelectedItem) {
-        if (oldSelectedItem != newSelectedItem) {
-            BundleItem.toggleSelectedItem(containerStack, newSelectedItem);
+    public void onToggleSelectedItem(ItemStack itemStack, int previousSelectedItem, int updatedSelectedItem) {
+        if (previousSelectedItem != updatedSelectedItem) {
+            BundleItem.toggleSelectedItem(itemStack, updatedSelectedItem);
         }
     }
 
     @Override
-    public NonNullList<ItemStack> getTooltipContents(ItemStack itemStack, Player player) {
+    public TooltipComponent createTooltipImageComponent(ItemStack itemStack, Player player, NonNullList<ItemStack> itemList) {
         BundleContents contents = itemStack.getOrDefault(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY);
-        return NonNullList.of(ItemStack.EMPTY, contents.itemCopyStream().toArray(ItemStack[]::new));
+        return new BundleContentsTooltip(contents,
+                this.getGridWidth(contents.size()),
+                this.getGridHeight(contents.size()));
     }
 
     @Override
-    public TooltipComponent createTooltipImageComponent(ItemStack itemStack, Player player, NonNullList<ItemStack> items) {
-        BundleContents contents = itemStack.getOrDefault(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY);
-        return new BundleContentsTooltip(contents, this.getGridWidth(items.size()), this.getGridHeight(items.size()));
+    public NonNullList<ItemStack> getTooltipContents(ItemStack itemStack, Player player) {
+        return NonNullList.create();
     }
 
-    public int getMaxAmountToAdd(ItemStack containerStack, ItemStack stackToAdd, Player player) {
-        Fraction fraction = this.getCapacityMultiplier(containerStack)
-                .subtract(this.computeContentWeight(containerStack, player));
+    /**
+     * @see BundleContents.Mutable#getMaxAmountToAdd(Fraction)
+     */
+    public int getMaxAmountToAdd(ItemStack itemStack, ItemStack stackToAdd, Player player) {
+        Fraction fraction = this.getCapacityMultiplier(itemStack)
+                .subtract(this.computeContentWeight(itemStack, player));
         return Math.max(fraction.divideBy(BundleContents.getWeight(stackToAdd).getOrThrow()).intValue(), 0);
     }
 
-    public Fraction computeContentWeight(ItemStack containerStack, Player player) {
-        NonNullList<ItemStack> items = this.getItemContainer(containerStack, player, false).getItems();
-        return BundleContents.computeContentWeight(items).getOrThrow();
+    public Fraction computeContentWeight(ItemStack itemStack, Player player) {
+        NonNullList<ItemStack> itemList = this.getItemContainer(itemStack, player, false).getItems();
+        return BundleContents.computeContentWeight(itemList).getOrThrow();
     }
 
     @Override
-    public Type<?> getType() {
+    public ItemStorageType<?> getType() {
         return ModRegistry.BUNDLE_ITEM_CONTENTS_PROVIDER_TYPE.value();
     }
 }
