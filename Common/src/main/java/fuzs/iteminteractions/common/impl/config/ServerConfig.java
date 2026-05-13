@@ -4,12 +4,11 @@ import fuzs.puzzleslib.common.api.config.v3.Config;
 import fuzs.puzzleslib.common.api.config.v3.ConfigCore;
 
 public class ServerConfig implements ConfigCore {
-    public static final String PRECISION_MODE_MESSAGE = "In precision mode left-clicking inserts an item, and right-clicking extracts a single item, overriding vanilla mouse interactions. The scroll wheel can also be used for quickly moving items.";
-
-    @Config(description = "Allow using the mouse wheel to scroll between slots in an item tooltip to choose the next item to extract.")
-    public boolean allowSlotCycling = true;
-    @Config(description = "Allow dragging the mouse while holding a container item to insert hovered items, or to extract container contents to empty hovered slots.")
-    public boolean allowMouseDragging = true;
-    @Config(description = {"Allow extracting / inserting only a single item from a container item instead of all items from the selected slot while a modifier key is held.", PRECISION_MODE_MESSAGE})
-    public boolean allowPrecisionMode = true;
+    @Config(description = "Support dragging the mouse while holding an item with contents to insert hovered items, or to extract contents to empty hovered slots.")
+    public boolean enableMouseDragging = true;
+    @Config(description = {
+            "Support moving only a single item from item contents instead of the whole item stack from the selected slot when clicking while a modifier key is held.",
+            "The scroll wheel can also be used for moving items even more quickly."
+    })
+    public boolean enableSingleItemMovement = true;
 }

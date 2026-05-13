@@ -15,6 +15,7 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.function.*;
 
+@Deprecated
 public class ItemInteractionHelper {
 
     public static boolean overrideStackedOnOther(ItemStack itemStack, Supplier<? extends Container> containerSupplier, Slot slot, ClickAction clickAction, Player player, ToIntFunction<ItemStack> acceptableItemCount, ToIntBiFunction<Container, ItemStack> maxStackSize) {

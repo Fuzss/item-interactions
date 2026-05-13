@@ -1,7 +1,7 @@
 package fuzs.iteminteractions.common.impl.client.gui.screens.inventory.tooltip;
 
 import fuzs.iteminteractions.common.impl.ItemInteractions;
-import fuzs.iteminteractions.common.impl.client.core.ActivationTypeProvider;
+import fuzs.iteminteractions.common.impl.client.core.KeyType;
 import fuzs.iteminteractions.common.impl.config.ClientConfig;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -22,8 +22,9 @@ public record CollapsibleClientTooltipComponent(ClientTooltipComponent component
 
     @Override
     public int getHeight(Font font) {
-        if (!ItemInteractions.CONFIG.get(ClientConfig.class).visualItemContents.isActive()) {
-            return 10;
+        KeyType type = ItemInteractions.CONFIG.get(ClientConfig.class).itemContentsTooltip;
+        if (!type.isUsed()) {
+            return type.getComponent(REVEAL_CONTENTS_TRANSLATION_KEY) != null ? font.lineHeight + 1 : 0;
         } else {
             return this.component.getHeight(font);
         }
@@ -31,10 +32,10 @@ public record CollapsibleClientTooltipComponent(ClientTooltipComponent component
 
     @Override
     public int getWidth(Font font) {
-        ActivationTypeProvider activation = ItemInteractions.CONFIG.get(ClientConfig.class).visualItemContents;
-        if (!activation.isActive()) {
-            Component component = activation.getComponent(REVEAL_CONTENTS_TRANSLATION_KEY);
-            return font.width(component);
+        KeyType type = ItemInteractions.CONFIG.get(ClientConfig.class).itemContentsTooltip;
+        if (!type.isUsed()) {
+            Component component = type.getComponent(REVEAL_CONTENTS_TRANSLATION_KEY);
+            return component != null ? font.width(component) : 0;
         } else {
             return this.component.getWidth(font);
         }
@@ -42,7 +43,7 @@ public record CollapsibleClientTooltipComponent(ClientTooltipComponent component
 
     @Override
     public boolean showTooltipWithItemInHand() {
-        if (ItemInteractions.CONFIG.get(ClientConfig.class).visualItemContents.isActive()) {
+        if (ItemInteractions.CONFIG.get(ClientConfig.class).itemContentsTooltip.isUsed()) {
             return this.component.showTooltipWithItemInHand();
         } else {
             return false;
@@ -51,16 +52,18 @@ public record CollapsibleClientTooltipComponent(ClientTooltipComponent component
 
     @Override
     public void extractText(GuiGraphicsExtractor guiGraphics, Font font, int x, int y) {
-        ActivationTypeProvider activation = ItemInteractions.CONFIG.get(ClientConfig.class).visualItemContents;
-        if (!activation.isActive()) {
-            Component component = activation.getComponent(REVEAL_CONTENTS_TRANSLATION_KEY);
-            guiGraphics.text(font, component, x, y, -1);
+        KeyType type = ItemInteractions.CONFIG.get(ClientConfig.class).itemContentsTooltip;
+        if (!type.isUsed()) {
+            Component component = type.getComponent(REVEAL_CONTENTS_TRANSLATION_KEY);
+            if (component != null) {
+                guiGraphics.text(font, component, x, y, -1);
+            }
         }
     }
 
     @Override
     public void extractImage(Font font, int x, int y, int width, int height, GuiGraphicsExtractor guiGraphics) {
-        if (ItemInteractions.CONFIG.get(ClientConfig.class).visualItemContents.isActive()) {
+        if (ItemInteractions.CONFIG.get(ClientConfig.class).itemContentsTooltip.isUsed()) {
             this.component.extractImage(font, x, y, width, height, guiGraphics);
         }
     }

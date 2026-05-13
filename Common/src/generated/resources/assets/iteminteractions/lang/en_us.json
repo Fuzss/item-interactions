@@ -1,12 +1,11 @@
 {
   "item.iteminteractions.container.tooltip.alt": "Alt",
-  "item.iteminteractions.container.tooltip.command": "Command",
   "item.iteminteractions.container.tooltip.control": "Control",
   "item.iteminteractions.container.tooltip.hold": "Hold",
   "item.iteminteractions.container.tooltip.reveal_contents": "%s %s to reveal contents",
   "item.iteminteractions.container.tooltip.shift": "Shift",
   "item.iteminteractions.container.tooltip.toggle": "Toggle",
   "key.category.iteminteractions.main": "Item Interactions",
-  "key.iteminteractions.toggle_carried_item_tooltips": "Toggle Carried Item Tooltips",
-  "key.iteminteractions.toggle_visual_item_contents": "Toggle Visual Item Contents"
+  "key.iteminteractions.toggle_item_contents_tooltip": "Toggle Item Contents Tooltip",
+  "key.iteminteractions.toggle_item_held_by_cursor_tooltip": "Toggle Item Held By Cursor Tooltip"
 }

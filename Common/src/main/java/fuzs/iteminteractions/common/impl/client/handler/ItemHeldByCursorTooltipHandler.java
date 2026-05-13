@@ -17,7 +17,7 @@ public class ItemHeldByCursorTooltipHandler {
      * @see AbstractContainerScreen#extractTooltip(GuiGraphicsExtractor, int, int)
      */
     public static void onAfterBackground(AbstractContainerScreen<?> screen, GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
-        if (!ItemInteractions.CONFIG.get(ClientConfig.class).itemHeldByCursorTooltip.isActive()) {
+        if (!ItemInteractions.CONFIG.get(ClientConfig.class).itemHeldByCursorTooltip.isUsed()) {
             return;
         }
 

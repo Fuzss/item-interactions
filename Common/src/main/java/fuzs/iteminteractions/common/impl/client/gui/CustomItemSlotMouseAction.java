@@ -21,10 +21,11 @@ public interface CustomItemSlotMouseAction extends ItemSlotMouseAction {
         if (!itemHeldByCursor.isEmpty()) {
             for (ItemSlotMouseAction itemMouseAction : screen.itemSlotMouseActions) {
                 if (itemMouseAction instanceof CustomItemSlotMouseAction customMouseAction && customMouseAction.matches(
-                        itemHeldByCursor) && customMouseAction.onMouseScrolled(horizontalAmount,
-                        verticalAmount,
-                        OptionalInt.empty(),
                         itemHeldByCursor)) {
+                    customMouseAction.onMouseScrolled(horizontalAmount,
+                            verticalAmount,
+                            OptionalInt.empty(),
+                            itemHeldByCursor);
                     return EventResult.INTERRUPT;
                 }
             }
@@ -68,7 +69,9 @@ public interface CustomItemSlotMouseAction extends ItemSlotMouseAction {
     boolean matches(ItemStack itemStack);
 
     default boolean onMouseScrolled(double scrollX, double scrollY, int slotIndex, ItemStack itemStack) {
-        return this.onMouseScrolled(scrollX, scrollY, OptionalInt.of(slotIndex), itemStack);
+        this.onMouseScrolled(scrollX, scrollY, OptionalInt.of(slotIndex), itemStack);
+        // Handle this always on purpose, so that other existing behavior for the same item will not run instead.
+        return true;
     }
 
     boolean onMouseScrolled(double scrollX, double scrollY, OptionalInt slotIndex, ItemStack itemStack);

@@ -49,25 +49,16 @@ public record ItemStorageHolder(ItemStorage storage) {
      * @see net.minecraft.world.item.BundleItem#overrideStackedOnOther(ItemStack, Slot, ClickAction, Player)
      */
     public boolean overrideStackedOnOther(ItemStack itemStack, Slot slot, ClickAction clickAction, Player player) {
-        if (this.canPlayerInteractWith(itemStack, player)) {
-            boolean broadcastChanges = ItemInteractionHelper.overrideStackedOnOther(itemStack,
-                    () -> this.getMutableContainer(itemStack, player),
-                    slot,
-                    clickAction,
-                    player,
-                    (ItemStack item) -> {
-                        return this.getAcceptableItemCount(itemStack, item, player);
-                    },
-                    // TODO this must call the method from the item storage implementation
-                    Container::getMaxStackSize);
-            if (broadcastChanges) {
-                this.storage().broadcastChangesOnContainerMenu(itemStack, player);
-            }
-
-            return broadcastChanges;
-        } else {
-            return false;
-        }
+        return ItemInteractionHelper.overrideStackedOnOther(itemStack,
+                () -> this.getMutableContainer(itemStack, player),
+                slot,
+                clickAction,
+                player,
+                (ItemStack item) -> {
+                    return this.getAcceptableItemCount(itemStack, item, player);
+                },
+                // TODO this must call the method from the item storage implementation
+                Container::getMaxStackSize);
     }
 
     /**
@@ -78,10 +69,8 @@ public record ItemStorageHolder(ItemStorage storage) {
         if (clickAction == ClickAction.PRIMARY && itemHeldByCursor.isEmpty()) {
             this.storage().toggleSelectedItem(itemStack, SelectedItem.DEFAULT_SELECTED_ITEM);
             return false;
-        }
-
-        if (this.canPlayerInteractWith(itemStack, player)) {
-            boolean broadcastChanges = ItemInteractionHelper.overrideOtherStackedOnMe(itemStack,
+        } else {
+            return ItemInteractionHelper.overrideOtherStackedOnMe(itemStack,
                     () -> this.getMutableContainer(itemStack, player),
                     itemHeldByCursor,
                     slot,
@@ -94,13 +83,6 @@ public record ItemStorageHolder(ItemStorage storage) {
                     // TODO this must call the method from the item storage implementation
                     Container::getMaxStackSize,
                     () -> this.storage().toggleSelectedItem(itemStack, SelectedItem.DEFAULT_SELECTED_ITEM));
-            if (broadcastChanges) {
-                this.storage().broadcastChangesOnContainerMenu(itemStack, player);
-            }
-
-            return broadcastChanges;
-        } else {
-            return false;
         }
     }
 

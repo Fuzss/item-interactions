@@ -1,34 +1,38 @@
 package fuzs.iteminteractions.common.impl.config;
 
 import fuzs.iteminteractions.common.impl.ItemInteractions;
+import fuzs.iteminteractions.common.impl.client.core.SimpleKeyType;
 import fuzs.puzzleslib.common.api.config.v3.Config;
 import fuzs.puzzleslib.common.api.config.v3.ConfigCore;
 
 public class ClientConfig implements ConfigCore {
-    private static final String ACTIVATION_TYPE_MESSAGE = "Select a modifier key required to be held, otherwise selecting \"KEY\" serves as a toggle. The key is defined in vanilla's controls menu.";
+    private static final String KEY_MESSAGE_TYPE_DESCRIPTION = "Select a modifier key required to be held, otherwise selecting \"KEY\" serves as a toggle. The key mapping is defined in vanilla's controls menu.";
 
     @Config(description = "Color item inventories on tooltips according to the container item's color.")
-    public boolean colorfulTooltips = true;
-    @Config(name = "reveal_contents",
-            description = {"Expand container item tooltips to reveal their contents.", ACTIVATION_TYPE_MESSAGE})
-    public VisualItemContents visualItemContents = VisualItemContents.ALWAYS;
-    @Config(description = "Render a white overlay or the hotbar selected item frame over the slot the next item will be taken out of when right-clicking the container item.")
-    public SlotHighlight slotHighlight = SlotHighlight.HIGHLIGHT;
-    @Config(description = "Show an indicator on container items when the stack carried by the cursor can be added in your inventory.")
+    public boolean colorfulTooltipContents = true;
+    @Config(description = {"Expand item tooltips to show their contents.", KEY_MESSAGE_TYPE_DESCRIPTION})
+    public ItemContentsTooltip itemContentsTooltip = ItemContentsTooltip.ALWAYS;
+    @Config(description = "Pick the sprite used for highlighting the currently selected item in item content tooltips.")
+    public SlotHighlight slotHighlightSprite = SlotHighlight.HIGHLIGHT;
+    @Config(description = "Show an plus sign indicator on container items when the item stack held by the cursor can be added.")
     public boolean containerItemIndicator = true;
+    @Config(description = "Select a modifier key required to be held to use single item movement when enabled in the server config.")
+    public SimpleKeyType singleItemMovement = SimpleKeyType.CONTROL;
     @Config(description = {
-            "Select a modifier key required to be held to use precision mode.", ServerConfig.PRECISION_MODE_MESSAGE
+            "Scroll vertically through contents shown on an item's tooltip. Otherwise, scrolling only works in horizontal directions.",
+            "Select a modifier key required to be held to use vertical scrolling."
     })
-    public ExtractSingleItem extractSingleItem = ExtractSingleItem.CONTROL;
+    public SimpleKeyType verticalTooltipScrolling = SimpleKeyType.SHIFT;
     @Config(description = {
-            "Always show item tooltips while interacting with container items, even when the cursor is currently carrying an item.",
-            ACTIVATION_TYPE_MESSAGE
+            "Show the item tooltip for the item currently held by the cursor to allow for scrolling through it.",
+            KEY_MESSAGE_TYPE_DESCRIPTION
     })
-    public CarriedItemTooltips itemHeldByCursorTooltip = CarriedItemTooltips.ALT;
+    public ItemHeldByCursorTooltip itemHeldByCursorTooltip = ItemHeldByCursorTooltip.ALT;
     @Config(description = "Invert scroll wheel direction for moving items with a container item in precision mode.")
     public boolean reverseSingleItemScrolling = false;
 
     public boolean extractSingleItemOnly() {
-        return this.extractSingleItem.isActive() && ItemInteractions.CONFIG.get(ServerConfig.class).allowPrecisionMode;
+        return this.singleItemMovement.isUsed()
+                && ItemInteractions.CONFIG.get(ServerConfig.class).enableSingleItemMovement;
     }
 }

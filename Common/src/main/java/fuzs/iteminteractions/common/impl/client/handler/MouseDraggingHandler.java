@@ -36,7 +36,7 @@ public class MouseDraggingHandler {
     private static ContainerDragType containerDragType;
 
     public static EventResult onBeforeMousePressed(AbstractContainerScreen<?> screen, MouseButtonEvent mouseButtonEvent) {
-        if (!ItemInteractions.CONFIG.get(ServerConfig.class).allowMouseDragging) {
+        if (!ItemInteractions.CONFIG.get(ServerConfig.class).enableMouseDragging) {
             return EventResult.PASS;
         }
 
@@ -62,7 +62,7 @@ public class MouseDraggingHandler {
     }
 
     public static EventResult onBeforeMouseDragged(AbstractContainerScreen<?> screen, MouseButtonEvent mouseButtonEvent, double dragX, double dragY) {
-        if (!ItemInteractions.CONFIG.get(ServerConfig.class).allowMouseDragging) {
+        if (!ItemInteractions.CONFIG.get(ServerConfig.class).enableMouseDragging) {
             return EventResult.PASS;
         }
 
@@ -106,7 +106,7 @@ public class MouseDraggingHandler {
     }
 
     public static EventResult onBeforeMouseRelease(AbstractContainerScreen<?> screen, MouseButtonEvent mouseButtonEvent) {
-        if (!ItemInteractions.CONFIG.get(ServerConfig.class).allowMouseDragging) {
+        if (!ItemInteractions.CONFIG.get(ServerConfig.class).enableMouseDragging) {
             return EventResult.PASS;
         }
 

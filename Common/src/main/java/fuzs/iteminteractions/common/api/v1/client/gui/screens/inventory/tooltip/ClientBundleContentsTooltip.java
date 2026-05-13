@@ -52,7 +52,7 @@ public class ClientBundleContentsTooltip extends ClientBundleTooltip {
 
     @Override
     public boolean showTooltipWithItemInHand() {
-        return !ItemInteractions.CONFIG.get(ClientConfig.class).itemHeldByCursorTooltip.isActive();
+        return !ItemInteractions.CONFIG.get(ClientConfig.class).itemHeldByCursorTooltip.isUsed();
     }
 
     @Override

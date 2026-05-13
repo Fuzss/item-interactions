@@ -8,7 +8,6 @@ import fuzs.iteminteractions.common.impl.init.ModRegistry;
 import fuzs.iteminteractions.common.impl.network.client.ServerboundContainerClientInputMessage;
 import fuzs.iteminteractions.common.impl.network.client.ServerboundSelectedItemMessage;
 import fuzs.puzzleslib.common.api.network.v4.MessageSender;
-import fuzs.puzzleslib.common.api.util.v1.CommonHelper;
 import net.minecraft.client.gui.BundleMouseActions;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -58,7 +57,7 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
 
     @Override
     public boolean onMouseScrolled(double scrollX, double scrollY, OptionalInt slotIndex, ItemStack itemStack) {
-        if (!ItemInteractions.CONFIG.get(ClientConfig.class).visualItemContents.isActive()) {
+        if (!ItemInteractions.CONFIG.get(ClientConfig.class).itemContentsTooltip.isUsed()) {
             return false;
         }
 
@@ -77,7 +76,7 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
         }
 
         if (itemStack == this.screen.getMenu().getCarried()
-                && !ItemInteractions.CONFIG.get(ClientConfig.class).itemHeldByCursorTooltip.isActive()) {
+                && !ItemInteractions.CONFIG.get(ClientConfig.class).itemHeldByCursorTooltip.isUsed()) {
             return false;
         }
 
@@ -85,15 +84,20 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
         if (holder.storage().hasContents(itemStack)) {
             int wheel = this.onMouseScroll(scrollX, scrollY);
             if (wheel != 0) {
-                // TODO make this a configurable keybind
-                Vector2ic scrollXY = CommonHelper.hasShiftDown() ? new Vector2i(0, wheel) : new Vector2i(-wheel, 0);
+                Vector2ic scrollXY;
+                if (ItemInteractions.CONFIG.get(ClientConfig.class).verticalTooltipScrolling.isUsed()) {
+                    scrollXY = new Vector2i(0, wheel);
+                } else {
+                    scrollXY = new Vector2i(-wheel, 0);
+                }
+
                 this.scrollSelectedItem(holder, slotIndex, itemStack, scrollXY);
             }
 
             return true;
-        } else {
-            return false;
         }
+
+        return false;
     }
 
     /**
@@ -131,12 +135,12 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
 
     @Override
     public boolean onKeyPressed(KeyEvent event, OptionalInt slotIndex, ItemStack itemStack) {
-        if (!ItemInteractions.CONFIG.get(ClientConfig.class).visualItemContents.isActive()) {
+        if (!ItemInteractions.CONFIG.get(ClientConfig.class).itemContentsTooltip.isUsed()) {
             return false;
         }
 
         if (itemStack == this.screen.getMenu().getCarried()
-                && !ItemInteractions.CONFIG.get(ClientConfig.class).itemHeldByCursorTooltip.isActive()) {
+                && !ItemInteractions.CONFIG.get(ClientConfig.class).itemHeldByCursorTooltip.isUsed()) {
             return false;
         }
 
@@ -163,13 +167,11 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
             if (scrollX != 0 || scrollY != 0) {
                 this.scrollSelectedItem(holder, slotIndex, itemStack, new Vector2i(scrollX, scrollY));
                 return true;
-            } else {
-                // Better to not handle this then, as other keys like escape will be blocked.
-                return false;
             }
-        } else {
-            return false;
         }
+
+        // Better to not handle this then, as other keys like escape will be blocked.
+        return false;
     }
 
     @Override

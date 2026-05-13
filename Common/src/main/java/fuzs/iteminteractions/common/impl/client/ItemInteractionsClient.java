@@ -4,15 +4,13 @@ import com.google.common.collect.ImmutableMap;
 import fuzs.iteminteractions.common.api.v1.client.gui.screens.inventory.tooltip.ClientBundleContentsTooltip;
 import fuzs.iteminteractions.common.api.v1.client.gui.screens.inventory.tooltip.ClientItemContentsTooltip;
 import fuzs.iteminteractions.common.api.v1.world.inventory.tooltip.BundleContentsTooltip;
-import fuzs.iteminteractions.common.api.v1.world.inventory.tooltip.ItemContentsTooltip;
 import fuzs.iteminteractions.common.impl.client.gui.CustomItemSlotMouseAction;
 import fuzs.iteminteractions.common.impl.client.gui.ItemStorageMouseActions;
 import fuzs.iteminteractions.common.impl.client.gui.screens.inventory.tooltip.CollapsibleClientTooltipComponent;
 import fuzs.iteminteractions.common.impl.client.handler.ItemHeldByCursorTooltipHandler;
 import fuzs.iteminteractions.common.impl.client.handler.MouseDraggingHandler;
-import fuzs.iteminteractions.common.impl.config.CarriedItemTooltips;
-import fuzs.iteminteractions.common.impl.config.ExtractSingleItem;
-import fuzs.iteminteractions.common.impl.config.VisualItemContents;
+import fuzs.iteminteractions.common.impl.config.ItemHeldByCursorTooltip;
+import fuzs.iteminteractions.common.impl.config.ItemContentsTooltip;
 import fuzs.iteminteractions.common.impl.world.item.container.ItemStorageManager;
 import fuzs.puzzleslib.common.api.client.core.v1.ClientModConstructor;
 import fuzs.puzzleslib.common.api.client.core.v1.context.ClientTooltipComponentsContext;
@@ -45,11 +43,9 @@ public class ItemInteractionsClient implements ClientModConstructor {
         ScreenMouseEvents.beforeMouseDrag(AbstractContainerScreen.class)
                 .register(EventPhase.BEFORE, MouseDraggingHandler::onBeforeMouseDragged);
         ScreenKeyboardEvents.beforeKeyPress(AbstractContainerScreen.class)
-                .register(CarriedItemTooltips::onBeforeKeyPressed);
+                .register(ItemHeldByCursorTooltip::onBeforeKeyPressed);
         ScreenKeyboardEvents.beforeKeyPress(AbstractContainerScreen.class)
-                .register(ExtractSingleItem::onBeforeKeyPressed);
-        ScreenKeyboardEvents.beforeKeyPress(AbstractContainerScreen.class)
-                .register(VisualItemContents::onBeforeKeyPressed);
+                .register(ItemContentsTooltip::onBeforeKeyPressed);
         ScreenMouseEvents.beforeMouseScroll(AbstractContainerScreen.class)
                 .register(CustomItemSlotMouseAction::onBeforeMouseScroll);
         ScreenKeyboardEvents.beforeKeyPress(AbstractContainerScreen.class)
@@ -67,13 +63,13 @@ public class ItemInteractionsClient implements ClientModConstructor {
 
     @Override
     public void onRegisterKeyMappings(KeyMappingsContext context) {
-        context.registerKeyMapping(VisualItemContents.KEY_MAPPING, KeyActivationContext.SCREEN);
-        context.registerKeyMapping(CarriedItemTooltips.KEY_MAPPING, KeyActivationContext.SCREEN);
+        context.registerKeyMapping(ItemContentsTooltip.KEY_MAPPING, KeyActivationContext.SCREEN);
+        context.registerKeyMapping(ItemHeldByCursorTooltip.KEY_MAPPING, KeyActivationContext.SCREEN);
     }
 
     @Override
     public void onRegisterClientTooltipComponents(ClientTooltipComponentsContext context) {
-        context.registerClientTooltipComponent(ItemContentsTooltip.class,
+        context.registerClientTooltipComponent(fuzs.iteminteractions.common.api.v1.world.inventory.tooltip.ItemContentsTooltip.class,
                 CollapsibleClientTooltipComponent.wrapFactory(ClientItemContentsTooltip::new));
         context.registerClientTooltipComponent(BundleContentsTooltip.class,
                 CollapsibleClientTooltipComponent.wrapFactory(ClientBundleContentsTooltip::new));

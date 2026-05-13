@@ -56,7 +56,7 @@ public class ItemInteractions implements ModConstructor {
     private static void registerEventHandlers() {
         SyncDataPackContentsCallback.EVENT.register(ItemStorageManager::onSyncDataPackContents);
         TagsUpdatedCallback.EVENT.register(ItemStorageManager::onTagsUpdated);
-        ItemClickedInMenuCallback.EVENT.register(ContainerClickInputHandler::onContainerItemClick);
+//        ItemClickedInMenuCallback.EVENT.register(ContainerClickInputHandler::onContainerItemClick);
         ContainerEvents.OPEN.register(EnderChestSyncHandler::onContainerOpen);
         PlayerNetworkEvents.JOIN.register(EnderChestSyncHandler::onPlayerJoin);
         AfterChangeDimensionCallback.EVENT.register(EnderChestSyncHandler::onAfterChangeDimension);
