@@ -1,11 +1,9 @@
 package fuzs.iteminteractions.common.impl;
 
-import fuzs.iteminteractions.common.api.v1.world.inventory.ItemClickedInMenuCallback;
 import fuzs.iteminteractions.common.api.v1.world.item.storage.ItemStorage;
 import fuzs.iteminteractions.common.impl.config.ClientConfig;
 import fuzs.iteminteractions.common.impl.config.ServerConfig;
 import fuzs.iteminteractions.common.impl.data.DynamicItemContentsProvider;
-import fuzs.iteminteractions.common.impl.handler.ContainerClickInputHandler;
 import fuzs.iteminteractions.common.impl.handler.EnderChestSyncHandler;
 import fuzs.iteminteractions.common.impl.init.ModRegistry;
 import fuzs.iteminteractions.common.impl.network.ClientboundEnderChestContentMessage;
@@ -56,7 +54,6 @@ public class ItemInteractions implements ModConstructor {
     private static void registerEventHandlers() {
         SyncDataPackContentsCallback.EVENT.register(ItemStorageManager::onSyncDataPackContents);
         TagsUpdatedCallback.EVENT.register(ItemStorageManager::onTagsUpdated);
-//        ItemClickedInMenuCallback.EVENT.register(ContainerClickInputHandler::onContainerItemClick);
         ContainerEvents.OPEN.register(EnderChestSyncHandler::onContainerOpen);
         PlayerNetworkEvents.JOIN.register(EnderChestSyncHandler::onPlayerJoin);
         AfterChangeDimensionCallback.EVENT.register(EnderChestSyncHandler::onAfterChangeDimension);
@@ -73,8 +70,7 @@ public class ItemInteractions implements ModConstructor {
         context.playToClient(ClientboundEnderChestSlotMessage.class, ClientboundEnderChestSlotMessage.STREAM_CODEC);
         context.playToServer(ServerboundEnderChestContentMessage.class,
                 ServerboundEnderChestContentMessage.STREAM_CODEC);
-        context.playToClient(ClientboundSyncItemStorage.class,
-                ClientboundSyncItemStorage.STREAM_CODEC);
+        context.playToClient(ClientboundSyncItemStorage.class, ClientboundSyncItemStorage.STREAM_CODEC);
     }
 
     @Override

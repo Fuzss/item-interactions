@@ -7,9 +7,6 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.Optional;
 
-/**
- * TODO add fill bar like bundles for all items
- */
 public interface ItemStorageWithTooltip extends ContainerItemStorage {
 
     @Override

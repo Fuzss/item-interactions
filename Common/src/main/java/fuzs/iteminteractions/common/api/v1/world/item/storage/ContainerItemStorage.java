@@ -6,8 +6,11 @@ import fuzs.iteminteractions.common.impl.world.item.component.SelectedItem;
 import it.unimi.dsi.fastutil.ints.IntLinkedOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.ints.IntSets;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.joml.Vector2i;
 import org.joml.Vector2ic;
@@ -194,5 +197,19 @@ public interface ContainerItemStorage extends ItemStorage {
      */
     default int getMaxStackSize(Container container, int slotNum, ItemStack itemStack) {
         return container.getMaxStackSize(itemStack);
+    }
+
+    /**
+     * @see net.minecraft.world.item.BundleItem#playRemoveOneSound(Entity)
+     */
+    default void playRemoveOneSound(Player player) {
+        player.playSound(SoundEvents.BUNDLE_REMOVE_ONE, 0.8F, 0.8F + player.level().getRandom().nextFloat() * 0.4F);
+    }
+
+    /**
+     * @see net.minecraft.world.item.BundleItem#playInsertSound(Entity)
+     */
+    default void playInsertSound(Player player) {
+        player.playSound(SoundEvents.BUNDLE_INSERT, 0.8F, 0.8F + player.level().getRandom().nextFloat() * 0.4F);
     }
 }

@@ -10,7 +10,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
@@ -99,43 +98,73 @@ public record ItemStorageHolder(ItemStorage storage) {
     }
 
     /**
-     * Is <code>stackToAdd</code> allowed to be added to the container supplied by <code>containerStack</code>.
-     * <p>
-     * This should be the same behavior as vanilla's {@link Item#canFitInsideContainerItems()}.
+     * Can the container item accept another item, checks for the player being allowed to interact as well as the
+     * container item being able to hold the other item.
      *
+     * @param itemStack  the item stack providing the container to add <code>stackToAdd</code> to
      * @param stackToAdd the stack to be added to the container
-     * @return is <code>stack</code> allowed to be added to the container
+     * @param player     the player interacting with both item stacks
+     * @return can the item be added
      */
-    public boolean isItemAllowedInContainer(ItemStack stackToAdd) {
-        return this.storage().isItemAllowedInContainer(stackToAdd);
+    public boolean canAcceptItem(ItemStack itemStack, ItemStack stackToAdd, Player player) {
+        return !stackToAdd.isEmpty() && this.canPlayerInteractWith(itemStack, player) && this.storage()
+                .isItemAllowedInContainer(stackToAdd);
     }
 
     /**
      * Is there enough space in the container provided by <code>containerStack</code> to add <code>stack</code> (not
      * necessarily the full stack).
-     * <p>
-     * Before this is called {@link #canPlayerInteractWith(ItemStack, Player)} and
-     * {@link #isItemAllowedInContainer(ItemStack)} are checked.
      *
-     * @param containerStack the item stack providing the container to add <code>stack</code> to
-     * @param stackToAdd     the stack to be added to the container
-     * @param player         the player interacting with both items
+     * @param itemStack  the item stack providing the container to add <code>stack</code> to
+     * @param stackToAdd the stack to be added to the container
+     * @param player     the player interacting with both items
      * @return is adding any portion of <code>stackToAdd</code> to the container possible
      */
-    public boolean canAddItem(ItemStack containerStack, ItemStack stackToAdd, Player player) {
-        return this.canAcceptItem(containerStack, stackToAdd, player) && this.storage()
-                .canAddItem(containerStack, stackToAdd, player);
+    public boolean canAddItem(ItemStack itemStack, ItemStack stackToAdd, Player player) {
+        return this.canAcceptItem(itemStack, stackToAdd, player) && this.storage()
+                .canAddItem(itemStack, stackToAdd, player);
+    }
+
+    /**
+     * Is there any item of the same type as <code>stackToAdd</code> already in the container provided by
+     * <code>containerStack</code>.
+     *
+     * @param itemStack  the item stack providing the container to add <code>stack</code> to
+     * @param stackToAdd the stack to be searched for in the container
+     * @param player     the player interacting with both items
+     * @return is any item of the same type as <code>stackToAdd</code> already in the container
+     */
+    public boolean hasAnyOf(ItemStack itemStack, ItemStack stackToAdd, Player player) {
+        return this.canAcceptItem(itemStack, stackToAdd, player) && this.getContainerView(itemStack, player)
+                .hasAnyMatching((ItemStack item) -> ItemStack.isSameItem(item, stackToAdd));
+    }
+
+    /**
+     * How much space is available in the container provided by <code>containerStack</code> to add
+     * <code>stackToAdd</code>.
+     *
+     * @param itemStack  the item stack providing the container to add <code>stackToAdd</code> to
+     * @param stackToAdd the stack to be added to the container
+     * @param player     the player interacting with both item stacks
+     * @return the portion of <code>stackToAdd</code> that can be added to the container
+     */
+    public int getAcceptableItemCount(ItemStack itemStack, ItemStack stackToAdd, Player player) {
+        if (this.canAcceptItem(itemStack, stackToAdd, player)) {
+            return this.storage().getAcceptableItemCount(itemStack, stackToAdd, player);
+        } else {
+            return 0;
+        }
     }
 
     /**
      * Get the container implementation provided by <code>containerStack</code> as a {@link SimpleContainer}.
      *
-     * @param containerStack item stack providing the container
-     * @param player         player involved in the interaction
+     * @param itemStack item stack providing the container
+     * @param player    player involved in the interaction
      * @return the provided container
      */
-    public Container getContainerView(ItemStack containerStack, Player player) {
-        return this.storage().getItemContainer(containerStack, player, false);
+    public Container getContainerView(ItemStack itemStack, Player player) {
+        return this.storage().getItemContainer(itemStack, player, false);
     }
 
     /**
@@ -143,65 +172,12 @@ public record ItemStorageHolder(ItemStorage storage) {
      * <p>
      * Attaches a saving listener to the container.
      *
-     * @param containerStack item stack providing the container
-     * @param player         player involved in the interaction
+     * @param itemStack item stack providing the container
+     * @param player    player involved in the interaction
      * @return the provided container
      */
-    public Container getMutableContainer(ItemStack containerStack, Player player) {
-        return this.storage().getItemContainer(containerStack, player, true);
-    }
-
-    /**
-     * Is there any item of the same type as <code>stackToAdd</code> already in the container provided by
-     * <code>containerStack</code>.
-     * <p>
-     * Before this is called {@link #canPlayerInteractWith(ItemStack, Player)} and
-     * {@link #isItemAllowedInContainer(ItemStack)} are checked.
-     *
-     * @param containerStack the item stack providing the container to add <code>stack</code> to
-     * @param stackToAdd     the stack to be searched for in the container
-     * @param player         the player interacting with both items
-     * @return is any item of the same type as <code>stackToAdd</code> already in the container
-     */
-    public boolean hasAnyOf(ItemStack containerStack, ItemStack stackToAdd, Player player) {
-        return this.canAcceptItem(containerStack, stackToAdd, player) && this.getContainerView(containerStack, player)
-                .hasAnyMatching((ItemStack item) -> ItemStack.isSameItem(item, stackToAdd));
-    }
-
-    /**
-     * How much space is available in the container provided by <code>containerStack</code> to add
-     * <code>stackToAdd</code>.
-     * <p>
-     * Mainly used by bundles, otherwise {@link ItemStorage#canAddItem} should be enough.
-     * <p>
-     * Before this is called {@link #canPlayerInteractWith(ItemStack, Player)} and
-     * {@link #isItemAllowedInContainer(ItemStack)} are checked.
-     *
-     * @param containerStack the item stack providing the container to add <code>stackToAdd</code> to
-     * @param stackToAdd     the stack to be added to the container
-     * @param player         the player interacting with both item stacks
-     * @return the portion of <code>stackToAdd</code> that can be added to the container
-     */
-    public int getAcceptableItemCount(ItemStack containerStack, ItemStack stackToAdd, Player player) {
-        if (this.canAcceptItem(containerStack, stackToAdd, player)) {
-            return this.storage().getAcceptableItemCount(containerStack, stackToAdd, player);
-        } else {
-            return 0;
-        }
-    }
-
-    /**
-     * Can the container item accept another item, checks for the player being allowed to interact as well as the
-     * container item being able to hold the other item.
-     *
-     * @param containerStack the item stack providing the container to add <code>stackToAdd</code> to
-     * @param stackToAdd     the stack to be added to the container
-     * @param player         the player interacting with both item stacks
-     * @return can the item be added
-     */
-    public boolean canAcceptItem(ItemStack containerStack, ItemStack stackToAdd, Player player) {
-        return !stackToAdd.isEmpty() && this.canPlayerInteractWith(containerStack, player)
-                && this.isItemAllowedInContainer(stackToAdd);
+    public Container getMutableContainer(ItemStack itemStack, Player player) {
+        return this.storage().getItemContainer(itemStack, player, true);
     }
 
     /**

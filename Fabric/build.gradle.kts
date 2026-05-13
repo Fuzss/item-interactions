@@ -12,8 +12,4 @@ multiloader {
         packagePrefix.set("impl")
         library.set(true)
     }
-
-    mixins {
-        mixin("AbstractContainerMenuFabricMixin")
-    }
 }
