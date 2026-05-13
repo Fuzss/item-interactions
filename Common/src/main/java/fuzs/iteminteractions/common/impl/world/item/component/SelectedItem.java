@@ -6,7 +6,8 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 
 public final class SelectedItem {
-    public static final SelectedItem DEFAULT = new SelectedItem(-1);
+    public static final int DEFAULT_SELECTED_ITEM = -1;
+    public static final SelectedItem DEFAULT = new SelectedItem(DEFAULT_SELECTED_ITEM);
     public static final Codec<SelectedItem> CODEC = MapCodec.unitCodec(DEFAULT);
     public static final StreamCodec<ByteBuf, SelectedItem> STREAM_CODEC = StreamCodec.unit(DEFAULT);
 

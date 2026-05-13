@@ -5,7 +5,6 @@ import fuzs.iteminteractions.common.api.v1.world.inventory.tooltip.ItemContentsT
 import fuzs.iteminteractions.common.api.v1.world.item.DyeBackedColor;
 import fuzs.iteminteractions.common.impl.handler.EnderChestSyncHandler;
 import fuzs.iteminteractions.common.impl.init.ModRegistry;
-import fuzs.iteminteractions.common.impl.world.inventory.ContainerSlotHelper;
 import net.minecraft.core.NonNullList;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleContainer;
@@ -43,9 +42,8 @@ public class EnderChestStorage implements ItemStorageWithTooltip {
 
     @Override
     public TooltipComponent createTooltipImageComponent(ItemStack itemStack, Player player, NonNullList<ItemStack> itemList) {
-        int selectedItem = ContainerSlotHelper.getSelectedItem(itemStack);
         return new ItemContentsTooltip(itemList,
-                selectedItem,
+                this.getSelectedItem(itemStack),
                 this.getGridWidth(itemList.size()),
                 this.getGridHeight(itemList.size()),
                 DEFAULT_ENDER_CHEST_COLOR);

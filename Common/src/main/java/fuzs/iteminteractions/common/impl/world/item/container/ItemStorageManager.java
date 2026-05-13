@@ -5,7 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import fuzs.iteminteractions.common.api.v1.world.item.storage.ItemStorage;
 import fuzs.iteminteractions.common.api.v1.world.item.storage.ItemStorageHolder;
 import fuzs.iteminteractions.common.impl.ItemInteractions;
-import fuzs.iteminteractions.common.impl.network.ClientboundSyncItemContentsProviders;
+import fuzs.iteminteractions.common.impl.network.ClientboundSyncItemStorage;
 import fuzs.puzzleslib.common.api.network.v4.MessageSender;
 import fuzs.puzzleslib.common.api.network.v4.PlayerSet;
 import net.minecraft.core.Holder;
@@ -47,7 +47,7 @@ public final class ItemStorageManager extends UnconditionalSimpleJsonResourceRel
         return ItemStorageHolder.ofNullable(resolvedProviders.get(itemStack.getItem()));
     }
 
-    public static void setItemContainerProviders(Map<Item, ItemStorage> providers) {
+    public static void setItemStorage(Map<Item, ItemStorage> providers) {
         ItemStorageManager.resolvedProviders = ImmutableMap.copyOf(providers);
     }
 
@@ -63,14 +63,14 @@ public final class ItemStorageManager extends UnconditionalSimpleJsonResourceRel
             }
 
             unresolvedProviders = null;
-            setItemContainerProviders(providers);
+            setItemStorage(providers);
         }
     }
 
     public static void onSyncDataPackContents(ServerPlayer serverPlayer, boolean joined) {
         if (!serverPlayer.connection.connection.isMemoryConnection()) {
             MessageSender.broadcast(PlayerSet.ofPlayer(serverPlayer),
-                    new ClientboundSyncItemContentsProviders(resolvedProviders));
+                    new ClientboundSyncItemStorage(resolvedProviders));
         }
     }
 }

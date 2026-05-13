@@ -20,8 +20,7 @@ abstract class ItemStackMixin {
         ItemStack itemStack = ItemStack.class.cast(this);
         ItemStorageHolder holder = ItemStorageHolder.ofItem(itemStack);
         Player player = CommonHelper.getClientPlayer();
-        if (holder.canProvideTooltipImage(itemStack, player)) {
-            callback.setReturnValue(holder.getTooltipImage(itemStack, player));
-        }
+        Optional<Optional<TooltipComponent>> tooltipImage = holder.getTooltipImage(itemStack, player);
+        tooltipImage.ifPresent(callback::setReturnValue);
     }
 }

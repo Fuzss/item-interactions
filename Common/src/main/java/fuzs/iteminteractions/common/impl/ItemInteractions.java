@@ -10,7 +10,7 @@ import fuzs.iteminteractions.common.impl.handler.EnderChestSyncHandler;
 import fuzs.iteminteractions.common.impl.init.ModRegistry;
 import fuzs.iteminteractions.common.impl.network.ClientboundEnderChestContentMessage;
 import fuzs.iteminteractions.common.impl.network.ClientboundEnderChestSlotMessage;
-import fuzs.iteminteractions.common.impl.network.ClientboundSyncItemContentsProviders;
+import fuzs.iteminteractions.common.impl.network.ClientboundSyncItemStorage;
 import fuzs.iteminteractions.common.impl.network.client.ServerboundContainerClientInputMessage;
 import fuzs.iteminteractions.common.impl.network.client.ServerboundEnderChestContentMessage;
 import fuzs.iteminteractions.common.impl.network.client.ServerboundSelectedItemMessage;
@@ -73,8 +73,8 @@ public class ItemInteractions implements ModConstructor {
         context.playToClient(ClientboundEnderChestSlotMessage.class, ClientboundEnderChestSlotMessage.STREAM_CODEC);
         context.playToServer(ServerboundEnderChestContentMessage.class,
                 ServerboundEnderChestContentMessage.STREAM_CODEC);
-        context.playToClient(ClientboundSyncItemContentsProviders.class,
-                ClientboundSyncItemContentsProviders.STREAM_CODEC);
+        context.playToClient(ClientboundSyncItemStorage.class,
+                ClientboundSyncItemStorage.STREAM_CODEC);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package fuzs.iteminteractions.common.impl.config;
 
+import fuzs.iteminteractions.common.impl.ItemInteractions;
 import fuzs.puzzleslib.common.api.config.v3.Config;
 import fuzs.puzzleslib.common.api.config.v3.ConfigCore;
 
@@ -15,7 +16,7 @@ public class ClientConfig implements ConfigCore {
     public SlotHighlight slotHighlight = SlotHighlight.HIGHLIGHT;
     @Config(description = "Show an indicator on container items when the stack carried by the cursor can be added in your inventory.")
     public boolean containerItemIndicator = true;
-    @Config(name = "precision_mode", description = {
+    @Config(description = {
             "Select a modifier key required to be held to use precision mode.", ServerConfig.PRECISION_MODE_MESSAGE
     })
     public ExtractSingleItem extractSingleItem = ExtractSingleItem.CONTROL;
@@ -23,7 +24,11 @@ public class ClientConfig implements ConfigCore {
             "Always show item tooltips while interacting with container items, even when the cursor is currently carrying an item.",
             ACTIVATION_TYPE_MESSAGE
     })
-    public CarriedItemTooltips carriedItemTooltips = CarriedItemTooltips.ALT;
-    @Config(description = "Invert scroll wheel direction for extracting / inserting items from a container item in precision mode.")
-    public boolean invertPrecisionModeScrolling = false;
+    public CarriedItemTooltips itemHeldByCursorTooltip = CarriedItemTooltips.ALT;
+    @Config(description = "Invert scroll wheel direction for moving items with a container item in precision mode.")
+    public boolean reverseSingleItemScrolling = false;
+
+    public boolean extractSingleItemOnly() {
+        return this.extractSingleItem.isActive() && ItemInteractions.CONFIG.get(ServerConfig.class).allowPrecisionMode;
+    }
 }

@@ -8,7 +8,7 @@ import fuzs.iteminteractions.common.api.v1.world.inventory.tooltip.ItemContentsT
 import fuzs.iteminteractions.common.impl.client.gui.CustomItemSlotMouseAction;
 import fuzs.iteminteractions.common.impl.client.gui.ItemStorageMouseActions;
 import fuzs.iteminteractions.common.impl.client.gui.screens.inventory.tooltip.CollapsibleClientTooltipComponent;
-import fuzs.iteminteractions.common.impl.client.handler.ItemTooltipRenderingHandler;
+import fuzs.iteminteractions.common.impl.client.handler.ItemHeldByCursorTooltipHandler;
 import fuzs.iteminteractions.common.impl.client.handler.MouseDraggingHandler;
 import fuzs.iteminteractions.common.impl.config.CarriedItemTooltips;
 import fuzs.iteminteractions.common.impl.config.ExtractSingleItem;
@@ -52,14 +52,16 @@ public class ItemInteractionsClient implements ClientModConstructor {
                 .register(VisualItemContents::onBeforeKeyPressed);
         ScreenMouseEvents.beforeMouseScroll(AbstractContainerScreen.class)
                 .register(CustomItemSlotMouseAction::onBeforeMouseScroll);
+        ScreenKeyboardEvents.beforeKeyPress(AbstractContainerScreen.class)
+                .register(CustomItemSlotMouseAction::onBeforeKeyPress);
         ScreenEvents.afterInit(AbstractContainerScreen.class).register(ItemStorageMouseActions::onAfterInit);
         ScreenEvents.afterBackground(AbstractContainerScreen.class)
-                .register(ItemTooltipRenderingHandler::onAfterBackground);
+                .register(ItemHeldByCursorTooltipHandler::onAfterBackground);
         ScreenEvents.afterBackground(AbstractContainerScreen.class).register(MouseDraggingHandler::onAfterBackground);
         RenderContainerScreenContentsCallback.EVENT.register(MouseDraggingHandler::onRenderContainerScreenContents);
         PlaySoundEvents.AT_ENTITY.register(MouseDraggingHandler::onPlaySoundAtEntity);
         ClientPlayerNetworkEvents.LEAVE.register((LocalPlayer player, MultiPlayerGameMode multiPlayerGameMode, Connection connection) -> {
-            ItemStorageManager.setItemContainerProviders(ImmutableMap.of());
+            ItemStorageManager.setItemStorage(ImmutableMap.of());
         });
     }
 

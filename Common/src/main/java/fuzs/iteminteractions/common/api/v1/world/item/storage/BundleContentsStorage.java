@@ -124,10 +124,9 @@ public class BundleContentsStorage extends ComponentBackedStorage {
     }
 
     @Override
-    public void onToggleSelectedItem(ItemStack itemStack, int previousSelectedItem, int updatedSelectedItem) {
-        if (previousSelectedItem != updatedSelectedItem) {
-            BundleItem.toggleSelectedItem(itemStack, updatedSelectedItem);
-        }
+    public void toggleSelectedItem(ItemStack itemStack, int selectedItem) {
+        super.toggleSelectedItem(itemStack, selectedItem);
+        BundleItem.toggleSelectedItem(itemStack, selectedItem);
     }
 
     @Override

@@ -1,7 +1,6 @@
 package fuzs.iteminteractions.common.impl.network.client;
 
 import fuzs.iteminteractions.common.api.v1.world.item.storage.ItemStorageHolder;
-import fuzs.iteminteractions.common.impl.world.inventory.ContainerSlotHelper;
 import fuzs.puzzleslib.common.api.network.v4.message.MessageListener;
 import fuzs.puzzleslib.common.api.network.v4.message.play.ServerboundPlayMessage;
 import net.minecraft.network.FriendlyByteBuf;
@@ -9,7 +8,6 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
-import org.jspecify.annotations.NonNull;
 
 import java.util.OptionalInt;
 
@@ -41,18 +39,13 @@ public record ServerboundSelectedItemMessage(OptionalInt slotId,
             public void accept(Context context) {
                 ItemStack itemStack = this.getContainerItem(context.player().containerMenu);
                 if (!itemStack.isEmpty()) {
-                    int previousSelectedItem = ContainerSlotHelper.getSelectedItem(itemStack);
-                    ContainerSlotHelper.setSelectedItem(itemStack,
-                            ServerboundSelectedItemMessage.this.selectedItemIndex);
-                    ItemStorageHolder holder = ItemStorageHolder.ofItem(itemStack);
-                    holder.storage()
-                            .onToggleSelectedItem(itemStack,
-                                    previousSelectedItem,
-                                    ServerboundSelectedItemMessage.this.selectedItemIndex);
+                    ItemStorageHolder.ofItem(itemStack)
+                            .storage()
+                            .toggleSelectedItem(itemStack, ServerboundSelectedItemMessage.this.selectedItemIndex);
                 }
             }
 
-            private @NonNull ItemStack getContainerItem(AbstractContainerMenu menu) {
+            private ItemStack getContainerItem(AbstractContainerMenu menu) {
                 OptionalInt slotIndex = ServerboundSelectedItemMessage.this.slotId;
                 if (slotIndex.isPresent()) {
                     if (slotIndex.getAsInt() >= 0 && slotIndex.getAsInt() < menu.slots.size()) {

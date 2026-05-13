@@ -83,7 +83,7 @@ public class ClientItemContentsTooltip implements ClientTooltipComponent {
 
     @Override
     public boolean showTooltipWithItemInHand() {
-        return !ItemInteractions.CONFIG.get(ClientConfig.class).carriedItemTooltips.isActive();
+        return !ItemInteractions.CONFIG.get(ClientConfig.class).itemHeldByCursorTooltip.isActive();
     }
 
     @SuppressWarnings("UnnecessaryLocalVariable")

@@ -6,7 +6,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import fuzs.iteminteractions.common.api.v1.world.inventory.tooltip.ItemContentsTooltip;
 import fuzs.iteminteractions.common.api.v1.world.item.DyeBackedColor;
 import fuzs.iteminteractions.common.impl.init.ModRegistry;
-import fuzs.iteminteractions.common.impl.world.inventory.ContainerSlotHelper;
 import fuzs.puzzleslib.common.api.container.v1.ContainerMenuHelper;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
@@ -159,9 +158,8 @@ public class ContainerStorage extends ComponentBackedStorage {
 
     @Override
     public TooltipComponent createTooltipImageComponent(ItemStack itemStack, Player player, NonNullList<ItemStack> itemList) {
-        int selectedItem = ContainerSlotHelper.getSelectedItem(itemStack);
         return new ItemContentsTooltip(itemList,
-                selectedItem,
+                this.getSelectedItem(itemStack),
                 this.getGridWidth(itemList.size()),
                 this.getGridHeight(itemList.size()),
                 this.dyeColor);

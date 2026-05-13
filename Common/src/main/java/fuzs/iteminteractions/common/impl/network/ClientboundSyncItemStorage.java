@@ -13,18 +13,18 @@ import net.minecraft.world.item.Item;
 import java.util.HashMap;
 import java.util.Map;
 
-public record ClientboundSyncItemContentsProviders(Map<Item, ItemStorage> providers) implements ClientboundPlayMessage {
-    public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundSyncItemContentsProviders> STREAM_CODEC = StreamCodec.composite(
+public record ClientboundSyncItemStorage(Map<Item, ItemStorage> providers) implements ClientboundPlayMessage {
+    public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundSyncItemStorage> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.map(HashMap::new, ByteBufCodecs.registry(Registries.ITEM), ItemStorage.STREAM_CODEC),
-            ClientboundSyncItemContentsProviders::providers,
-            ClientboundSyncItemContentsProviders::new);
+            ClientboundSyncItemStorage::providers,
+            ClientboundSyncItemStorage::new);
 
     @Override
     public MessageListener<Context> getListener() {
         return new MessageListener<Context>() {
             @Override
             public void accept(Context context) {
-                ItemStorageManager.setItemContainerProviders(ClientboundSyncItemContentsProviders.this.providers);
+                ItemStorageManager.setItemStorage(ClientboundSyncItemStorage.this.providers);
             }
         };
     }

@@ -1,7 +1,7 @@
 package fuzs.iteminteractions.common.impl.network.client;
 
 import fuzs.iteminteractions.common.impl.ItemInteractions;
-import fuzs.iteminteractions.common.impl.world.inventory.ContainerSlotHelper;
+import fuzs.iteminteractions.common.impl.init.ModRegistry;
 import fuzs.puzzleslib.common.api.network.v4.message.MessageListener;
 import fuzs.puzzleslib.common.api.network.v4.message.play.ServerboundPlayMessage;
 import io.netty.buffer.ByteBuf;
@@ -28,7 +28,7 @@ public record ServerboundContainerClientInputMessage(boolean extractSingleItem) 
                     return;
                 }
 
-                ContainerSlotHelper.extractSingleItem(player,
+                ModRegistry.MOVE_SINGLE_ITEM_ATTACHMENT_TYPE.set(player,
                         ServerboundContainerClientInputMessage.this.extractSingleItem);
             }
         };

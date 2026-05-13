@@ -4,21 +4,22 @@ import com.mojang.blaze3d.platform.InputConstants;
 import fuzs.iteminteractions.common.api.v1.world.item.storage.ItemStorageHolder;
 import fuzs.iteminteractions.common.impl.ItemInteractions;
 import fuzs.iteminteractions.common.impl.config.ClientConfig;
-import fuzs.iteminteractions.common.impl.config.ServerConfig;
+import fuzs.iteminteractions.common.impl.init.ModRegistry;
 import fuzs.iteminteractions.common.impl.network.client.ServerboundContainerClientInputMessage;
 import fuzs.iteminteractions.common.impl.network.client.ServerboundSelectedItemMessage;
-import fuzs.iteminteractions.common.impl.world.inventory.ContainerSlotHelper;
 import fuzs.puzzleslib.common.api.network.v4.MessageSender;
 import fuzs.puzzleslib.common.api.util.v1.CommonHelper;
 import net.minecraft.client.gui.BundleMouseActions;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.world.Container;
 import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.joml.Vector2i;
+import org.joml.Vector2ic;
 
 import java.util.List;
 import java.util.OptionalInt;
@@ -38,11 +39,6 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
 
     public static void onAfterInit(AbstractContainerScreen<?> screen, int screenWidth, int screenHeight, List<AbstractWidget> widgets, UnaryOperator<AbstractWidget> addWidget, Consumer<AbstractWidget> removeWidget) {
         screen.itemSlotMouseActions.addFirst(new ItemStorageMouseActions(screen));
-    }
-
-    public static boolean extractSingleItemOnly() {
-        return ItemInteractions.CONFIG.get(ServerConfig.class).allowPrecisionMode && ItemInteractions.CONFIG.get(
-                ClientConfig.class).extractSingleItem.isActive();
     }
 
     @Override
@@ -66,11 +62,11 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
             return false;
         }
 
-        if (this.screen.hoveredSlot != null && extractSingleItemOnly()) {
-            Vector2i wheelXY = this.scrollWheelHandler.onMouseScroll(scrollX, scrollY);
-            int wheel = wheelXY.y == 0 ? -wheelXY.x : wheelXY.y;
+        // TODO single item-only mode picks up the container item when carried is empty which should not happen
+        if (slotIndex.isPresent() && ItemInteractions.CONFIG.get(ClientConfig.class).extractSingleItemOnly()) {
+            int wheel = this.onMouseScroll(scrollX, scrollY);
             if (wheel != 0) {
-                Slot slot = this.screen.hoveredSlot;
+                Slot slot = this.screen.getMenu().getSlot(slotIndex.getAsInt());
                 int buttonNum = this.getMouseButtonFromWheel(wheel);
                 this.setSingleItemOnly(true);
                 this.screen.slotClicked(slot, slot.index, buttonNum, ContainerInput.PICKUP);
@@ -81,24 +77,17 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
         }
 
         if (itemStack == this.screen.getMenu().getCarried()
-                && !ItemInteractions.CONFIG.get(ClientConfig.class).carriedItemTooltips.isActive()) {
+                && !ItemInteractions.CONFIG.get(ClientConfig.class).itemHeldByCursorTooltip.isActive()) {
             return false;
         }
 
         ItemStorageHolder holder = ItemStorageHolder.ofItem(itemStack);
         if (holder.storage().hasContents(itemStack)) {
-            Vector2i wheelXY = this.scrollWheelHandler.onMouseScroll(scrollX, scrollY);
-            int wheel = wheelXY.y == 0 ? -wheelXY.x : wheelXY.y;
+            int wheel = this.onMouseScroll(scrollX, scrollY);
             if (wheel != 0) {
-                int selectedItem = ContainerSlotHelper.getSelectedItem(itemStack);
-                Container container = holder.getContainerView(itemStack, this.minecraft.player);
-                int updatedSelectedItem = ContainerSlotHelper.findClosestSlotWithContent(container,
-                        selectedItem,
-                        wheel < 0,
-                        CommonHelper.hasShiftDown());
-                if (selectedItem != updatedSelectedItem) {
-                    this.toggleSelectedBundleItem(itemStack, slotIndex, updatedSelectedItem);
-                }
+                // TODO make this a configurable keybind
+                Vector2ic scrollXY = CommonHelper.hasShiftDown() ? new Vector2i(0, wheel) : new Vector2i(-wheel, 0);
+                this.scrollSelectedItem(holder, slotIndex, itemStack, scrollXY);
             }
 
             return true;
@@ -107,8 +96,16 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
         }
     }
 
+    /**
+     * @see net.minecraft.client.MouseHandler#onScroll(long, double, double)
+     */
+    private int onMouseScroll(double scrollX, double scrollY) {
+        Vector2i wheelXY = this.scrollWheelHandler.onMouseScroll(scrollX, scrollY);
+        return wheelXY.y == 0 ? -wheelXY.x : wheelXY.y;
+    }
+
     private int getMouseButtonFromWheel(int wheel) {
-        if (ItemInteractions.CONFIG.get(ClientConfig.class).invertPrecisionModeScrolling ? wheel < 0 : wheel > 0) {
+        if (ItemInteractions.CONFIG.get(ClientConfig.class).reverseSingleItemScrolling ? wheel < 0 : wheel > 0) {
             return InputConstants.MOUSE_BUTTON_RIGHT;
         } else {
             return InputConstants.MOUSE_BUTTON_LEFT;
@@ -116,25 +113,72 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
     }
 
     /**
-     * Important to call before click actions (notably in the creative menu).
-     *
      * @see MultiPlayerGameMode#ensureHasSentCarriedItem()
      */
     private void setSingleItemOnly(boolean singleItemOnly) {
-        ContainerSlotHelper.extractSingleItem(this.minecraft.player, singleItemOnly);
+        ModRegistry.MOVE_SINGLE_ITEM_ATTACHMENT_TYPE.set(this.minecraft.player, singleItemOnly);
         MessageSender.broadcast(new ServerboundContainerClientInputMessage(singleItemOnly));
+    }
+
+    private void scrollSelectedItem(ItemStorageHolder holder, OptionalInt slotIndex, ItemStack itemStack, Vector2ic scrollXY) {
+        Container container = holder.getContainerView(itemStack, this.minecraft.player);
+        int updatedSelectedItem = holder.storage().scrollSelectedItem(itemStack, container, scrollXY);
+        int previousSelectedItem = holder.storage().getSelectedItem(itemStack);
+        if (previousSelectedItem != updatedSelectedItem) {
+            this.toggleSelectedItem(itemStack, slotIndex, updatedSelectedItem);
+        }
+    }
+
+    @Override
+    public boolean onKeyPressed(KeyEvent event, OptionalInt slotIndex, ItemStack itemStack) {
+        if (!ItemInteractions.CONFIG.get(ClientConfig.class).visualItemContents.isActive()) {
+            return false;
+        }
+
+        if (itemStack == this.screen.getMenu().getCarried()
+                && !ItemInteractions.CONFIG.get(ClientConfig.class).itemHeldByCursorTooltip.isActive()) {
+            return false;
+        }
+
+        ItemStorageHolder holder = ItemStorageHolder.ofItem(itemStack);
+        if (holder.storage().hasContents(itemStack)) {
+            int scrollX = 0;
+            int scrollY = 0;
+            if (event.isLeft()) {
+                scrollX--;
+            }
+
+            if (event.isRight()) {
+                scrollX++;
+            }
+
+            if (event.isUp()) {
+                scrollY--;
+            }
+
+            if (event.isDown()) {
+                scrollY++;
+            }
+
+            if (scrollX != 0 || scrollY != 0) {
+                this.scrollSelectedItem(holder, slotIndex, itemStack, new Vector2i(scrollX, scrollY));
+                return true;
+            } else {
+                // Better to not handle this then, as other keys like escape will be blocked.
+                return false;
+            }
+        } else {
+            return false;
+        }
     }
 
     @Override
     public void toggleSelectedBundleItem(ItemStack bundleItem, int slotIndex, int updatedSelectedItem) {
-        this.toggleSelectedBundleItem(bundleItem, OptionalInt.of(slotIndex), updatedSelectedItem);
+        this.toggleSelectedItem(bundleItem, OptionalInt.of(slotIndex), updatedSelectedItem);
     }
 
-    private void toggleSelectedBundleItem(ItemStack bundleItem, OptionalInt slotIndex, int updatedSelectedItem) {
-        int previousSelectedItem = ContainerSlotHelper.getSelectedItem(bundleItem);
-        ContainerSlotHelper.setSelectedItem(bundleItem, updatedSelectedItem);
-        ItemStorageHolder holder = ItemStorageHolder.ofItem(bundleItem);
-        holder.storage().onToggleSelectedItem(bundleItem, previousSelectedItem, updatedSelectedItem);
+    private void toggleSelectedItem(ItemStack bundleItem, OptionalInt slotIndex, int updatedSelectedItem) {
+        ItemStorageHolder.ofItem(bundleItem).storage().toggleSelectedItem(bundleItem, updatedSelectedItem);
         MessageSender.broadcast(new ServerboundSelectedItemMessage(slotIndex, updatedSelectedItem));
     }
 }

@@ -7,15 +7,10 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.Optional;
 
-public interface ItemStorageWithTooltip extends ItemStorage {
-
-    int getGridWidth(int itemCount);
-
-    int getGridHeight(int itemCount);
-
-    default int getGridSize(int itemCount) {
-        return this.getGridWidth(itemCount) * this.getGridHeight(itemCount);
-    }
+/**
+ * TODO add fill bar like bundles for all items
+ */
+public interface ItemStorageWithTooltip extends ContainerItemStorage {
 
     @Override
     default boolean canProvideTooltipImage(ItemStack itemStack, Player player) {

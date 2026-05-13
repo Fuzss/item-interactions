@@ -19,6 +19,7 @@ import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
+import org.joml.Vector2ic;
 
 import java.util.Map;
 import java.util.Optional;
@@ -70,20 +71,6 @@ public interface ItemStorage {
      */
     default boolean canPlayerInteractWith(ItemStack itemStack, Player player) {
         return itemStack.getCount() == 1;
-    }
-
-    /**
-     * Get the maximum stack size for this item in the current container.
-     * <p>
-     * Allows supporting containers with custom max stack sizes such as our Limitless Container library.
-     *
-     * @param container current container
-     * @param slotIndex the menu slot index
-     * @param itemStack item stack to retrieve stack size for
-     * @return supported max stack size
-     */
-    default int getMaxStackSize(Container container, int slotIndex, ItemStack itemStack) {
-        return container.getMaxStackSize(itemStack);
     }
 
     /**
@@ -188,16 +175,17 @@ public interface ItemStorage {
      */
     Optional<TooltipComponent> getTooltipImage(ItemStack containerStack, Player player);
 
+    int getSelectedItem(ItemStack itemStack);
+
+    int scrollSelectedItem(ItemStack itemStack, Container container, Vector2ic scrollXY);
+
     /**
      * Called when the selected item index for a container item changes from the player scrolling through the tooltip.
      *
-     * @param itemStack            the item stack providing the container
-     * @param previousSelectedItem the previous selected slot inside the container item
-     * @param updatedSelectedItem  the next selected slot inside the container item
+     * @param itemStack    the item stack providing the container
+     * @param selectedItem the updated selected slot inside the container item
      */
-    default void onToggleSelectedItem(ItemStack itemStack, int previousSelectedItem, int updatedSelectedItem) {
-        // NO-OP
-    }
+    void toggleSelectedItem(ItemStack itemStack, int selectedItem);
 
     /**
      * @return the item container provider type

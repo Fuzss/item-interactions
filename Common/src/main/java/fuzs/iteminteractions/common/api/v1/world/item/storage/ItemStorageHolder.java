@@ -1,5 +1,6 @@
 package fuzs.iteminteractions.common.api.v1.world.item.storage;
 
+import fuzs.iteminteractions.common.impl.world.item.component.SelectedItem;
 import fuzs.iteminteractions.common.impl.world.item.container.ItemInteractionHelper;
 import fuzs.iteminteractions.common.impl.world.item.container.ItemStorageManager;
 import net.minecraft.world.Container;
@@ -44,8 +45,11 @@ public record ItemStorageHolder(ItemStorage storage) {
         return storage != null ? new ItemStorageHolder(storage) : EMPTY;
     }
 
+    /**
+     * @see net.minecraft.world.item.BundleItem#overrideStackedOnOther(ItemStack, Slot, ClickAction, Player)
+     */
     public boolean overrideStackedOnOther(ItemStack itemStack, Slot slot, ClickAction clickAction, Player player) {
-        if (this.allowsPlayerInteractions(itemStack, player)) {
+        if (this.canPlayerInteractWith(itemStack, player)) {
             boolean broadcastChanges = ItemInteractionHelper.overrideStackedOnOther(itemStack,
                     () -> this.getMutableContainer(itemStack, player),
                     slot,
@@ -54,7 +58,8 @@ public record ItemStorageHolder(ItemStorage storage) {
                     (ItemStack item) -> {
                         return this.getAcceptableItemCount(itemStack, item, player);
                     },
-                    (Container container, ItemStack item) -> this.storage().getMaxStackSize(container, -1, item));
+                    // TODO this must call the method from the item storage implementation
+                    Container::getMaxStackSize);
             if (broadcastChanges) {
                 this.storage().broadcastChangesOnContainerMenu(itemStack, player);
             }
@@ -65,8 +70,17 @@ public record ItemStorageHolder(ItemStorage storage) {
         }
     }
 
+    /**
+     * @see net.minecraft.world.item.BundleItem#overrideOtherStackedOnMe(ItemStack, ItemStack, Slot, ClickAction,
+     *         Player, SlotAccess)
+     */
     public boolean overrideOtherStackedOnMe(ItemStack itemStack, ItemStack itemHeldByCursor, Slot slot, ClickAction clickAction, Player player, SlotAccess slotHeldByCursor) {
-        if (this.allowsPlayerInteractions(itemStack, player)) {
+        if (clickAction == ClickAction.PRIMARY && itemHeldByCursor.isEmpty()) {
+            this.storage().toggleSelectedItem(itemStack, SelectedItem.DEFAULT_SELECTED_ITEM);
+            return false;
+        }
+
+        if (this.canPlayerInteractWith(itemStack, player)) {
             boolean broadcastChanges = ItemInteractionHelper.overrideOtherStackedOnMe(itemStack,
                     () -> this.getMutableContainer(itemStack, player),
                     itemHeldByCursor,
@@ -77,8 +91,9 @@ public record ItemStorageHolder(ItemStorage storage) {
                     (ItemStack item) -> {
                         return this.getAcceptableItemCount(itemStack, item, player);
                     },
-                    (Container container, ItemStack item) -> this.storage().getMaxStackSize(container, -1, item),
-                    () -> this.storage().onToggleSelectedItem(itemStack, 0, -1));
+                    // TODO this must call the method from the item storage implementation
+                    Container::getMaxStackSize,
+                    () -> this.storage().toggleSelectedItem(itemStack, SelectedItem.DEFAULT_SELECTED_ITEM));
             if (broadcastChanges) {
                 this.storage().broadcastChangesOnContainerMenu(itemStack, player);
             }
@@ -90,22 +105,15 @@ public record ItemStorageHolder(ItemStorage storage) {
     }
 
     /**
-     * @see net.minecraft.world.item.BundleItem#broadcastChangesOnContainerMenu(Player)
-     */
-    private void broadcastChangesOnContainerMenu(Player player) {
-        player.containerMenu.slotsChanged(player.getInventory());
-    }
-
-    /**
      * Does this provider support item inventory interactions (extracting and adding items) on the given
      * <code>containterStack</code>.
      *
-     * @param containerStack the container stack
-     * @param player         the player performing the interaction
+     * @param itemStack the container stack
+     * @param player    the player performing the interaction
      * @return are inventory interactions allowed (is a container present on this item)
      */
-    public boolean allowsPlayerInteractions(ItemStack containerStack, Player player) {
-        return this.storage.canPlayerInteractWith(containerStack, player);
+    public boolean canPlayerInteractWith(ItemStack itemStack, Player player) {
+        return this.storage().canPlayerInteractWith(itemStack, player);
     }
 
     /**
@@ -117,14 +125,14 @@ public record ItemStorageHolder(ItemStorage storage) {
      * @return is <code>stack</code> allowed to be added to the container
      */
     public boolean isItemAllowedInContainer(ItemStack stackToAdd) {
-        return this.storage.isItemAllowedInContainer(stackToAdd);
+        return this.storage().isItemAllowedInContainer(stackToAdd);
     }
 
     /**
      * Is there enough space in the container provided by <code>containerStack</code> to add <code>stack</code> (not
      * necessarily the full stack).
      * <p>
-     * Before this is called {@link #allowsPlayerInteractions(ItemStack, Player)} and
+     * Before this is called {@link #canPlayerInteractWith(ItemStack, Player)} and
      * {@link #isItemAllowedInContainer(ItemStack)} are checked.
      *
      * @param containerStack the item stack providing the container to add <code>stack</code> to
@@ -133,9 +141,8 @@ public record ItemStorageHolder(ItemStorage storage) {
      * @return is adding any portion of <code>stackToAdd</code> to the container possible
      */
     public boolean canAddItem(ItemStack containerStack, ItemStack stackToAdd, Player player) {
-        return this.canAcceptItem(containerStack, stackToAdd, player) && this.storage.canAddItem(containerStack,
-                stackToAdd,
-                player);
+        return this.canAcceptItem(containerStack, stackToAdd, player) && this.storage()
+                .canAddItem(containerStack, stackToAdd, player);
     }
 
     /**
@@ -145,8 +152,8 @@ public record ItemStorageHolder(ItemStorage storage) {
      * @param player         player involved in the interaction
      * @return the provided container
      */
-    public SimpleContainer getContainerView(ItemStack containerStack, Player player) {
-        return this.storage.getItemContainer(containerStack, player, false);
+    public Container getContainerView(ItemStack containerStack, Player player) {
+        return this.storage().getItemContainer(containerStack, player, false);
     }
 
     /**
@@ -158,15 +165,15 @@ public record ItemStorageHolder(ItemStorage storage) {
      * @param player         player involved in the interaction
      * @return the provided container
      */
-    public SimpleContainer getMutableContainer(ItemStack containerStack, Player player) {
-        return this.storage.getItemContainer(containerStack, player, true);
+    public Container getMutableContainer(ItemStack containerStack, Player player) {
+        return this.storage().getItemContainer(containerStack, player, true);
     }
 
     /**
      * Is there any item of the same type as <code>stackToAdd</code> already in the container provided by
      * <code>containerStack</code>.
      * <p>
-     * Before this is called {@link #allowsPlayerInteractions(ItemStack, Player)} and
+     * Before this is called {@link #canPlayerInteractWith(ItemStack, Player)} and
      * {@link #isItemAllowedInContainer(ItemStack)} are checked.
      *
      * @param containerStack the item stack providing the container to add <code>stack</code> to
@@ -185,7 +192,7 @@ public record ItemStorageHolder(ItemStorage storage) {
      * <p>
      * Mainly used by bundles, otherwise {@link ItemStorage#canAddItem} should be enough.
      * <p>
-     * Before this is called {@link #allowsPlayerInteractions(ItemStack, Player)} and
+     * Before this is called {@link #canPlayerInteractWith(ItemStack, Player)} and
      * {@link #isItemAllowedInContainer(ItemStack)} are checked.
      *
      * @param containerStack the item stack providing the container to add <code>stackToAdd</code> to
@@ -195,7 +202,7 @@ public record ItemStorageHolder(ItemStorage storage) {
      */
     public int getAcceptableItemCount(ItemStack containerStack, ItemStack stackToAdd, Player player) {
         if (this.canAcceptItem(containerStack, stackToAdd, player)) {
-            return this.storage.getAcceptableItemCount(containerStack, stackToAdd, player);
+            return this.storage().getAcceptableItemCount(containerStack, stackToAdd, player);
         } else {
             return 0;
         }
@@ -211,22 +218,8 @@ public record ItemStorageHolder(ItemStorage storage) {
      * @return can the item be added
      */
     public boolean canAcceptItem(ItemStack containerStack, ItemStack stackToAdd, Player player) {
-        return !stackToAdd.isEmpty() && this.allowsPlayerInteractions(containerStack, player)
+        return !stackToAdd.isEmpty() && this.canPlayerInteractWith(containerStack, player)
                 && this.isItemAllowedInContainer(stackToAdd);
-    }
-
-    /**
-     * Does this provider support an image tooltip.
-     * <p>
-     * This is required despite {@link #getTooltipImage} providing an {@link Optional} when overriding the tooltip image
-     * for items which normally provide their own (like bundles).
-     *
-     * @param containerStack the item stack providing the container to show a tooltip for
-     * @param player         player involved in the interaction
-     * @return does <code>containerStack</code> provide a tooltip image
-     */
-    public boolean canProvideTooltipImage(ItemStack containerStack, Player player) {
-        return this.storage.canProvideTooltipImage(containerStack, player);
     }
 
     /**
@@ -236,15 +229,12 @@ public record ItemStorageHolder(ItemStorage storage) {
      * @param player         player involved in the interaction
      * @return the image tooltip provided by the item stack.
      */
-    public Optional<TooltipComponent> getTooltipImage(ItemStack containerStack, Player player) {
-        return this.storage.getTooltipImage(containerStack, player);
-    }
-
-    /**
-     * @return the item container provider type
-     */
-    public ItemStorageType<?> getType() {
-        return this.storage.getType();
+    public Optional<Optional<TooltipComponent>> getTooltipImage(ItemStack containerStack, Player player) {
+        if (this.storage().canProvideTooltipImage(containerStack, player)) {
+            return Optional.of(this.storage().getTooltipImage(containerStack, player));
+        } else {
+            return Optional.empty();
+        }
     }
 
     /**

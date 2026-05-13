@@ -8,7 +8,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
 
-public class ItemTooltipRenderingHandler {
+public class ItemHeldByCursorTooltipHandler {
 
     /**
      * Shows the item tooltip for the item held by the cursor; to be used with the single item moving feature to be able
@@ -17,7 +17,7 @@ public class ItemTooltipRenderingHandler {
      * @see AbstractContainerScreen#extractTooltip(GuiGraphicsExtractor, int, int)
      */
     public static void onAfterBackground(AbstractContainerScreen<?> screen, GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
-        if (!ItemInteractions.CONFIG.get(ClientConfig.class).carriedItemTooltips.isActive()) {
+        if (!ItemInteractions.CONFIG.get(ClientConfig.class).itemHeldByCursorTooltip.isActive()) {
             return;
         }
 
