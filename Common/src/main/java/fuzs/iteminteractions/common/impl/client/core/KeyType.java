@@ -11,6 +11,7 @@ public interface KeyType {
     Component TOGGLE_COMPONENT = createDescriptionComponent("toggle");
     Component SHIFT_COMPONENT = createDescriptionComponent("shift");
     Component CONTROL_COMPONENT = createDescriptionComponent("control");
+    Component COMMAND_COMPONENT = createDescriptionComponent("command");
     Component ALT_COMPONENT = createDescriptionComponent("alt");
 
     boolean isUsed();

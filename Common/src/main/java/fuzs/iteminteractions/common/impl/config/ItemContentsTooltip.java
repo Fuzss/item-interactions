@@ -37,6 +37,12 @@ public enum ItemContentsTooltip implements BackedKeyType {
             return Either.left(SimpleKeyType.CONTROL);
         }
     },
+    CONTROL_OR_COMMAND {
+        @Override
+        public Either<KeyType, KeyMapping> getBackingType() {
+            return Either.left(SimpleKeyType.CONTROL_OR_COMMAND);
+        }
+    },
     ALT {
         @Override
         public Either<KeyType, KeyMapping> getBackingType() {

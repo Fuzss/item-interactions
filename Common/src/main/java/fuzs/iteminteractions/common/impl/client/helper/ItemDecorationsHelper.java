@@ -21,7 +21,7 @@ public class ItemDecorationsHelper {
      * @see GuiGraphicsExtractor#itemDecorations(Font, ItemStack, int, int, String)
      */
     public static void extractItemDecorations(GuiGraphicsExtractor guiGraphics, Font font, ItemStack itemStack, int itemPosX, int itemPosY) {
-        if (!ItemInteractions.CONFIG.get(ClientConfig.class).containerItemIndicator) {
+        if (!ItemInteractions.CONFIG.get(ClientConfig.class).itemStorageIndicator) {
             return;
         }
 

@@ -8,7 +8,12 @@ dependencies {
 
 multiloader {
     mixins {
-        mixin("AbstractContainerMenuMixin", "ItemStackMixin")
-        clientMixin("AbstractContainerScreenMixin", "GuiGraphicsExtractorMixin", "MultiPlayerGameModeMixin")
+        mixin("AbstractContainerMenuMixin")
+        clientMixin(
+            "AbstractContainerScreenMixin",
+            "GuiGraphicsExtractorMixin",
+            "ItemStackMixin",
+            "MultiPlayerGameModeMixin"
+        )
     }
 }

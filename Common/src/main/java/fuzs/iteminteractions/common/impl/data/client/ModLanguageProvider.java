@@ -21,6 +21,7 @@ public class ModLanguageProvider extends AbstractLanguageProvider {
         builder.add(KeyType.TOGGLE_COMPONENT, "Toggle");
         builder.add(KeyType.SHIFT_COMPONENT, "Shift");
         builder.add(KeyType.CONTROL_COMPONENT, "Control");
+        builder.add(KeyType.COMMAND_COMPONENT, "Command");
         builder.add(KeyType.ALT_COMPONENT, "Alt");
         builder.add(ItemContentsTooltip.KEY_MAPPING, "Toggle Item Contents Tooltip");
         builder.add(ItemHeldByCursorTooltip.KEY_MAPPING, "Toggle Item Held By Cursor Tooltip");

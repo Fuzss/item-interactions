@@ -9,8 +9,8 @@ import fuzs.iteminteractions.common.impl.client.gui.ItemStorageMouseActions;
 import fuzs.iteminteractions.common.impl.client.gui.screens.inventory.tooltip.CollapsibleClientTooltipComponent;
 import fuzs.iteminteractions.common.impl.client.handler.ItemHeldByCursorTooltipHandler;
 import fuzs.iteminteractions.common.impl.client.handler.MouseDraggingHandler;
-import fuzs.iteminteractions.common.impl.config.ItemHeldByCursorTooltip;
 import fuzs.iteminteractions.common.impl.config.ItemContentsTooltip;
+import fuzs.iteminteractions.common.impl.config.ItemHeldByCursorTooltip;
 import fuzs.iteminteractions.common.impl.world.item.container.ItemStorageManager;
 import fuzs.puzzleslib.common.api.client.core.v1.ClientModConstructor;
 import fuzs.puzzleslib.common.api.client.core.v1.context.ClientTooltipComponentsContext;
@@ -23,10 +23,15 @@ import fuzs.puzzleslib.common.api.client.event.v1.gui.ScreenMouseEvents;
 import fuzs.puzzleslib.common.api.client.key.v1.KeyActivationContext;
 import fuzs.puzzleslib.common.api.event.v1.core.EventPhase;
 import fuzs.puzzleslib.common.api.event.v1.level.PlaySoundEvents;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.Connection;
+
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
 
 public class ItemInteractionsClient implements ClientModConstructor {
 
@@ -50,15 +55,21 @@ public class ItemInteractionsClient implements ClientModConstructor {
                 .register(CustomItemSlotMouseAction::onBeforeMouseScroll);
         ScreenKeyboardEvents.beforeKeyPress(AbstractContainerScreen.class)
                 .register(CustomItemSlotMouseAction::onBeforeKeyPress);
-        ScreenEvents.afterInit(AbstractContainerScreen.class).register(ItemStorageMouseActions::onAfterInit);
+        ScreenEvents.afterInit(AbstractContainerScreen.class).register(ItemInteractionsClient::onAfterInit);
         ScreenEvents.afterBackground(AbstractContainerScreen.class)
                 .register(ItemHeldByCursorTooltipHandler::onAfterBackground);
         ScreenEvents.afterBackground(AbstractContainerScreen.class).register(MouseDraggingHandler::onAfterBackground);
         RenderContainerScreenContentsCallback.EVENT.register(MouseDraggingHandler::onRenderContainerScreenContents);
         PlaySoundEvents.AT_ENTITY.register(MouseDraggingHandler::onPlaySoundAtEntity);
-        ClientPlayerNetworkEvents.LEAVE.register((LocalPlayer player, MultiPlayerGameMode multiPlayerGameMode, Connection connection) -> {
-            ItemStorageManager.setItemStorage(ImmutableMap.of());
-        });
+        ClientPlayerNetworkEvents.LEAVE.register(ItemInteractionsClient::onPlayerLeave);
+    }
+
+    private static void onAfterInit(AbstractContainerScreen<?> screen, int screenWidth, int screenHeight, List<AbstractWidget> widgets, UnaryOperator<AbstractWidget> addWidget, Consumer<AbstractWidget> removeWidget) {
+        screen.itemSlotMouseActions.addFirst(new ItemStorageMouseActions(screen));
+    }
+
+    private static void onPlayerLeave(LocalPlayer player, MultiPlayerGameMode multiPlayerGameMode, Connection connection) {
+        ItemStorageManager.setItemStorage(ImmutableMap.of());
     }
 
     @Override

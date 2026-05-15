@@ -44,7 +44,7 @@ public class ClientItemContentsTooltip implements ClientTooltipComponent {
     }
 
     public static int computeBackgroundColor(@Nullable DyeBackedColor color) {
-        if (!ItemInteractions.CONFIG.get(ClientConfig.class).colorfulTooltipContents || color == null) {
+        if (!ItemInteractions.CONFIG.get(ClientConfig.class).itemStorageColors || color == null) {
             return -1;
         } else {
             DyeColor dyeColor = DyeColor.byName(color.serialize(), null);
@@ -140,7 +140,7 @@ public class ClientItemContentsTooltip implements ClientTooltipComponent {
 
     private void extractHighlightSlotContents(Font font, GuiGraphicsExtractor guiGraphics, int posX, int posY, int slotIndex, boolean isHighlightSlot) {
         if (isHighlightSlot) {
-            SlotHighlight slotHighlight = ItemInteractions.CONFIG.get(ClientConfig.class).slotHighlightSprite;
+            SlotHighlight slotHighlight = ItemInteractions.CONFIG.get(ClientConfig.class).itemStorageHighlightSprite;
             slotHighlight.blitBackSprite(guiGraphics, posX, posY);
             this.extractSlot(font, guiGraphics, posX, posY, slotIndex);
             slotHighlight.blitFrontSprite(guiGraphics, posX, posY);

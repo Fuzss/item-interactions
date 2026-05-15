@@ -7,7 +7,6 @@ import fuzs.iteminteractions.common.impl.config.ClientConfig;
 import fuzs.iteminteractions.common.impl.network.client.ServerboundSelectedItemMessage;
 import fuzs.puzzleslib.common.api.network.v4.MessageSender;
 import net.minecraft.client.gui.BundleMouseActions;
-import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.world.Container;
@@ -17,10 +16,7 @@ import net.minecraft.world.item.ItemStack;
 import org.joml.Vector2i;
 import org.joml.Vector2ic;
 
-import java.util.List;
 import java.util.OptionalInt;
-import java.util.function.Consumer;
-import java.util.function.UnaryOperator;
 
 /**
  * @see BundleMouseActions
@@ -31,10 +27,6 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
     public ItemStorageMouseActions(AbstractContainerScreen<?> screen) {
         super(screen.minecraft);
         this.screen = screen;
-    }
-
-    public static void onAfterInit(AbstractContainerScreen<?> screen, int screenWidth, int screenHeight, List<AbstractWidget> widgets, UnaryOperator<AbstractWidget> addWidget, Consumer<AbstractWidget> removeWidget) {
-        screen.itemSlotMouseActions.addFirst(new ItemStorageMouseActions(screen));
     }
 
     @Override
@@ -54,7 +46,7 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
 
     @Override
     public boolean onMouseScrolled(double scrollX, double scrollY, OptionalInt slotIndex, ItemStack itemStack) {
-        if (!ItemInteractions.CONFIG.get(ClientConfig.class).itemContentsTooltip.isUsed()) {
+        if (!ItemInteractions.CONFIG.get(ClientConfig.class).itemStorageTooltip.isUsed()) {
             return false;
         }
 
@@ -122,7 +114,7 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
 
     @Override
     public boolean onKeyPressed(KeyEvent event, OptionalInt slotIndex, ItemStack itemStack) {
-        if (!ItemInteractions.CONFIG.get(ClientConfig.class).itemContentsTooltip.isUsed()) {
+        if (!ItemInteractions.CONFIG.get(ClientConfig.class).itemStorageTooltip.isUsed()) {
             return false;
         }
 

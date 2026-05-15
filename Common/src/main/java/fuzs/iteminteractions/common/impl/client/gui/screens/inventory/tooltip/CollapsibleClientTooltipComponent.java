@@ -22,7 +22,7 @@ public record CollapsibleClientTooltipComponent(ClientTooltipComponent component
 
     @Override
     public int getHeight(Font font) {
-        KeyType type = ItemInteractions.CONFIG.get(ClientConfig.class).itemContentsTooltip;
+        KeyType type = ItemInteractions.CONFIG.get(ClientConfig.class).itemStorageTooltip;
         if (!type.isUsed()) {
             return type.getComponent(REVEAL_CONTENTS_TRANSLATION_KEY) != null ? font.lineHeight + 1 : 0;
         } else {
@@ -32,7 +32,7 @@ public record CollapsibleClientTooltipComponent(ClientTooltipComponent component
 
     @Override
     public int getWidth(Font font) {
-        KeyType type = ItemInteractions.CONFIG.get(ClientConfig.class).itemContentsTooltip;
+        KeyType type = ItemInteractions.CONFIG.get(ClientConfig.class).itemStorageTooltip;
         if (!type.isUsed()) {
             Component component = type.getComponent(REVEAL_CONTENTS_TRANSLATION_KEY);
             return component != null ? font.width(component) : 0;
@@ -43,7 +43,7 @@ public record CollapsibleClientTooltipComponent(ClientTooltipComponent component
 
     @Override
     public boolean showTooltipWithItemInHand() {
-        if (ItemInteractions.CONFIG.get(ClientConfig.class).itemContentsTooltip.isUsed()) {
+        if (ItemInteractions.CONFIG.get(ClientConfig.class).itemStorageTooltip.isUsed()) {
             return this.component.showTooltipWithItemInHand();
         } else {
             return false;
@@ -52,7 +52,7 @@ public record CollapsibleClientTooltipComponent(ClientTooltipComponent component
 
     @Override
     public void extractText(GuiGraphicsExtractor guiGraphics, Font font, int x, int y) {
-        KeyType type = ItemInteractions.CONFIG.get(ClientConfig.class).itemContentsTooltip;
+        KeyType type = ItemInteractions.CONFIG.get(ClientConfig.class).itemStorageTooltip;
         if (!type.isUsed()) {
             Component component = type.getComponent(REVEAL_CONTENTS_TRANSLATION_KEY);
             if (component != null) {
@@ -63,7 +63,7 @@ public record CollapsibleClientTooltipComponent(ClientTooltipComponent component
 
     @Override
     public void extractImage(Font font, int x, int y, int width, int height, GuiGraphicsExtractor guiGraphics) {
-        if (ItemInteractions.CONFIG.get(ClientConfig.class).itemContentsTooltip.isUsed()) {
+        if (ItemInteractions.CONFIG.get(ClientConfig.class).itemStorageTooltip.isUsed()) {
             this.component.extractImage(font, x, y, width, height, guiGraphics);
         }
     }
