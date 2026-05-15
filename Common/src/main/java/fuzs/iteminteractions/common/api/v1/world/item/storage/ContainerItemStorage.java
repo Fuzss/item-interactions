@@ -119,7 +119,7 @@ public interface ContainerItemStorage extends ItemStorage {
     default boolean overrideStackedOnOther(ItemStorageHolder holder, ItemStack itemStack, Slot slot, ClickAction clickAction, Player player) {
         ItemStackingContext context = new ItemStackingContext(holder, this, player);
         ItemStack otherItem = slot.getItem();
-        if (clickAction == ClickAction.PRIMARY && !otherItem.isEmpty()) {
+        if (clickAction == ClickAction.PRIMARY && (!otherItem.isEmpty() || this.extractSingleItemOnly(player))) {
             otherItem = slot.safeTake(otherItem.getCount(), otherItem.getCount(), player);
             int transferredCount = context.tryInsert(itemStack, otherItem);
             otherItem.shrink(transferredCount);
@@ -234,6 +234,7 @@ public interface ContainerItemStorage extends ItemStorage {
     /**
      * @see net.minecraft.world.item.BundleItem#playRemoveOneSound(Entity)
      */
+    @Override
     default void playRemoveOneSound(Player player) {
         player.playSound(SoundEvents.BUNDLE_REMOVE_ONE, 0.8F, 0.8F + player.level().getRandom().nextFloat() * 0.4F);
     }
@@ -241,6 +242,7 @@ public interface ContainerItemStorage extends ItemStorage {
     /**
      * @see net.minecraft.world.item.BundleItem#playInsertSound(Entity)
      */
+    @Override
     default void playInsertSound(Player player) {
         player.playSound(SoundEvents.BUNDLE_INSERT, 0.8F, 0.8F + player.level().getRandom().nextFloat() * 0.4F);
     }

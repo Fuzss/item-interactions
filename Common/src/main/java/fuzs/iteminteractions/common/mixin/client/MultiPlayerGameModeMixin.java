@@ -1,6 +1,6 @@
 package fuzs.iteminteractions.common.mixin.client;
 
-import fuzs.iteminteractions.common.impl.client.handler.ClientInputActionHandler;
+import fuzs.iteminteractions.common.impl.client.handler.ClientEventHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.world.entity.player.Player;
@@ -21,7 +21,7 @@ abstract class MultiPlayerGameModeMixin {
     @Inject(method = "handleContainerInput", at = @At("HEAD"))
     public void handleContainerInput(int containerId, int slotNum, int buttonNum, ContainerInput containerInput, Player player, CallbackInfo callback) {
         if (containerId == player.containerMenu.containerId) {
-            ClientInputActionHandler.ensureHasSentContainerClientInput(player);
+            ClientEventHandler.ensureHasSentContainerClientInput(player);
         }
     }
 }

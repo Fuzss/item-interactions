@@ -171,6 +171,10 @@ public interface ItemStorage {
      */
     void toggleSelectedItem(ItemStack itemStack, int selectedItem);
 
+    void playRemoveOneSound(Player player);
+
+    void playInsertSound(Player player);
+
     /**
      * @return the item container provider type
      */

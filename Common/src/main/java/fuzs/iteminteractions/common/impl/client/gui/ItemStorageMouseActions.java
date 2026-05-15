@@ -1,28 +1,42 @@
 package fuzs.iteminteractions.common.impl.client.gui;
 
+import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.InputConstants;
 import fuzs.iteminteractions.common.api.v1.world.item.storage.ItemStorageHolder;
 import fuzs.iteminteractions.common.impl.ItemInteractions;
 import fuzs.iteminteractions.common.impl.config.ClientConfig;
+import fuzs.iteminteractions.common.impl.config.ServerConfig;
 import fuzs.iteminteractions.common.impl.network.client.ServerboundSelectedItemMessage;
 import fuzs.puzzleslib.common.api.network.v4.MessageSender;
 import net.minecraft.client.gui.BundleMouseActions;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.joml.Vector2i;
 import org.joml.Vector2ic;
+import org.jspecify.annotations.Nullable;
 
 import java.util.OptionalInt;
+import java.util.Set;
 
 /**
  * @see BundleMouseActions
  */
 public class ItemStorageMouseActions extends BundleMouseActions implements CustomItemSlotMouseAction {
     private final AbstractContainerScreen<?> screen;
+    private final Set<Slot> clickedDraggingSlots = Sets.newIdentityHashSet();
+    private final Set<Slot> allDraggingSlots = Sets.newIdentityHashSet();
+    @Nullable
+    private ClickAction clickAction;
 
     public ItemStorageMouseActions(AbstractContainerScreen<?> screen) {
         super(screen.minecraft);
@@ -37,6 +51,148 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
     @Override
     public boolean matches(ItemStack itemStack) {
         return !ItemStorageHolder.ofItem(itemStack).isEmpty();
+    }
+
+    @Override
+    public void onExtractBackground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTicks) {
+        if (!this.clickedDraggingSlots.isEmpty()) {
+            guiGraphics.pose().pushMatrix();
+            guiGraphics.pose().translate(this.screen.leftPos, this.screen.topPos);
+            this.extractSlotHighlights(guiGraphics, mouseX, mouseY, AbstractContainerScreen.SLOT_HIGHLIGHT_BACK_SPRITE);
+            guiGraphics.pose().popMatrix();
+        }
+    }
+
+    @Override
+    public void onExtractContents(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTicks) {
+        if (!this.clickedDraggingSlots.isEmpty()) {
+            this.extractSlotHighlights(guiGraphics,
+                    mouseX,
+                    mouseY,
+                    AbstractContainerScreen.SLOT_HIGHLIGHT_FRONT_SPRITE);
+        }
+    }
+
+    private void extractSlotHighlights(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, Identifier slotHighlightSprite) {
+        for (Slot slot : this.screen.getMenu().slots) {
+            if (slot.isHighlightable() && this.clickedDraggingSlots.contains(slot)) {
+                // slots will sometimes be added to dragged slots when simply clicking on a slot, so don't render our overlay then
+                if (this.clickedDraggingSlots.size() > 1 || !this.screen.isHovering(slot, mouseX, mouseY)) {
+                    guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED,
+                            slotHighlightSprite,
+                            slot.x - 4,
+                            slot.y - 4,
+                            24,
+                            24);
+                }
+            }
+        }
+    }
+
+    @Override
+    public boolean onMouseClicked(MouseButtonEvent event, ItemStack itemStack) {
+        if (!ItemInteractions.CONFIG.get(ServerConfig.class).enableMouseDragging) {
+            return false;
+        }
+
+        this.clearDraggingSlots();
+        if (ItemStorageHolder.ofItem(itemStack).isPresentFor(itemStack, this.screen.minecraft.player)) {
+            Slot slot = this.screen.getHoveredSlot(event.x(), event.y());
+            if (slot != null) {
+                this.clickAction = event.button() == InputConstants.MOUSE_BUTTON_LEFT ? ClickAction.PRIMARY :
+                        ClickAction.SECONDARY;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private void clearDraggingSlots() {
+        this.clickAction = null;
+        this.clickedDraggingSlots.clear();
+        this.allDraggingSlots.clear();
+    }
+
+    @Override
+    public boolean onMouseReleased(MouseButtonEvent event, ItemStack itemStack) {
+        if (!ItemInteractions.CONFIG.get(ServerConfig.class).enableMouseDragging) {
+            return false;
+        }
+
+        ClickAction lastClickAction = this.getLastClickAction();
+        boolean handleMouseRelease = this.isMouseReleaseHandled();
+        this.clearDraggingSlots();
+        if (lastClickAction != null) {
+            // Play this manually at the end as we suppress all interaction sounds played while dragging.
+            switch (lastClickAction) {
+                case PRIMARY -> {
+                    ItemStorageHolder.ofItem(itemStack).storage().playInsertSound(this.screen.minecraft.player);
+                }
+                case SECONDARY -> {
+                    ItemStorageHolder.ofItem(itemStack).storage().playRemoveOneSound(this.screen.minecraft.player);
+                }
+            }
+        }
+
+        return handleMouseRelease;
+    }
+
+    private @Nullable ClickAction getLastClickAction() {
+        return !this.clickedDraggingSlots.isEmpty() ? this.clickAction : null;
+    }
+
+    private boolean isMouseReleaseHandled() {
+        return this.allDraggingSlots.size() > 1 || !this.clickedDraggingSlots.isEmpty();
+    }
+
+    @Override
+    public boolean onMouseDragged(MouseButtonEvent event, double dragX, double dragY, ItemStack itemStack) {
+        if (!ItemInteractions.CONFIG.get(ServerConfig.class).enableMouseDragging) {
+            return false;
+        }
+
+        if (this.clickAction != null) {
+            ItemStorageHolder holder = ItemStorageHolder.ofItem(itemStack);
+            if (!holder.isPresentFor(itemStack, this.screen.minecraft.player)) {
+                this.clearDraggingSlots();
+                return false;
+            }
+
+            Slot slot = this.screen.getHoveredSlot(event.x(), event.y());
+            if (slot != null && this.screen.getMenu().canDragTo(slot) && !this.allDraggingSlots.contains(slot)) {
+                if (this.shouldSlotBeClicked(this.clickAction, slot, holder, itemStack, this.screen.minecraft.player)) {
+                    this.clickedDraggingSlots.add(slot);
+                    this.screen.slotClicked(slot, slot.index, event.button(), ContainerInput.PICKUP);
+                }
+
+                this.allDraggingSlots.add(slot);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean shouldSlotBeClicked(ClickAction clickAction, Slot slot, ItemStorageHolder holder, ItemStack itemStack, Player player) {
+        return switch (clickAction) {
+            case PRIMARY -> {
+                yield slot.hasItem() && holder.canAddItem(itemStack, slot.getItem(), player);
+            }
+            case SECONDARY -> {
+                yield !slot.hasItem() && !holder.getItemContainer(itemStack, player).isEmpty()
+                        || ItemInteractions.CONFIG.get(ClientConfig.class).extractSingleItemOnly() && holder.hasAnyOf(
+                        itemStack,
+                        slot.getItem(),
+                        player,
+                        true);
+            }
+        };
+    }
+
+    @Override
+    public boolean isDragging() {
+        return this.clickAction != null;
     }
 
     @Override

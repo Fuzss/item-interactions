@@ -114,9 +114,15 @@ public record ItemStorageHolder(ItemStorage storage) {
      * @param player     the player interacting with both items
      * @return is any item of the same type as <code>stackToAdd</code> already in the container
      */
-    public boolean hasAnyOf(ItemStack itemStack, ItemStack stackToAdd, Player player) {
+    public boolean hasAnyOf(ItemStack itemStack, ItemStack stackToAdd, Player player, boolean isSameComponents) {
         return this.canAcceptItem(itemStack, stackToAdd, player) && this.getItemContainer(itemStack, player)
-                .hasAnyMatching((ItemStack item) -> ItemStack.isSameItem(item, stackToAdd));
+                .hasAnyMatching((ItemStack item) -> {
+                    if (isSameComponents) {
+                        return ItemStack.isSameItemSameComponents(item, stackToAdd);
+                    } else {
+                        return ItemStack.isSameItem(item, stackToAdd);
+                    }
+                });
     }
 
     /**

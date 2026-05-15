@@ -87,6 +87,16 @@ public class VoidStorage implements ItemStorage {
     }
 
     @Override
+    public void playRemoveOneSound(Player player) {
+        // NO-OP
+    }
+
+    @Override
+    public void playInsertSound(Player player) {
+        // NO-OP
+    }
+
+    @Override
     public ItemStorageType<?> getType() {
         return ModRegistry.EMPTY_ITEM_CONTENTS_PROVIDER_TYPE.value();
     }

@@ -32,12 +32,12 @@ public enum ItemDecorationsType {
 
     public static @Nullable ItemDecorationsType pickType(ItemStorageHolder holder, ItemStack itemStack, ItemStack itemHeldByCursor, Player player) {
         if (holder.canAddItem(itemStack, itemHeldByCursor, player)) {
-            if (holder.hasAnyOf(itemStack, itemHeldByCursor, player)) {
+            if (holder.hasAnyOf(itemStack, itemHeldByCursor, player, false)) {
                 return ItemDecorationsType.HAS_ITEM;
             } else {
                 return ItemDecorationsType.NOT_FULL;
             }
-        } else if (holder.hasAnyOf(itemStack, itemHeldByCursor, player)) {
+        } else if (holder.hasAnyOf(itemStack, itemHeldByCursor, player, false)) {
             return ItemDecorationsType.HAS_ITEM_BUT_FULL;
         } else {
             return null;
