@@ -42,7 +42,7 @@ public class MouseDraggingHandler {
 
         ItemStack carriedStack = screen.getMenu().getCarried();
         if (validMouseButton(mouseButtonEvent)) {
-            if (ItemStorageHolder.ofItem(carriedStack).canPlayerInteractWith(carriedStack, screen.minecraft.player)) {
+            if (ItemStorageHolder.ofItem(carriedStack).isPresentFor(carriedStack, screen.minecraft.player)) {
                 Slot slot = screen.getHoveredSlot(mouseButtonEvent.x(), mouseButtonEvent.y());
                 if (slot != null) {
                     if (slot.hasItem() && !ItemInteractions.CONFIG.get(ClientConfig.class).extractSingleItemOnly()) {
@@ -70,7 +70,7 @@ public class MouseDraggingHandler {
             AbstractContainerMenu menu = screen.getMenu();
             ItemStack carriedStack = menu.getCarried();
             ItemStorageHolder behavior = ItemStorageHolder.ofItem(carriedStack);
-            if (!validMouseButton(mouseButtonEvent) || !behavior.canPlayerInteractWith(carriedStack,
+            if (!validMouseButton(mouseButtonEvent) || !behavior.isPresentFor(carriedStack,
                     screen.minecraft.player)) {
                 containerDragType = null;
                 CONTAINER_DRAG_SLOTS.clear();
@@ -87,7 +87,7 @@ public class MouseDraggingHandler {
                 } else if (containerDragType == ContainerDragType.REMOVE) {
                     boolean normalInteraction =
                             mouseButtonEvent.button() == InputConstants.MOUSE_BUTTON_RIGHT && !slot.hasItem()
-                                    && !behavior.getContainerView(carriedStack, screen.minecraft.player).isEmpty();
+                                    && !behavior.getItemContainer(carriedStack, screen.minecraft.player).isEmpty();
                     if (normalInteraction || slot.hasItem() && ItemInteractions.CONFIG.get(ClientConfig.class)
                             .extractSingleItemOnly()) {
                         interact = true;

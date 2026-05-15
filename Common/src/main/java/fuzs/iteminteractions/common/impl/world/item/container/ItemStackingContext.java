@@ -24,29 +24,6 @@ public final class ItemStackingContext {
         this.player = player;
     }
 
-    private int getItemCountLimit(ItemStack itemStack) {
-        int itemLimit = itemStack.getCount();
-        return this.storage.extractSingleItemOnly(this.player) ? Math.min(1, itemLimit) : itemLimit;
-    }
-
-    private int getItemCountLimit(ItemStack itemStack, ItemStack otherItem) {
-        int itemLimit = Math.min(otherItem.getCount(),
-                this.holder.getAcceptableItemCount(itemStack, otherItem, this.player));
-        return this.storage.extractSingleItemOnly(this.player) ? Math.min(1, itemLimit) : itemLimit;
-    }
-
-    private void handleAddItem(ItemStack itemStack, ItemStack otherItem) {
-        int transferredCount = this.tryInsert(itemStack, otherItem);
-        otherItem.shrink(transferredCount);
-        if (!this.storage.extractSingleItemOnly(this.player)) {
-            if (transferredCount > 0) {
-                this.storage.playInsertSound(this.player);
-            } else {
-                this.storage.playInsertFailSound(this.player);
-            }
-        }
-    }
-
     /**
      * @see BundleContents.Mutable#tryInsert(ItemStack)
      */
@@ -67,14 +44,10 @@ public final class ItemStackingContext {
         }
     }
 
-    public void handleRemoveItem(ItemStack itemStack, ItemStack otherItem) {
-        ItemSlot itemSlot = this.removeOne(itemStack, otherItem);
-        if (!itemSlot.item().isEmpty()) {
-//            this.setItemInSlot(itemSlot.slotNum(), itemSlot.item());
-            if (!this.storage.extractSingleItemOnly(this.player)) {
-                this.storage.playRemoveOneSound(this.player);
-            }
-        }
+    private int getItemCountLimit(ItemStack itemStack, ItemStack otherItem) {
+        int itemLimit = Math.min(otherItem.getCount(),
+                this.holder.getAcceptableItemCount(itemStack, otherItem, this.player));
+        return this.storage.extractSingleItemOnly(this.player) ? Math.min(1, itemLimit) : itemLimit;
     }
 
     /**
@@ -92,26 +65,20 @@ public final class ItemStackingContext {
         }
     }
 
-    private int updateSelectedSlot(Container container, ItemStack itemStack, ItemStack otherItem) {
-        int selectedItem = this.storage.getSelectedItem(itemStack);
-        if (selectedItem >= 0 && selectedItem < container.getContainerSize()) {
-            ItemStack item = container.getItem(selectedItem);
-            if (!item.isEmpty() && this.canCombineItemInSlot(otherItem, container, selectedItem, item)) {
-                // When we empty the slot, cycle to a different one.
-                if (item.getCount() <= this.getItemCountLimit(item)) {
-                    int updatedSelectedItem = this.storage.scrollSelectedItem(itemStack,
-                            container,
-                            new Vector2i(-1, 0));
-                    this.storage.setSelectedItem(itemStack, updatedSelectedItem);
-                }
+    private int getItemCountLimit(ItemStack itemStack) {
+        int itemLimit = itemStack.getCount();
+        return this.storage.extractSingleItemOnly(this.player) ? Math.min(1, itemLimit) : itemLimit;
+    }
 
-                return selectedItem;
-            }
+    private int updateSelectedSlot(Container container, ItemStack itemStack, ItemStack otherItem) {
+        int selectedItem = this.updatePreviousSelectedSlot(container, itemStack, otherItem);
+        if (selectedItem != SelectedItem.DEFAULT_SELECTED_ITEM) {
+            return selectedItem;
         }
 
         for (int slotNum = container.getContainerSize() - 1; slotNum >= 0; slotNum--) {
             ItemStack item = container.getItem(slotNum);
-            if (!item.isEmpty() && this.canCombineItemInSlot(otherItem, container, slotNum, item)) {
+            if (!item.isEmpty() && this.canCombineItemsInSlot(otherItem, container, slotNum, item)) {
                 // When we empty the slot, cycle to a different one.
                 if (item.getCount() <= this.getItemCountLimit(item)) {
                     this.storage.setSelectedItem(itemStack, SelectedItem.DEFAULT_SELECTED_ITEM);
@@ -127,7 +94,27 @@ public final class ItemStackingContext {
         return SelectedItem.DEFAULT_SELECTED_ITEM;
     }
 
-    private boolean canCombineItemInSlot(ItemStack itemStack, Container container, int slotNum, ItemStack slotItem) {
+    private int updatePreviousSelectedSlot(Container container, ItemStack itemStack, ItemStack otherItem) {
+        int selectedItem = this.storage.getSelectedItem(itemStack);
+        if (selectedItem >= 0 && selectedItem < container.getContainerSize()) {
+            ItemStack item = container.getItem(selectedItem);
+            if (!item.isEmpty() && this.canCombineItemsInSlot(otherItem, container, selectedItem, item)) {
+                // When we empty the slot, cycle to a different one.
+                if (item.getCount() <= this.getItemCountLimit(item)) {
+                    int updatedSelectedItem = this.storage.scrollSelectedItem(itemStack,
+                            container,
+                            new Vector2i(-1, 0));
+                    this.storage.setSelectedItem(itemStack, updatedSelectedItem);
+                }
+
+                return selectedItem;
+            }
+        }
+
+        return SelectedItem.DEFAULT_SELECTED_ITEM;
+    }
+
+    private boolean canCombineItemsInSlot(ItemStack itemStack, Container container, int slotNum, ItemStack slotItem) {
         return itemStack.isEmpty() || (ItemStack.isSameItemSameComponents(itemStack, slotItem)
                 && itemStack.getCount() < this.storage.getMaxStackSize(container, slotNum, slotItem));
     }

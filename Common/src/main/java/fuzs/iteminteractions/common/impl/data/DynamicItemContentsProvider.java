@@ -4,6 +4,7 @@ import fuzs.iteminteractions.common.api.v1.data.AbstractItemContentsProvider;
 import fuzs.iteminteractions.common.api.v1.world.item.storage.BundleContentsStorage;
 import fuzs.iteminteractions.common.api.v1.world.item.storage.ContainerStorage;
 import fuzs.iteminteractions.common.api.v1.world.item.storage.EnderChestStorage;
+import fuzs.iteminteractions.common.api.v1.world.item.storage.StorageOptions;
 import fuzs.iteminteractions.common.impl.ItemInteractions;
 import fuzs.puzzleslib.common.api.data.v2.core.DataProviderContext;
 import net.minecraft.core.HolderLookup;
@@ -19,13 +20,12 @@ public class DynamicItemContentsProvider extends AbstractItemContentsProvider {
 
     @Override
     public void addItemProviders(HolderLookup.Provider registries) {
-        this.add(new EnderChestStorage(), Items.ENDER_CHEST);
+        this.add(EnderChestStorage.INSTANCE, Items.ENDER_CHEST);
         this.add(registries.lookupOrThrow(Registries.ITEM),
-                new ContainerStorage(9, 3).filterContainerItems(true),
+                new ContainerStorage(9, 3, null, StorageOptions.DEFAULT.setFilterContainerItems()),
                 ItemTags.SHULKER_BOXES);
         this.add(ItemInteractions.id("bundle"),
-                new BundleContentsStorage().filterContainerItems(true),
-                Items.BUNDLE,
-                Items.SADDLE);
+                new BundleContentsStorage(1, StorageOptions.DEFAULT.setFilterContainerItems()),
+                Items.BUNDLE);
     }
 }

@@ -31,7 +31,9 @@ public class ItemDecorationsHelper {
         }
 
         ItemStorageHolder holder = ItemStorageHolder.ofItem(itemStack);
-        if (!holder.isEmpty() && isValidSlot(slotBeingRendered, itemStack, minecraft.player)) {
+        if (holder.isPresentFor(itemStack, minecraft.player) && isValidSlot(slotBeingRendered,
+                itemStack,
+                minecraft.player)) {
             ItemStack itemHeldByCursor = screen.getMenu().getCarried();
             if (itemStack != itemHeldByCursor) {
                 ItemDecorationsType type = ItemDecorationsType.pickType(holder,

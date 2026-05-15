@@ -5,6 +5,8 @@ accessible  method  net/minecraft/client/gui/screens/inventory/AbstractContainer
 accessible  method  net/minecraft/client/gui/screens/inventory/AbstractContainerScreen  showTooltipWithItemInHand   (Lnet/minecraft/world/item/ItemStack;)Z
 accessible  method  net/minecraft/client/gui/screens/inventory/AbstractContainerScreen  getTooltipFromContainerItem (Lnet/minecraft/world/item/ItemStack;)Ljava/util/List;
 accessible  class   net/minecraft/client/gui/screens/inventory/CreativeModeInventoryScreen$CustomCreativeSlot
+accessible  field   net/minecraft/world/item/BundleItem FULL_BAR_COLOR  I
+accessible  field   net/minecraft/world/item/BundleItem BAR_COLOR   I
 accessible  method  net/minecraft/world/item/component/BundleContents   getWeight   (Lnet/minecraft/world/item/ItemInstance;)Lcom/mojang/serialization/DataResult;
 accessible  method  net/minecraft/world/item/component/BundleContents   computeContentWeight    (Ljava/util/List;)Lcom/mojang/serialization/DataResult;
 accessible  field   net/minecraft/server/packs/resources/SimpleJsonResourceReloadListener   ops Lcom/mojang/serialization/DynamicOps;

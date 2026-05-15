@@ -22,28 +22,15 @@ public class ItemHeldByCursorTooltipHandler {
         }
 
         ItemStack itemHeldByCursor = screen.getMenu().getCarried();
-        if (!itemHeldByCursor.isEmpty() && !showTooltipWithItemInHand(screen)) {
-            ItemStorageHolder holder = ItemStorageHolder.ofItem(itemHeldByCursor);
-            if (!holder.isEmpty() && holder.storage().hasContents(itemHeldByCursor)) {
-                guiGraphics.setTooltipForNextFrame(screen.getFont(),
-                        screen.getTooltipFromContainerItem(itemHeldByCursor),
-                        itemHeldByCursor.getTooltipImage(),
-                        mouseX,
-                        mouseY,
-                        itemHeldByCursor.get(DataComponents.TOOLTIP_STYLE));
-            }
-        }
-    }
-
-    /**
-     * @see AbstractContainerScreen#extractTooltip(GuiGraphicsExtractor, int, int)
-     */
-    private static boolean showTooltipWithItemInHand(AbstractContainerScreen<?> screen) {
-        if (screen.hoveredSlot != null && screen.hoveredSlot.hasItem()) {
-            ItemStack item = screen.hoveredSlot.getItem();
-            return screen.showTooltipWithItemInHand(item);
-        } else {
-            return false;
+        ItemStorageHolder holder = ItemStorageHolder.ofItem(itemHeldByCursor);
+        if (holder.isPresentFor(itemHeldByCursor, screen.minecraft.player) && holder.storage()
+                .hasContents(itemHeldByCursor)) {
+            guiGraphics.setTooltipForNextFrame(screen.getFont(),
+                    screen.getTooltipFromContainerItem(itemHeldByCursor),
+                    itemHeldByCursor.getTooltipImage(),
+                    mouseX,
+                    mouseY,
+                    itemHeldByCursor.get(DataComponents.TOOLTIP_STYLE));
         }
     }
 }

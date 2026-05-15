@@ -2,10 +2,6 @@ package fuzs.iteminteractions.common.mixin;
 
 import fuzs.iteminteractions.common.api.v1.world.item.storage.ItemStorageHolder;
 import fuzs.puzzleslib.common.api.util.v1.CommonHelper;
-import net.minecraft.world.entity.SlotAccess;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.ClickAction;
-import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
@@ -18,35 +14,35 @@ import java.util.Optional;
 @Mixin(ItemStack.class)
 abstract class ItemStackMixin {
 
-    @Inject(method = "overrideStackedOnOther", at = @At("HEAD"), cancellable = true)
-    public void overrideStackedOnOther(Slot slot, ClickAction clickAction, Player player, CallbackInfoReturnable<Boolean> callback) {
-        ItemStack itemStack = ItemStack.class.cast(this);
-        ItemStorageHolder holder = ItemStorageHolder.ofItem(itemStack);
-        if (holder.canPlayerInteractWith(itemStack, player)) {
-            callback.setReturnValue(holder.overrideStackedOnOther(itemStack, slot, clickAction, player));
-        }
-    }
-
-    @Inject(method = "overrideOtherStackedOnMe", at = @At("HEAD"), cancellable = true)
-    public void overrideOtherStackedOnMe(ItemStack itemHeldByCursor, Slot slot, ClickAction clickAction, Player player, SlotAccess slotHeldByCursor, CallbackInfoReturnable<Boolean> callback) {
-        ItemStack itemStack = ItemStack.class.cast(this);
-        ItemStorageHolder holder = ItemStorageHolder.ofItem(itemStack);
-        if (holder.canPlayerInteractWith(itemStack, player)) {
-            callback.setReturnValue(holder.overrideOtherStackedOnMe(itemStack,
-                    itemHeldByCursor,
-                    slot,
-                    clickAction,
-                    player,
-                    slotHeldByCursor));
-        }
-    }
-
     @Inject(method = "getTooltipImage", at = @At("HEAD"), cancellable = true)
     public void getTooltipImage(CallbackInfoReturnable<Optional<TooltipComponent>> callback) {
         ItemStack itemStack = ItemStack.class.cast(this);
-        ItemStorageHolder holder = ItemStorageHolder.ofItem(itemStack);
-        Player player = CommonHelper.getClientPlayer();
-        Optional<Optional<TooltipComponent>> tooltipImage = holder.getTooltipImage(itemStack, player);
-        tooltipImage.ifPresent(callback::setReturnValue);
+        ItemStorageHolder.ofItem(itemStack)
+                .getTooltipImage(itemStack, CommonHelper.getClientPlayer())
+                .ifPresent(callback::setReturnValue);
+    }
+
+    @Inject(method = "isBarVisible", at = @At("HEAD"), cancellable = true)
+    public void isBarVisible(CallbackInfoReturnable<Boolean> callback) {
+        ItemStack itemStack = ItemStack.class.cast(this);
+        ItemStorageHolder.ofItem(itemStack)
+                .isBarVisible(itemStack, CommonHelper.getClientPlayer())
+                .ifPresent(callback::setReturnValue);
+    }
+
+    @Inject(method = "getBarWidth", at = @At("HEAD"), cancellable = true)
+    public void getBarWidth(CallbackInfoReturnable<Integer> callback) {
+        ItemStack itemStack = ItemStack.class.cast(this);
+        ItemStorageHolder.ofItem(itemStack)
+                .getBarWidth(itemStack, CommonHelper.getClientPlayer())
+                .ifPresent(callback::setReturnValue);
+    }
+
+    @Inject(method = "getBarColor", at = @At("HEAD"), cancellable = true)
+    public void getBarColor(CallbackInfoReturnable<Integer> callback) {
+        ItemStack itemStack = ItemStack.class.cast(this);
+        ItemStorageHolder.ofItem(itemStack)
+                .getBarColor(itemStack, CommonHelper.getClientPlayer())
+                .ifPresent(callback::setReturnValue);
     }
 }

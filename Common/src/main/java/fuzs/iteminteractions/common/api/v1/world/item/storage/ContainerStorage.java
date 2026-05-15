@@ -21,7 +21,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemContainerContents;
 import org.jspecify.annotations.Nullable;
 
-import java.util.Arrays;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -37,12 +36,13 @@ public class ContainerStorage extends ComponentBackedStorage {
                         (Integer inventoryWidth, Integer inventoryHeight, Optional<DyeBackedColor> dyeColor, StorageOptions storageOptions, InteractionPermissions interactionPermissions, EquipmentSlotGroup equipmentSlots) -> {
                             return new ContainerStorage(inventoryWidth,
                                     inventoryHeight,
-                                    dyeColor.orElse(null)).storageOptions(storageOptions)
-                                    .interactionPermissions(interactionPermissions)
+                                    dyeColor.orElse(null),
+                                    storageOptions).interactionPermissions(interactionPermissions)
                                     .equipmentSlots(equipmentSlots);
                         });
     });
     private static final EquipmentSlot[] EQUIPMENT_SLOTS = EquipmentSlot.values();
+
     final int inventoryWidth;
     final int inventoryHeight;
     @Nullable
@@ -55,6 +55,11 @@ public class ContainerStorage extends ComponentBackedStorage {
     }
 
     public ContainerStorage(int inventoryWidth, int inventoryHeight, @Nullable DyeBackedColor dyeColor) {
+        this(inventoryWidth, inventoryHeight, dyeColor, StorageOptions.DEFAULT);
+    }
+
+    public ContainerStorage(int inventoryWidth, int inventoryHeight, @Nullable DyeBackedColor dyeColor, StorageOptions storageOptions) {
+        super(storageOptions);
         this.inventoryWidth = inventoryWidth;
         this.inventoryHeight = inventoryHeight;
         this.dyeColor = dyeColor;
@@ -70,29 +75,19 @@ public class ContainerStorage extends ComponentBackedStorage {
 
     protected static <T extends ContainerStorage> RecordCodecBuilder<T, Optional<DyeBackedColor>> backgroundColorCodec() {
         return DyeBackedColor.CODEC.optionalFieldOf("background_color")
-                .forGetter((T provider) -> Optional.ofNullable(provider.dyeColor));
+                .forGetter((T storage) -> Optional.ofNullable(storage.dyeColor));
     }
 
     protected static <T extends ContainerStorage> RecordCodecBuilder<T, InteractionPermissions> interactionPermissionsCodec() {
         return InteractionPermissions.CODEC.fieldOf("interaction_permissions")
                 .orElse(InteractionPermissions.ALWAYS)
-                .forGetter(provider -> provider.interactionPermissions);
+                .forGetter(ContainerStorage::getInteractionPermissions);
     }
 
     protected static <T extends ContainerStorage> RecordCodecBuilder<T, EquipmentSlotGroup> equipmentSlotsCodec() {
         return EquipmentSlotGroup.CODEC.fieldOf("equipment_slots")
                 .orElse(EquipmentSlotGroup.ANY)
-                .forGetter(provider -> provider.equipmentSlots);
-    }
-
-    @Override
-    protected ContainerStorage storageOptions(StorageOptions storageOptions) {
-        return (ContainerStorage) super.storageOptions(storageOptions);
-    }
-
-    @Override
-    public ContainerStorage filterContainerItems(boolean filterContainerItems) {
-        return (ContainerStorage) super.filterContainerItems(filterContainerItems);
+                .forGetter(ContainerStorage::getEquipmentSlots);
     }
 
     public ContainerStorage interactionPermissions(InteractionPermissions interactionPermissions) {
@@ -115,16 +110,24 @@ public class ContainerStorage extends ComponentBackedStorage {
         return this.getInventoryHeight();
     }
 
-    protected int getInventoryWidth() {
+    public int getInventoryWidth() {
         return this.inventoryWidth;
     }
 
-    protected int getInventoryHeight() {
+    public int getInventoryHeight() {
         return this.inventoryHeight;
     }
 
     public int getInventorySize() {
         return this.getInventoryWidth() * this.getInventoryHeight();
+    }
+
+    public InteractionPermissions getInteractionPermissions() {
+        return this.interactionPermissions;
+    }
+
+    public EquipmentSlotGroup getEquipmentSlots() {
+        return this.equipmentSlots;
     }
 
     @Override
@@ -135,16 +138,38 @@ public class ContainerStorage extends ComponentBackedStorage {
 
     @Override
     public boolean canPlayerInteractWith(ItemStack itemStack, Player player) {
-        return super.canPlayerInteractWith(itemStack, player) && this.interactionPermissions.allowsPlayerInteractions(
-                player) && (player.getAbilities().instabuild || this.equipmentSlots == EquipmentSlotGroup.ANY
-                || Arrays.stream(EQUIPMENT_SLOTS)
-                .filter(this.equipmentSlots::test)
-                .map(player::getItemBySlot)
-                .anyMatch((ItemStack item) -> item == itemStack));
+        if (!itemStack.has(DataComponents.CONTAINER)) {
+            return false;
+        } else if (!super.canPlayerInteractWith(itemStack, player)) {
+            return false;
+        } else if (!this.interactionPermissions.allowsPlayerInteractions(player)) {
+            return false;
+        } else if (!this.matchesRequiredEquipmentSlots(itemStack, player)) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    private boolean matchesRequiredEquipmentSlots(ItemStack itemStack, Player player) {
+        if (player.getAbilities().instabuild || this.equipmentSlots == EquipmentSlotGroup.ANY) {
+            return true;
+        } else {
+            for (EquipmentSlot slot : EQUIPMENT_SLOTS) {
+                if (this.equipmentSlots.test(slot)) {
+                    ItemStack itemInSlot = player.getItemBySlot(slot);
+                    if (itemStack == itemInSlot) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
     }
 
     @Override
-    public SimpleContainer getItemContainer(ItemStack itemStack, Player player, boolean isMutable) {
+    public SimpleContainer getItemContainer(ItemStack itemStack, boolean isMutable) {
         NonNullList<ItemStack> itemList = NonNullList.withSize(this.getInventorySize(), ItemStack.EMPTY);
         itemStack.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).copyInto(itemList);
         return ContainerMenuHelper.createListBackedContainer(itemList, (Container container) -> {

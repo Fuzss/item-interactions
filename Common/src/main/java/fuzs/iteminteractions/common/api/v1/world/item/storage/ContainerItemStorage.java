@@ -3,11 +3,11 @@ package fuzs.iteminteractions.common.api.v1.world.item.storage;
 import fuzs.iteminteractions.common.impl.init.ModRegistry;
 import fuzs.iteminteractions.common.impl.world.inventory.ItemSlot;
 import fuzs.iteminteractions.common.impl.world.item.component.SelectedItem;
-import fuzs.iteminteractions.common.impl.world.item.container.ItemInteractionHelper;
 import fuzs.iteminteractions.common.impl.world.item.container.ItemStackingContext;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
+import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Player;
@@ -85,23 +85,38 @@ public interface ContainerItemStorage extends ItemStorage {
         return SelectedItem.DEFAULT_SELECTED_ITEM;
     }
 
+    @Override
+    default boolean canPlayerInteractWith(ItemStack itemStack, Player player) {
+        return itemStack.getCount() == 1;
+    }
+
+    @Override
+    default boolean isItemAllowedInContainer(ItemStack stackToAdd) {
+        return true;
+    }
+
+    @Override
+    default Container getItemContainer(ItemStack itemStack, Player player) {
+        return this.getItemContainer(itemStack, player, false);
+    }
+
+    SimpleContainer getItemContainer(ItemStack itemStack, Player player, boolean isMutable);
+
+    @Override
+    default boolean canAddItem(ItemStack itemStack, ItemStack stackToAdd, Player player) {
+        return this.getItemContainer(itemStack, player, false).canAddItem(stackToAdd);
+    }
+
+    @Override
+    default int getAcceptableItemCount(ItemStack itemStack, ItemStack stackToAdd, Player player) {
+        return stackToAdd.getCount();
+    }
+
     /**
      * @see net.minecraft.world.item.BundleItem#overrideStackedOnOther(ItemStack, Slot, ClickAction, Player)
      */
     @Override
     default boolean overrideStackedOnOther(ItemStorageHolder holder, ItemStack itemStack, Slot slot, ClickAction clickAction, Player player) {
-        if (false) {
-            return ItemInteractionHelper.overrideStackedOnOther(itemStack,
-                    () -> holder.getMutableContainer(itemStack, player),
-                    slot,
-                    clickAction,
-                    player,
-                    (ItemStack item) -> {
-                        return holder.getAcceptableItemCount(itemStack, item, player);
-                    },
-                    Container::getMaxStackSize);
-        }
-
         ItemStackingContext context = new ItemStackingContext(holder, this, player);
         ItemStack otherItem = slot.getItem();
         if (clickAction == ClickAction.PRIMARY && !otherItem.isEmpty()) {
@@ -142,21 +157,6 @@ public interface ContainerItemStorage extends ItemStorage {
      */
     @Override
     default boolean overrideOtherStackedOnMe(ItemStorageHolder holder, ItemStack itemStack, ItemStack itemHeldByCursor, Slot slot, ClickAction clickAction, Player player, SlotAccess slotHeldByCursor) {
-        if (false) {
-            return ItemInteractionHelper.overrideOtherStackedOnMe(itemStack,
-                    () -> holder.getMutableContainer(itemStack, player),
-                    itemHeldByCursor,
-                    slot,
-                    clickAction,
-                    player,
-                    slotHeldByCursor,
-                    (ItemStack item) -> {
-                        return this.getAcceptableItemCount(itemStack, item, player);
-                    },
-                    Container::getMaxStackSize,
-                    () -> holder.storage().toggleSelectedItem(itemStack, SelectedItem.DEFAULT_SELECTED_ITEM));
-        }
-
         if (clickAction == ClickAction.PRIMARY && itemHeldByCursor.isEmpty()) {
             if (!this.extractSingleItemOnly(player)) {
                 this.toggleSelectedItem(itemStack, SelectedItem.DEFAULT_SELECTED_ITEM);

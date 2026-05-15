@@ -12,6 +12,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
+import java.util.OptionalInt;
 
 /**
  * A holder class for individual {@link ItemStorage} instances, mainly to include additional checks when calling various
@@ -58,14 +59,21 @@ public record ItemStorageHolder(ItemStorage storage) {
     }
 
     /**
+     * @return is the holder empty
+     */
+    public boolean isEmpty() {
+        return this.storage == VoidStorage.INSTANCE;
+    }
+
+    /**
      * Does this provider support item inventory interactions (extracting and adding items) on the given
      * <code>containterStack</code>.
      *
      * @param itemStack the container stack
-     * @param player    the player performing the interaction
+     * @param player    the player
      * @return are inventory interactions allowed (is a container present on this item)
      */
-    public boolean canPlayerInteractWith(ItemStack itemStack, Player player) {
+    public boolean isPresentFor(ItemStack itemStack, Player player) {
         return this.storage().canPlayerInteractWith(itemStack, player);
     }
 
@@ -79,7 +87,7 @@ public record ItemStorageHolder(ItemStorage storage) {
      * @return can the item be added
      */
     public boolean canAcceptItem(ItemStack itemStack, ItemStack stackToAdd, Player player) {
-        return !stackToAdd.isEmpty() && this.canPlayerInteractWith(itemStack, player) && this.storage()
+        return !stackToAdd.isEmpty() && this.isPresentFor(itemStack, player) && this.storage()
                 .isItemAllowedInContainer(stackToAdd);
     }
 
@@ -107,7 +115,7 @@ public record ItemStorageHolder(ItemStorage storage) {
      * @return is any item of the same type as <code>stackToAdd</code> already in the container
      */
     public boolean hasAnyOf(ItemStack itemStack, ItemStack stackToAdd, Player player) {
-        return this.canAcceptItem(itemStack, stackToAdd, player) && this.getContainerView(itemStack, player)
+        return this.canAcceptItem(itemStack, stackToAdd, player) && this.getItemContainer(itemStack, player)
                 .hasAnyMatching((ItemStack item) -> ItemStack.isSameItem(item, stackToAdd));
     }
 
@@ -135,42 +143,26 @@ public record ItemStorageHolder(ItemStorage storage) {
      * @param player    player involved in the interaction
      * @return the provided container
      */
-    public Container getContainerView(ItemStack itemStack, Player player) {
-        return this.storage().getItemContainer(itemStack, player, false);
+    public Container getItemContainer(ItemStack itemStack, Player player) {
+        return this.storage().getItemContainer(itemStack, player);
     }
 
-    /**
-     * Get the container implementation provided by <code>containerStack</code> as a {@link SimpleContainer}.
-     * <p>
-     * Attaches a saving listener to the container.
-     *
-     * @param itemStack item stack providing the container
-     * @param player    player involved in the interaction
-     * @return the provided container
-     */
-    public Container getMutableContainer(ItemStack itemStack, Player player) {
-        return this.storage().getItemContainer(itemStack, player, true);
+    public Optional<Optional<TooltipComponent>> getTooltipImage(ItemStack itemStack, Player player) {
+        return this.isPresentFor(itemStack, player) ? this.storage().getTooltipImage(itemStack, player) :
+                Optional.empty();
     }
 
-    /**
-     * The image tooltip provided by the item stack.
-     *
-     * @param containerStack the item stack providing the container to show a tooltip for
-     * @param player         player involved in the interaction
-     * @return the image tooltip provided by the item stack.
-     */
-    public Optional<Optional<TooltipComponent>> getTooltipImage(ItemStack containerStack, Player player) {
-        if (this.storage().canProvideTooltipImage(containerStack, player)) {
-            return Optional.of(this.storage().getTooltipImage(containerStack, player));
-        } else {
-            return Optional.empty();
-        }
+    public Optional<Boolean> isBarVisible(ItemStack itemStack, Player player) {
+        return this.isPresentFor(itemStack, player) ? this.storage().isBarVisible(itemStack, player) : Optional.empty();
     }
 
-    /**
-     * @return is this the empty behavior singleton instance
-     */
-    public boolean isEmpty() {
-        return this.storage == VoidStorage.INSTANCE;
+    public OptionalInt getBarWidth(ItemStack itemStack, Player player) {
+        return this.isPresentFor(itemStack, player) ? this.storage().getBarWidth(itemStack, player) :
+                OptionalInt.empty();
+    }
+
+    public OptionalInt getBarColor(ItemStack itemStack, Player player) {
+        return this.isPresentFor(itemStack, player) ? this.storage().getBarColor(itemStack, player) :
+                OptionalInt.empty();
     }
 }

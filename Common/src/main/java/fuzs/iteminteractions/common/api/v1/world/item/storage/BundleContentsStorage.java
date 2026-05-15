@@ -17,17 +17,18 @@ import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.BundleItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.BundleContents;
 import org.apache.commons.lang3.math.Fraction;
 
+import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.stream.Stream;
 
 public class BundleContentsStorage extends ComponentBackedStorage {
     public static final MapCodec<BundleContentsStorage> CODEC = RecordCodecBuilder.mapCodec(instance -> {
         return instance.group(capacityMultiplierCodec(), itemContentsCodec())
-                .apply(instance, (Integer capacityMultiplier, StorageOptions storageOptions) -> {
-                    return new BundleContentsStorage(capacityMultiplier).storageOptions(storageOptions);
-                });
+                .apply(instance, BundleContentsStorage::new);
     });
 
     final int capacityMultiplier;
@@ -37,22 +38,17 @@ public class BundleContentsStorage extends ComponentBackedStorage {
     }
 
     public BundleContentsStorage(int capacityMultiplier) {
+        this(capacityMultiplier, StorageOptions.DEFAULT);
+    }
+
+    public BundleContentsStorage(int capacityMultiplier, StorageOptions storageOptions) {
+        super(storageOptions);
         this.capacityMultiplier = capacityMultiplier;
     }
 
     protected static <T extends BundleContentsStorage> RecordCodecBuilder<T, Integer> capacityMultiplierCodec() {
         return ExtraCodecs.POSITIVE_INT.fieldOf("capacity_multiplier")
-                .forGetter(provider -> provider.capacityMultiplier);
-    }
-
-    @Override
-    protected BundleContentsStorage storageOptions(StorageOptions storageOptions) {
-        return (BundleContentsStorage) super.storageOptions(storageOptions);
-    }
-
-    @Override
-    public BundleContentsStorage filterContainerItems(boolean filterContainerItems) {
-        return (BundleContentsStorage) super.filterContainerItems(filterContainerItems);
+                .forGetter((T storage) -> storage.capacityMultiplier);
     }
 
     public Fraction getCapacityMultiplier(ItemStack itemStack) {
@@ -65,7 +61,12 @@ public class BundleContentsStorage extends ComponentBackedStorage {
     }
 
     @Override
-    public SimpleContainer getItemContainer(ItemStack itemStack, Player player, boolean isMutable) {
+    public boolean canPlayerInteractWith(ItemStack itemStack, Player player) {
+        return itemStack.has(DataComponents.BUNDLE_CONTENTS) && super.canPlayerInteractWith(itemStack, player);
+    }
+
+    @Override
+    public SimpleContainer getItemContainer(ItemStack itemStack, boolean isMutable) {
         BundleContents contents = itemStack.getOrDefault(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY);
         // TODO make this add in front again
         // Add one additional slot at the front, so we can add items in the inventory.
@@ -119,14 +120,14 @@ public class BundleContentsStorage extends ComponentBackedStorage {
     }
 
     @Override
-    public boolean canProvideTooltipImage(ItemStack itemStack, Player player) {
-        return true;
-    }
-
-    @Override
     public void toggleSelectedItem(ItemStack itemStack, int selectedItem) {
         super.toggleSelectedItem(itemStack, selectedItem);
         BundleItem.toggleSelectedItem(itemStack, selectedItem);
+    }
+
+    @Override
+    public Optional<Optional<TooltipComponent>> getTooltipImage(ItemStack itemStack, Player player) {
+        return Optional.of(Optional.of(this.createTooltipImageComponent(itemStack, player, NonNullList.create())));
     }
 
     @Override
@@ -138,8 +139,18 @@ public class BundleContentsStorage extends ComponentBackedStorage {
     }
 
     @Override
-    public NonNullList<ItemStack> getTooltipContents(ItemStack itemStack, Player player) {
-        return NonNullList.create();
+    public Optional<Boolean> isBarVisible(ItemStack itemStack, Player player) {
+        return Optional.of(Items.BUNDLE.isBarVisible(itemStack));
+    }
+
+    @Override
+    public OptionalInt getBarWidth(ItemStack itemStack, Player player) {
+        return OptionalInt.of(Items.BUNDLE.getBarWidth(itemStack));
+    }
+
+    @Override
+    public OptionalInt getBarColor(ItemStack itemStack, Player player) {
+        return OptionalInt.of(Items.BUNDLE.getBarColor(itemStack));
     }
 
     /**

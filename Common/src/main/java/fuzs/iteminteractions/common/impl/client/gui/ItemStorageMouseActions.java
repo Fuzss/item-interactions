@@ -112,7 +112,7 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
     }
 
     private void scrollSelectedItem(ItemStorageHolder holder, OptionalInt slotIndex, ItemStack itemStack, Vector2ic scrollXY) {
-        Container container = holder.getContainerView(itemStack, this.minecraft.player);
+        Container container = holder.getItemContainer(itemStack, this.minecraft.player);
         int updatedSelectedItem = holder.storage().scrollSelectedItem(itemStack, container, scrollXY);
         int previousSelectedItem = holder.storage().getSelectedItem(itemStack);
         if (previousSelectedItem != updatedSelectedItem) {

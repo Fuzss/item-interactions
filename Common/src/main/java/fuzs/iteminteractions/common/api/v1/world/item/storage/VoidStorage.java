@@ -22,6 +22,10 @@ public class VoidStorage implements ItemStorage {
     public static final ItemStorage INSTANCE = new VoidStorage();
     public static final MapCodec<ItemStorage> CODEC = MapCodec.unit(INSTANCE);
 
+    protected VoidStorage() {
+        // NO-OP
+    }
+
     @Override
     public boolean canPlayerInteractWith(ItemStack itemStack, Player player) {
         return false;
@@ -53,7 +57,7 @@ public class VoidStorage implements ItemStorage {
     }
 
     @Override
-    public SimpleContainer getItemContainer(ItemStack itemStack, Player player, boolean isMutable) {
+    public Container getItemContainer(ItemStack itemStack, Player player) {
         return new SimpleContainer();
     }
 
@@ -63,12 +67,7 @@ public class VoidStorage implements ItemStorage {
     }
 
     @Override
-    public boolean canProvideTooltipImage(ItemStack itemStack, Player player) {
-        return false;
-    }
-
-    @Override
-    public Optional<TooltipComponent> getTooltipImage(ItemStack itemStack, Player player) {
+    public Optional<Optional<TooltipComponent>> getTooltipImage(ItemStack itemStack, Player player) {
         return Optional.empty();
     }
 

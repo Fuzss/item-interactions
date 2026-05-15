@@ -12,12 +12,22 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
 
-public class EnderChestStorage implements ItemStorageWithTooltip {
+public class EnderChestStorage implements VisualItemStorage {
+    public static final ItemStorage INSTANCE = new EnderChestStorage();
+    public static final MapCodec<ItemStorage> CODEC = MapCodec.unit(INSTANCE);
     /**
      * Pretty ender color from the <a href="https://www.curseforge.com/minecraft/mc-mods/tinted">Tinted</a> mod.
      */
     private static final DyeBackedColor DEFAULT_ENDER_CHEST_COLOR = DyeBackedColor.fromRgb(0X2A6255);
-    public static final MapCodec<EnderChestStorage> CODEC = MapCodec.unit(EnderChestStorage::new);
+
+    protected EnderChestStorage() {
+        // NO-OP
+    }
+
+    @Override
+    public boolean hasContents(ItemStack itemStack) {
+        return true;
+    }
 
     @Override
     public SimpleContainer getItemContainer(ItemStack itemStack, Player player, boolean isMutable) {

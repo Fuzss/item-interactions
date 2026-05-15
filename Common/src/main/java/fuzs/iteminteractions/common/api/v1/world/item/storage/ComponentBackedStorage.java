@@ -1,23 +1,20 @@
 package fuzs.iteminteractions.common.api.v1.world.item.storage;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
-public abstract class ComponentBackedStorage implements ItemStorageWithTooltip {
-    StorageOptions storageOptions = StorageOptions.EMPTY;
+public abstract class ComponentBackedStorage implements VisualItemStorage {
+    final StorageOptions storageOptions;
+
+    public ComponentBackedStorage(StorageOptions storageOptions) {
+        this.storageOptions = storageOptions;
+    }
 
     protected static <T extends ComponentBackedStorage> RecordCodecBuilder<T, StorageOptions> itemContentsCodec() {
-        return StorageOptions.CODEC.lenientOptionalFieldOf("item_contents", StorageOptions.EMPTY)
+        return StorageOptions.CODEC.lenientOptionalFieldOf("storage_options", StorageOptions.DEFAULT)
                 .forGetter((T provider) -> provider.storageOptions);
-    }
-
-    protected ComponentBackedStorage storageOptions(StorageOptions storageOptions) {
-        this.storageOptions = storageOptions;
-        return this;
-    }
-
-    public ComponentBackedStorage filterContainerItems(boolean filterContainerItems) {
-        return this.storageOptions(this.storageOptions.filterContainerItems(filterContainerItems));
     }
 
     @Override
@@ -27,4 +24,11 @@ public abstract class ComponentBackedStorage implements ItemStorageWithTooltip {
     public boolean isItemAllowedInContainer(ItemStack stackToAdd) {
         return this.storageOptions.canFitInsideContainerItem(stackToAdd);
     }
+
+    @Override
+    public final SimpleContainer getItemContainer(ItemStack itemStack, Player player, boolean isMutable) {
+        return this.getItemContainer(itemStack, isMutable);
+    }
+
+    public abstract SimpleContainer getItemContainer(ItemStack itemStack, boolean isMutable);
 }

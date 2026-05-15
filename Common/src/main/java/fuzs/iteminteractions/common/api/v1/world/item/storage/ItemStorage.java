@@ -26,6 +26,7 @@ import org.joml.Vector2ic;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalInt;
 
 /**
  * An interface that when implemented, represents a provider for any item to enable bundle-like inventory item
@@ -72,9 +73,7 @@ public interface ItemStorage {
      * @param player    the player performing the interaction
      * @return are inventory interactions allowed?
      */
-    default boolean canPlayerInteractWith(ItemStack itemStack, Player player) {
-        return itemStack.getCount() == 1;
-    }
+    boolean canPlayerInteractWith(ItemStack itemStack, Player player);
 
     /**
      * does the item stack have data for stored items
@@ -84,9 +83,7 @@ public interface ItemStorage {
      * @param itemStack the container stack
      * @return is the item stack tag with stored item data present
      */
-    default boolean hasContents(ItemStack itemStack) {
-        return true;
-    }
+    boolean hasContents(ItemStack itemStack);
 
     boolean overrideStackedOnOther(ItemStorageHolder holder, ItemStack itemStack, Slot slot, ClickAction clickAction, Player player);
 
@@ -100,22 +97,7 @@ public interface ItemStorage {
      * @param stackToAdd the stack to be added to the container
      * @return is <code>stack</code> allowed to be added to the container
      */
-    default boolean isItemAllowedInContainer(ItemStack stackToAdd) {
-        return true;
-    }
-
-    /**
-     * Is there enough space in the container provided by <code>containerStack</code> to add <code>stack</code> (not
-     * necessarily the full stack).
-     *
-     * @param itemStack  the item stack providing the container to add <code>stack</code> to
-     * @param stackToAdd the stack to be added to the container
-     * @param player     the player interacting with both items
-     * @return is adding any portion of <code>stackToAdd</code> to the container possible
-     */
-    default boolean canAddItem(ItemStack itemStack, ItemStack stackToAdd, Player player) {
-        return this.getItemContainer(itemStack, player, false).canAddItem(stackToAdd);
-    }
+    boolean isItemAllowedInContainer(ItemStack stackToAdd);
 
     /**
      * Get the container implementation provided by <code>containerStack</code> as a {@link SimpleContainer}, must not
@@ -127,7 +109,18 @@ public interface ItemStorage {
      *                  container e.g. for rendering a tooltip)
      * @return the provided container
      */
-    SimpleContainer getItemContainer(ItemStack itemStack, Player player, boolean isMutable);
+    Container getItemContainer(ItemStack itemStack, Player player);
+
+    /**
+     * Is there enough space in the container provided by <code>containerStack</code> to add <code>stack</code> (not
+     * necessarily the full stack).
+     *
+     * @param itemStack  the item stack providing the container to add <code>stack</code> to
+     * @param stackToAdd the stack to be added to the container
+     * @param player     the player interacting with both items
+     * @return is adding any portion of <code>stackToAdd</code> to the container possible
+     */
+    boolean canAddItem(ItemStack itemStack, ItemStack stackToAdd, Player player);
 
     /**
      * How much space is available in the container provided by <code>containerStack</code> to add
@@ -143,30 +136,28 @@ public interface ItemStorage {
      * @param player     the player interacting with both item stacks
      * @return the portion of <code>stackToAdd</code> that can be added to the container
      */
-    default int getAcceptableItemCount(ItemStack itemStack, ItemStack stackToAdd, Player player) {
-        return stackToAdd.getCount();
-    }
-
-    /**
-     * Does this provider support an image tooltip.
-     * <p>
-     * This is required despite {@link #getTooltipImage} providing an {@link Optional} when overriding the tooltip image
-     * for items which normally provide their own (like bundles).
-     *
-     * @param containerStack the item stack providing the container to show a tooltip for
-     * @param player         player involved in the interaction
-     * @return does <code>containerStack</code> provide a tooltip image
-     */
-    boolean canProvideTooltipImage(ItemStack containerStack, Player player);
+    int getAcceptableItemCount(ItemStack itemStack, ItemStack stackToAdd, Player player);
 
     /**
      * The image tooltip provided by the item stack.
      *
-     * @param containerStack the item stack providing the container to show a tooltip for
-     * @param player         player involved in the interaction
-     * @return the image tooltip provided by the item stack.
+     * @param itemStack the item stack providing the item storage
+     * @param player    the player
+     * @return the image tooltip provided by the item stack
      */
-    Optional<TooltipComponent> getTooltipImage(ItemStack containerStack, Player player);
+    Optional<Optional<TooltipComponent>> getTooltipImage(ItemStack itemStack, Player player);
+
+    default Optional<Boolean> isBarVisible(ItemStack itemStack, Player player) {
+        return Optional.empty();
+    }
+
+    default OptionalInt getBarWidth(ItemStack itemStack, Player player) {
+        return OptionalInt.empty();
+    }
+
+    default OptionalInt getBarColor(ItemStack itemStack, Player player) {
+        return OptionalInt.empty();
+    }
 
     int getSelectedItem(ItemStack itemStack);
 
