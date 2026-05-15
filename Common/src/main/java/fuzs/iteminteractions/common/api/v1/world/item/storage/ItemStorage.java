@@ -14,7 +14,10 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.ClickAction;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -85,16 +88,9 @@ public interface ItemStorage {
         return true;
     }
 
-    /**
-     * Used to synchronize item storage changes.
-     *
-     * @param itemStack the item stack providing the storage
-     * @param player    the player performing the interaction
-     * @see net.minecraft.world.item.BundleItem#broadcastChangesOnContainerMenu(Player)
-     */
-    default void broadcastChangesOnContainerMenu(ItemStack itemStack, Player player) {
-        player.containerMenu.slotsChanged(player.getInventory());
-    }
+    boolean overrideStackedOnOther(ItemStorageHolder holder, ItemStack itemStack, Slot slot, ClickAction clickAction, Player player);
+
+    boolean overrideOtherStackedOnMe(ItemStorageHolder holder, ItemStack itemStack, ItemStack itemHeldByCursor, Slot slot, ClickAction clickAction, Player player, SlotAccess slotHeldByCursor);
 
     /**
      * Is <code>stackToAdd</code> allowed to be added to the container supplied by <code>containerStack</code>.
@@ -111,9 +107,6 @@ public interface ItemStorage {
     /**
      * Is there enough space in the container provided by <code>containerStack</code> to add <code>stack</code> (not
      * necessarily the full stack).
-     * <p>
-     * Before this is called {@link #canPlayerInteractWith(ItemStack, Player)} and
-     * {@link #isItemAllowedInContainer(ItemStack)} are checked.
      *
      * @param itemStack  the item stack providing the container to add <code>stack</code> to
      * @param stackToAdd the stack to be added to the container

@@ -191,12 +191,14 @@ public class MouseDraggingHandler {
     }
 
     private enum ContainerDragType {
-        INSERT(SoundEvents.BUNDLE_INSERT),
-        REMOVE(SoundEvents.BUNDLE_REMOVE_ONE);
+        INSERT(InputConstants.MOUSE_BUTTON_LEFT, SoundEvents.BUNDLE_INSERT),
+        REMOVE(InputConstants.MOUSE_BUTTON_RIGHT, SoundEvents.BUNDLE_REMOVE_ONE);
 
+        public final int buttonNum;
         public final SoundEvent sound;
 
-        ContainerDragType(SoundEvent sound) {
+        ContainerDragType(int buttonNum, SoundEvent sound) {
+            this.buttonNum = buttonNum;
             this.sound = sound;
         }
     }

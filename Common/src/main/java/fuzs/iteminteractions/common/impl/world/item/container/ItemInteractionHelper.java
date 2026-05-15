@@ -20,8 +20,7 @@ public class ItemInteractionHelper {
 
     public static boolean overrideStackedOnOther(ItemStack itemStack, Supplier<? extends Container> containerSupplier, Slot slot, ClickAction clickAction, Player player, ToIntFunction<ItemStack> acceptableItemCount, ToIntBiFunction<Container, ItemStack> maxStackSize) {
         ItemStack itemInHoveredSlot = slot.getItem();
-        boolean extractSingleItemOnly = ModRegistry.MOVE_SINGLE_ITEM_ATTACHMENT_TYPE.getOrDefault(player,
-                Boolean.FALSE);
+        boolean extractSingleItemOnly = ModRegistry.MOVE_SINGLE_ITEM_ATTACHMENT_TYPE.has(player);
         if (clickAction == ClickAction.SECONDARY && (itemInHoveredSlot.isEmpty() || extractSingleItemOnly)) {
             BiConsumer<ItemStack, Integer> addToSlot = (ItemStack stackToAdd, Integer index) -> {
                 addItem(containerSupplier,
@@ -60,8 +59,7 @@ public class ItemInteractionHelper {
         if (!slot.allowModification(player)) {
             return false;
         } else {
-            boolean extractSingleItemOnly = ModRegistry.MOVE_SINGLE_ITEM_ATTACHMENT_TYPE.getOrDefault(player,
-                    Boolean.FALSE);
+            boolean extractSingleItemOnly = ModRegistry.MOVE_SINGLE_ITEM_ATTACHMENT_TYPE.has(player);
             if (clickAction == ClickAction.SECONDARY && (itemHeldByCursor.isEmpty() || extractSingleItemOnly)) {
                 BiConsumer<ItemStack, Integer> addToSlot = (ItemStack stackToAdd, Integer index) -> {
                     ItemStack stackInSlot = slotAccess.get();
@@ -180,9 +178,7 @@ public class ItemInteractionHelper {
             if (!item.isEmpty() && itemFilter.test(item)) {
                 // When we empty the slot, cycle to a different one.
                 if (item.getCount() <= amountToRemove.applyAsInt(item)) {
-                    int updatedSelectedItem = ContainerSlotHelper.scrollSelectedItem(container,
-                            selectedItem,
-                            -1);
+                    int updatedSelectedItem = ContainerSlotHelper.scrollSelectedItem(container, selectedItem, -1);
                     ContainerSlotHelper.setSelectedItem(itemStack, updatedSelectedItem);
                 }
 

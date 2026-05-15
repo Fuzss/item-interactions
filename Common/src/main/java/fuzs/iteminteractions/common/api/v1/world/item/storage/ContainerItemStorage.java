@@ -3,26 +3,28 @@ package fuzs.iteminteractions.common.api.v1.world.item.storage;
 import fuzs.iteminteractions.common.impl.init.ModRegistry;
 import fuzs.iteminteractions.common.impl.world.inventory.ItemSlot;
 import fuzs.iteminteractions.common.impl.world.item.component.SelectedItem;
-import it.unimi.dsi.fastutil.ints.IntLinkedOpenHashSet;
-import it.unimi.dsi.fastutil.ints.IntSet;
-import it.unimi.dsi.fastutil.ints.IntSets;
+import fuzs.iteminteractions.common.impl.world.item.container.ItemInteractionHelper;
+import fuzs.iteminteractions.common.impl.world.item.container.ItemStackingContext;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.ClickAction;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import org.joml.Vector2i;
 import org.joml.Vector2ic;
-
-import java.util.function.Predicate;
-import java.util.function.ToIntFunction;
 
 public interface ContainerItemStorage extends ItemStorage {
 
     int getGridWidth(int itemCount);
 
     int getGridHeight(int itemCount);
+
+    default boolean extractSingleItemOnly(Player player) {
+        return ModRegistry.MOVE_SINGLE_ITEM_ATTACHMENT_TYPE.has(player);
+    }
 
     @Override
     default int getSelectedItem(ItemStack itemStack) {
@@ -83,108 +85,138 @@ public interface ContainerItemStorage extends ItemStorage {
         return SelectedItem.DEFAULT_SELECTED_ITEM;
     }
 
-    private int pickSelectedSlot(Container container, ItemStack itemStack, Predicate<ItemStack> itemFilter, ToIntFunction<ItemStack> amountToRemove) {
-        int selectedItem = this.getSelectedItem(itemStack);
-        if (selectedItem >= 0 && selectedItem < container.getContainerSize()) {
-            ItemStack item = container.getItem(selectedItem);
-            if (!item.isEmpty() && itemFilter.test(item)) {
-                // When we empty the slot, cycle to a different one.
-                if (item.getCount() <= amountToRemove.applyAsInt(item)) {
-                    int updatedSelectedItem = this.scrollSelectedItem(itemStack, container, new Vector2i(-1, 0));
-                    this.setSelectedItem(itemStack, updatedSelectedItem);
-                }
-
-                return selectedItem;
-            }
+    /**
+     * @see net.minecraft.world.item.BundleItem#overrideStackedOnOther(ItemStack, Slot, ClickAction, Player)
+     */
+    @Override
+    default boolean overrideStackedOnOther(ItemStorageHolder holder, ItemStack itemStack, Slot slot, ClickAction clickAction, Player player) {
+        if (false) {
+            return ItemInteractionHelper.overrideStackedOnOther(itemStack,
+                    () -> holder.getMutableContainer(itemStack, player),
+                    slot,
+                    clickAction,
+                    player,
+                    (ItemStack item) -> {
+                        return holder.getAcceptableItemCount(itemStack, item, player);
+                    },
+                    Container::getMaxStackSize);
         }
 
-        for (int slotNum = container.getContainerSize() - 1; slotNum >= 0; slotNum--) {
-            ItemStack item = container.getItem(slotNum);
-            if (!item.isEmpty() && itemFilter.test(item)) {
-                // When we empty the slot, cycle to a different one.
-                if (item.getCount() <= amountToRemove.applyAsInt(item)) {
-                    this.setSelectedItem(itemStack, SelectedItem.DEFAULT_SELECTED_ITEM);
+        ItemStackingContext context = new ItemStackingContext(holder, this, player);
+        ItemStack otherItem = slot.getItem();
+        if (clickAction == ClickAction.PRIMARY && !otherItem.isEmpty()) {
+            otherItem = slot.safeTake(otherItem.getCount(), otherItem.getCount(), player);
+            int transferredCount = context.tryInsert(itemStack, otherItem);
+            otherItem.shrink(transferredCount);
+            if (!this.extractSingleItemOnly(player)) {
+                if (transferredCount > 0) {
+                    this.playInsertSound(player);
                 } else {
-                    // Otherwise, when not empty, set this as the newly selected item.
-                    this.setSelectedItem(itemStack, slotNum);
+                    this.playInsertFailSound(player);
                 }
-
-                return slotNum;
             }
-        }
 
-        return SelectedItem.DEFAULT_SELECTED_ITEM;
-    }
+            slot.safeInsert(otherItem);
+            this.broadcastChangesOnContainerMenu(itemStack, player);
+            return true;
+        } else if (clickAction == ClickAction.SECONDARY && (otherItem.isEmpty()
+                || this.extractSingleItemOnly(player))) {
+            ItemSlot itemSlot = context.removeOne(itemStack, otherItem);
+            if (!itemSlot.item().isEmpty()) {
+                context.tryInsert(itemStack, slot.safeInsert(itemSlot.item()), itemSlot.slotNum());
+                if (!this.extractSingleItemOnly(player)) {
+                    this.playRemoveOneSound(player);
+                }
+            }
 
-    /**
-     * @see net.minecraft.world.SimpleContainer#addItem(ItemStack)
-     */
-    default ItemSlot addItem(Container container, ItemStack itemStack, int prioritizedSlot) {
-        ItemStack remainingItems = itemStack.copy();
-        int slotNum = this.moveItemToOccupiedSlotsWithSameType(container, remainingItems, prioritizedSlot);
-        if (remainingItems.isEmpty()) {
-            return new ItemSlot(slotNum);
+            this.broadcastChangesOnContainerMenu(itemStack, player);
+            return true;
         } else {
-            slotNum = this.moveItemToEmptySlots(container, remainingItems, slotNum);
-            if (remainingItems.isEmpty()) {
-                return new ItemSlot(slotNum);
+            return false;
+        }
+    }
+
+    /**
+     * @see net.minecraft.world.item.BundleItem#overrideOtherStackedOnMe(ItemStack, ItemStack, Slot, ClickAction,
+     *         Player, SlotAccess)
+     */
+    @Override
+    default boolean overrideOtherStackedOnMe(ItemStorageHolder holder, ItemStack itemStack, ItemStack itemHeldByCursor, Slot slot, ClickAction clickAction, Player player, SlotAccess slotHeldByCursor) {
+        if (false) {
+            return ItemInteractionHelper.overrideOtherStackedOnMe(itemStack,
+                    () -> holder.getMutableContainer(itemStack, player),
+                    itemHeldByCursor,
+                    slot,
+                    clickAction,
+                    player,
+                    slotHeldByCursor,
+                    (ItemStack item) -> {
+                        return this.getAcceptableItemCount(itemStack, item, player);
+                    },
+                    Container::getMaxStackSize,
+                    () -> holder.storage().toggleSelectedItem(itemStack, SelectedItem.DEFAULT_SELECTED_ITEM));
+        }
+
+        if (clickAction == ClickAction.PRIMARY && itemHeldByCursor.isEmpty()) {
+            if (!this.extractSingleItemOnly(player)) {
+                this.toggleSelectedItem(itemStack, SelectedItem.DEFAULT_SELECTED_ITEM);
+                return false;
             } else {
-                return new ItemSlot(slotNum, remainingItems);
+                return true;
             }
-        }
-    }
-
-    /**
-     * @see net.minecraft.world.SimpleContainer#moveItemToEmptySlots(ItemStack)
-     */
-    private int moveItemToEmptySlots(Container container, ItemStack sourceStack, int prioritizedSlot) {
-        IntSet slotNums = IntLinkedOpenHashSet.of(prioritizedSlot);
-        slotNums.addAll(IntSets.fromTo(0, container.getContainerSize()));
-        for (int slotNum : slotNums.toIntArray()) {
-            if (slotNum >= 0 && slotNum < container.getContainerSize()) {
-                ItemStack targetStack = container.getItem(slotNum);
-                if (targetStack.isEmpty()) {
-                    container.setItem(slotNum, sourceStack.copyAndClear());
-                    return slotNum;
-                }
-            }
-        }
-
-        return -1;
-    }
-
-    /**
-     * @see net.minecraft.world.SimpleContainer#moveItemToOccupiedSlotsWithSameType(ItemStack)
-     */
-    private int moveItemToOccupiedSlotsWithSameType(Container container, ItemStack sourceStack, int prioritizedSlot) {
-        IntSet slotNums = IntLinkedOpenHashSet.of(prioritizedSlot);
-        slotNums.addAll(IntSets.fromTo(0, container.getContainerSize()));
-        for (int slotNum : slotNums.toIntArray()) {
-            if (slotNum >= 0 && slotNum < container.getContainerSize()) {
-                ItemStack targetStack = container.getItem(slotNum);
-                if (ItemStack.isSameItemSameComponents(targetStack, sourceStack)) {
-                    this.moveItemsBetweenStacks(container, sourceStack, targetStack, slotNum);
-                    if (sourceStack.isEmpty()) {
-                        return slotNum;
+        } else {
+            ItemStackingContext context = new ItemStackingContext(holder, this, player);
+            if (clickAction == ClickAction.PRIMARY && !itemHeldByCursor.isEmpty()) {
+                if (slot.allowModification(player)) {
+                    int transferredCount = context.tryInsert(itemStack, itemHeldByCursor);
+                    itemHeldByCursor.shrink(transferredCount);
+                    if (!this.extractSingleItemOnly(player)) {
+                        if (transferredCount > 0) {
+                            this.playInsertSound(player);
+                        } else {
+                            this.playInsertFailSound(player);
+                        }
                     }
                 }
+
+                this.broadcastChangesOnContainerMenu(itemStack, player);
+                return true;
+            } else if (clickAction == ClickAction.SECONDARY && (itemHeldByCursor.isEmpty()
+                    || this.extractSingleItemOnly(player))) {
+                if (slot.allowModification(player)) {
+                    ItemStack itemRemainder = context.removeOne(itemStack, itemHeldByCursor).item();
+                    if (!itemRemainder.isEmpty()) {
+                        // When extracting single items only, the item held by cursor may not be empty, so we cannot just replace it straight away.
+                        if (itemHeldByCursor.isEmpty()) {
+                            slotHeldByCursor.set(itemRemainder);
+                        } else {
+                            itemHeldByCursor.grow(itemRemainder.getCount());
+                        }
+
+                        if (!this.extractSingleItemOnly(player)) {
+                            this.playRemoveOneSound(player);
+                        }
+                    }
+                }
+
+                this.broadcastChangesOnContainerMenu(itemStack, player);
+                return true;
+            } else {
+                this.toggleSelectedItem(itemStack, SelectedItem.DEFAULT_SELECTED_ITEM);
+                return false;
             }
         }
-
-        return -1;
     }
 
     /**
-     * @see net.minecraft.world.SimpleContainer#moveItemsBetweenStacks(ItemStack, ItemStack)
+     * Used to synchronize item storage changes.
+     *
+     * @param itemStack the item stack providing the storage
+     * @param player    the player performing the interaction
+     * @see net.minecraft.world.item.BundleItem#broadcastChangesOnContainerMenu(Player)
      */
-    private void moveItemsBetweenStacks(Container container, ItemStack sourceStack, ItemStack targetStack, int slotNum) {
-        int maxCount = this.getMaxStackSize(container, slotNum, targetStack);
-        int diff = Math.min(sourceStack.getCount(), maxCount - targetStack.getCount());
-        if (diff > 0) {
-            targetStack.grow(diff);
-            sourceStack.shrink(diff);
-            container.setChanged();
-        }
+    default void broadcastChangesOnContainerMenu(ItemStack itemStack, Player player) {
+        player.containerMenu.slotsChanged(player.getInventory());
     }
 
     /**
@@ -211,5 +243,12 @@ public interface ContainerItemStorage extends ItemStorage {
      */
     default void playInsertSound(Player player) {
         player.playSound(SoundEvents.BUNDLE_INSERT, 0.8F, 0.8F + player.level().getRandom().nextFloat() * 0.4F);
+    }
+
+    /**
+     * @see net.minecraft.world.item.BundleItem#playInsertFailSound(Entity)
+     */
+    default void playInsertFailSound(Player player) {
+        player.playSound(SoundEvents.BUNDLE_INSERT_FAIL, 1.0F, 1.0F);
     }
 }

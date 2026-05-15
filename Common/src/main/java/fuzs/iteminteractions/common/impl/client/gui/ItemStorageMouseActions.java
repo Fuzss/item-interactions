@@ -4,15 +4,12 @@ import com.mojang.blaze3d.platform.InputConstants;
 import fuzs.iteminteractions.common.api.v1.world.item.storage.ItemStorageHolder;
 import fuzs.iteminteractions.common.impl.ItemInteractions;
 import fuzs.iteminteractions.common.impl.config.ClientConfig;
-import fuzs.iteminteractions.common.impl.init.ModRegistry;
-import fuzs.iteminteractions.common.impl.network.client.ServerboundContainerClientInputMessage;
 import fuzs.iteminteractions.common.impl.network.client.ServerboundSelectedItemMessage;
 import fuzs.puzzleslib.common.api.network.v4.MessageSender;
 import net.minecraft.client.gui.BundleMouseActions;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.world.Container;
 import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
@@ -61,15 +58,13 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
             return false;
         }
 
-        // TODO single item-only mode picks up the container item when carried is empty which should not happen
-        if (slotIndex.isPresent() && ItemInteractions.CONFIG.get(ClientConfig.class).extractSingleItemOnly()) {
+        if (this.screen.hoveredSlot != null && ItemInteractions.CONFIG.get(ClientConfig.class)
+                .extractSingleItemOnly()) {
             int wheel = this.onMouseScroll(scrollX, scrollY);
             if (wheel != 0) {
-                Slot slot = this.screen.getMenu().getSlot(slotIndex.getAsInt());
+                Slot slot = this.screen.hoveredSlot;
                 int buttonNum = this.getMouseButtonFromWheel(wheel);
-                this.setSingleItemOnly(true);
                 this.screen.slotClicked(slot, slot.index, buttonNum, ContainerInput.PICKUP);
-                this.setSingleItemOnly(false);
             }
 
             return true;
@@ -114,14 +109,6 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
         } else {
             return InputConstants.MOUSE_BUTTON_LEFT;
         }
-    }
-
-    /**
-     * @see MultiPlayerGameMode#ensureHasSentCarriedItem()
-     */
-    private void setSingleItemOnly(boolean singleItemOnly) {
-        ModRegistry.MOVE_SINGLE_ITEM_ATTACHMENT_TYPE.set(this.minecraft.player, singleItemOnly);
-        MessageSender.broadcast(new ServerboundContainerClientInputMessage(singleItemOnly));
     }
 
     private void scrollSelectedItem(ItemStorageHolder holder, OptionalInt slotIndex, ItemStack itemStack, Vector2ic scrollXY) {

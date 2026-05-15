@@ -23,12 +23,7 @@ abstract class ItemStackMixin {
         ItemStack itemStack = ItemStack.class.cast(this);
         ItemStorageHolder holder = ItemStorageHolder.ofItem(itemStack);
         if (holder.canPlayerInteractWith(itemStack, player)) {
-            if (holder.overrideStackedOnOther(itemStack, slot, clickAction, player)) {
-                holder.storage().broadcastChangesOnContainerMenu(itemStack, player);
-                callback.setReturnValue(Boolean.TRUE);
-            } else {
-                callback.setReturnValue(Boolean.FALSE);
-            }
+            callback.setReturnValue(holder.overrideStackedOnOther(itemStack, slot, clickAction, player));
         }
     }
 
@@ -37,17 +32,12 @@ abstract class ItemStackMixin {
         ItemStack itemStack = ItemStack.class.cast(this);
         ItemStorageHolder holder = ItemStorageHolder.ofItem(itemStack);
         if (holder.canPlayerInteractWith(itemStack, player)) {
-            if (holder.overrideOtherStackedOnMe(itemStack,
+            callback.setReturnValue(holder.overrideOtherStackedOnMe(itemStack,
                     itemHeldByCursor,
                     slot,
                     clickAction,
                     player,
-                    slotHeldByCursor)) {
-                holder.storage().broadcastChangesOnContainerMenu(itemStack, player);
-                callback.setReturnValue(Boolean.TRUE);
-            } else {
-                callback.setReturnValue(Boolean.FALSE);
-            }
+                    slotHeldByCursor));
         }
     }
 

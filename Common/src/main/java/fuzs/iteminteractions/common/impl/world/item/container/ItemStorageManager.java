@@ -27,7 +27,7 @@ import java.util.Map;
 
 public final class ItemStorageManager extends UnconditionalSimpleJsonResourceReloadListener<Map.Entry<HolderSet<Item>, ItemStorage>> {
     public static final ResourceKey<Registry<Map.Entry<HolderSet<Item>, ItemStorage>>> REGISTRY_KEY = ResourceKey.createRegistryKey(
-            ItemInteractions.id("item_contents_provider"));
+            ItemInteractions.id("item_storage"));
 
     @Nullable
     private static List<Map.Entry<HolderSet<Item>, ItemStorage>> unresolvedProviders;

@@ -1,7 +1,5 @@
 package fuzs.iteminteractions.common.api.v1.world.item.storage;
 
-import fuzs.iteminteractions.common.impl.world.item.component.SelectedItem;
-import fuzs.iteminteractions.common.impl.world.item.container.ItemInteractionHelper;
 import fuzs.iteminteractions.common.impl.world.item.container.ItemStorageManager;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
@@ -44,45 +42,19 @@ public record ItemStorageHolder(ItemStorage storage) {
         return storage != null ? new ItemStorageHolder(storage) : EMPTY;
     }
 
-    /**
-     * @see net.minecraft.world.item.BundleItem#overrideStackedOnOther(ItemStack, Slot, ClickAction, Player)
-     */
     public boolean overrideStackedOnOther(ItemStack itemStack, Slot slot, ClickAction clickAction, Player player) {
-        return ItemInteractionHelper.overrideStackedOnOther(itemStack,
-                () -> this.getMutableContainer(itemStack, player),
-                slot,
-                clickAction,
-                player,
-                (ItemStack item) -> {
-                    return this.getAcceptableItemCount(itemStack, item, player);
-                },
-                // TODO this must call the method from the item storage implementation
-                Container::getMaxStackSize);
+        return this.storage().overrideStackedOnOther(this, itemStack, slot, clickAction, player);
     }
 
-    /**
-     * @see net.minecraft.world.item.BundleItem#overrideOtherStackedOnMe(ItemStack, ItemStack, Slot, ClickAction,
-     *         Player, SlotAccess)
-     */
     public boolean overrideOtherStackedOnMe(ItemStack itemStack, ItemStack itemHeldByCursor, Slot slot, ClickAction clickAction, Player player, SlotAccess slotHeldByCursor) {
-        if (clickAction == ClickAction.PRIMARY && itemHeldByCursor.isEmpty()) {
-            this.storage().toggleSelectedItem(itemStack, SelectedItem.DEFAULT_SELECTED_ITEM);
-            return false;
-        } else {
-            return ItemInteractionHelper.overrideOtherStackedOnMe(itemStack,
-                    () -> this.getMutableContainer(itemStack, player),
-                    itemHeldByCursor,
-                    slot,
-                    clickAction,
-                    player,
-                    slotHeldByCursor,
-                    (ItemStack item) -> {
-                        return this.getAcceptableItemCount(itemStack, item, player);
-                    },
-                    // TODO this must call the method from the item storage implementation
-                    Container::getMaxStackSize,
-                    () -> this.storage().toggleSelectedItem(itemStack, SelectedItem.DEFAULT_SELECTED_ITEM));
-        }
+        return this.storage()
+                .overrideOtherStackedOnMe(this,
+                        itemStack,
+                        itemHeldByCursor,
+                        slot,
+                        clickAction,
+                        player,
+                        slotHeldByCursor);
     }
 
     /**
@@ -143,14 +115,14 @@ public record ItemStorageHolder(ItemStorage storage) {
      * How much space is available in the container provided by <code>containerStack</code> to add
      * <code>stackToAdd</code>.
      *
-     * @param itemStack  the item stack providing the container to add <code>stackToAdd</code> to
-     * @param stackToAdd the stack to be added to the container
-     * @param player     the player interacting with both item stacks
+     * @param itemStack the item stack providing the container to add <code>stackToAdd</code> to
+     * @param otherItem the stack to be added to the container
+     * @param player    the player interacting with both item stacks
      * @return the portion of <code>stackToAdd</code> that can be added to the container
      */
-    public int getAcceptableItemCount(ItemStack itemStack, ItemStack stackToAdd, Player player) {
-        if (this.canAcceptItem(itemStack, stackToAdd, player)) {
-            return this.storage().getAcceptableItemCount(itemStack, stackToAdd, player);
+    public int getAcceptableItemCount(ItemStack itemStack, ItemStack otherItem, Player player) {
+        if (this.canAcceptItem(itemStack, otherItem, player)) {
+            return this.storage().getAcceptableItemCount(itemStack, otherItem, player);
         } else {
             return 0;
         }

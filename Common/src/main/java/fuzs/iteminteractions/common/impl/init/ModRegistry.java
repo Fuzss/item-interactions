@@ -8,8 +8,8 @@ import fuzs.puzzleslib.common.api.attachment.v4.DataAttachmentType;
 import fuzs.puzzleslib.common.api.init.v3.registry.RegistryManager;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponentType;
+import net.minecraft.util.Unit;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
 
 public class ModRegistry {
     static final RegistryManager REGISTRIES = RegistryManager.from(ItemInteractions.MOD_ID);
@@ -35,8 +35,7 @@ public class ModRegistry {
             "bundle",
             () -> new ItemStorageType<>(BundleContentsStorage.CODEC));
 
-    public static final DataAttachmentType<Entity, Boolean> MOVE_SINGLE_ITEM_ATTACHMENT_TYPE = DataAttachmentRegistry.<Boolean>entityBuilder()
-            .defaultValue(EntityType.PLAYER, Boolean.FALSE)
+    public static final DataAttachmentType<Entity, Unit> MOVE_SINGLE_ITEM_ATTACHMENT_TYPE = DataAttachmentRegistry.<Unit>entityBuilder()
             .build(ItemInteractions.id("move_single_item"));
 
     public static void bootstrap() {
