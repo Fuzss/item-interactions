@@ -163,12 +163,12 @@ public class BundleContentsStorage extends ComponentBackedStorage {
     }
 
     public Fraction computeContentWeight(ItemStack itemStack, Player player) {
-        NonNullList<ItemStack> itemList = this.getItemContainer(itemStack, player, false).getItems();
-        return BundleContents.computeContentWeight(itemList).getOrThrow();
+        BundleContents contents = itemStack.getOrDefault(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY);
+        return BundleContents.computeContentWeight(contents.items()).getOrThrow();
     }
 
     @Override
     public ItemStorageType<?> getType() {
-        return ModRegistry.BUNDLE_ITEM_CONTENTS_PROVIDER_TYPE.value();
+        return ModRegistry.BUNDLE_ITEM_STORAGE_TYPE.value();
     }
 }

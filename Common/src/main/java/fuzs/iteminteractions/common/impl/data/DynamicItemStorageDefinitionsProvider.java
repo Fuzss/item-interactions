@@ -1,6 +1,6 @@
 package fuzs.iteminteractions.common.impl.data;
 
-import fuzs.iteminteractions.common.api.v1.data.AbstractItemContentsProvider;
+import fuzs.iteminteractions.common.api.v1.data.AbstractItemStorageDefinitionsProvider;
 import fuzs.iteminteractions.common.api.v1.world.item.storage.BundleContentsStorage;
 import fuzs.iteminteractions.common.api.v1.world.item.storage.ContainerStorage;
 import fuzs.iteminteractions.common.api.v1.world.item.storage.EnderChestStorage;
@@ -12,14 +12,14 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Items;
 
-public class DynamicItemContentsProvider extends AbstractItemContentsProvider {
+public class DynamicItemStorageDefinitionsProvider extends AbstractItemStorageDefinitionsProvider {
 
-    public DynamicItemContentsProvider(DataProviderContext context) {
+    public DynamicItemStorageDefinitionsProvider(DataProviderContext context) {
         super(context);
     }
 
     @Override
-    public void addItemProviders(HolderLookup.Provider registries) {
+    public void addItemStorageDefinitions(HolderLookup.Provider registries) {
         this.add(EnderChestStorage.INSTANCE, Items.ENDER_CHEST);
         this.add(registries.lookupOrThrow(Registries.ITEM),
                 new ContainerStorage(9, 3, null, StorageOptions.DEFAULT.setFilterContainerItems()),

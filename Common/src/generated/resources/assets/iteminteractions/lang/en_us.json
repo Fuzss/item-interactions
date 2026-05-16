@@ -1,5 +1,6 @@
 {
   "item.iteminteractions.container.tooltip.alt": "Alt",
+  "item.iteminteractions.container.tooltip.command": "Command",
   "item.iteminteractions.container.tooltip.control": "Control",
   "item.iteminteractions.container.tooltip.hold": "Hold",
   "item.iteminteractions.container.tooltip.reveal_contents": "%s %s to reveal contents",

@@ -192,7 +192,7 @@ public class ContainerStorage extends ComponentBackedStorage {
 
     @Override
     public ItemStorageType<?> getType() {
-        return ModRegistry.CONTAINER_ITEM_CONTENTS_PROVIDER_TYPE.value();
+        return ModRegistry.CONTAINER_ITEM_STORAGE_TYPE.value();
     }
 
     public enum InteractionPermissions implements StringRepresentable {

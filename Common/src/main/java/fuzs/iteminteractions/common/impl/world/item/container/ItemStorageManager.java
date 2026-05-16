@@ -30,8 +30,8 @@ public final class ItemStorageManager extends UnconditionalSimpleJsonResourceRel
             ItemInteractions.id("item_storage"));
 
     @Nullable
-    private static List<Map.Entry<HolderSet<Item>, ItemStorage>> unresolvedProviders;
-    private static Map<Item, ItemStorage> resolvedProviders = ImmutableMap.of();
+    private static List<Map.Entry<HolderSet<Item>, ItemStorage>> unresolvedDefinitions;
+    private static Map<Item, ItemStorage> resolvedDefinitions = ImmutableMap.of();
 
     public ItemStorageManager(HolderLookup.Provider registries) {
         super(registries, ItemStorage.WITH_ITEMS_CODEC, REGISTRY_KEY);
@@ -39,21 +39,21 @@ public final class ItemStorageManager extends UnconditionalSimpleJsonResourceRel
 
     @Override
     public void apply(Map<Identifier, Map.Entry<HolderSet<Item>, ItemStorage>> map, ResourceManager resourceManager, ProfilerFiller profiler) {
-        unresolvedProviders = ImmutableList.copyOf(map.values());
-        resolvedProviders = ImmutableMap.of();
+        unresolvedDefinitions = ImmutableList.copyOf(map.values());
+        resolvedDefinitions = ImmutableMap.of();
     }
 
-    public static ItemStorageHolder get(ItemStack itemStack) {
-        return ItemStorageHolder.ofNullable(resolvedProviders.get(itemStack.getItem()));
+    public static ItemStorageHolder getHolder(ItemStack itemStack) {
+        return ItemStorageHolder.ofNullable(resolvedDefinitions.get(itemStack.getItem()));
     }
 
-    public static void setItemStorage(Map<Item, ItemStorage> providers) {
-        ItemStorageManager.resolvedProviders = ImmutableMap.copyOf(providers);
+    public static void setItemStorageDefinitions(Map<Item, ItemStorage> definitions) {
+        ItemStorageManager.resolvedDefinitions = ImmutableMap.copyOf(definitions);
     }
 
-    public static void onTagsUpdated(HolderLookup.Provider registries, boolean client) {
-        List<Map.Entry<HolderSet<Item>, ItemStorage>> holderSets = unresolvedProviders;
-        if (holderSets != null && !client) {
+    public static void onTagsUpdated(HolderLookup.Provider registries, boolean isClientUpdate) {
+        List<Map.Entry<HolderSet<Item>, ItemStorage>> holderSets = unresolvedDefinitions;
+        if (holderSets != null && !isClientUpdate) {
             Map<Item, ItemStorage> providers = new IdentityHashMap<>();
             for (Map.Entry<HolderSet<Item>, ItemStorage> entry : holderSets) {
                 entry.getKey().forEach((Holder<Item> holder) -> {
@@ -62,15 +62,15 @@ public final class ItemStorageManager extends UnconditionalSimpleJsonResourceRel
                 });
             }
 
-            unresolvedProviders = null;
-            setItemStorage(providers);
+            unresolvedDefinitions = null;
+            setItemStorageDefinitions(providers);
         }
     }
 
     public static void onSyncDataPackContents(ServerPlayer serverPlayer, boolean joined) {
         if (!serverPlayer.connection.connection.isMemoryConnection()) {
             MessageSender.broadcast(PlayerSet.ofPlayer(serverPlayer),
-                    new ClientboundSyncItemStorage(resolvedProviders));
+                    new ClientboundSyncItemStorage(resolvedDefinitions));
         }
     }
 }

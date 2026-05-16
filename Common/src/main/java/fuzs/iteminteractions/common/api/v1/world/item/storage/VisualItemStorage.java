@@ -16,7 +16,7 @@ public interface VisualItemStorage extends ContainerItemStorage {
 
     @Override
     default Optional<Optional<TooltipComponent>> getTooltipImage(ItemStack itemStack, Player player) {
-        if (this.hasContents(itemStack) && !this.getItemContainer(itemStack, player, false).isEmpty()) {
+        if (this.hasContents(itemStack) && !this.getItemContainer(itemStack, player).isEmpty()) {
             NonNullList<ItemStack> itemList = this.getItemContainer(itemStack, player, false).getItems();
             return Optional.of(Optional.of(this.createTooltipImageComponent(itemStack, player, itemList)));
         } else {
@@ -31,7 +31,7 @@ public interface VisualItemStorage extends ContainerItemStorage {
      */
     @Override
     default Optional<Boolean> isBarVisible(ItemStack itemStack, Player player) {
-        return Optional.of(!this.getItemContainer(itemStack, player, false).isEmpty());
+        return Optional.of(!this.getItemContainer(itemStack, player).isEmpty());
     }
 
     /**
@@ -39,7 +39,7 @@ public interface VisualItemStorage extends ContainerItemStorage {
      */
     @Override
     default OptionalInt getBarWidth(ItemStack itemStack, Player player) {
-        Container container = this.getItemContainer(itemStack, player, false);
+        Container container = this.getItemContainer(itemStack, player);
         Fraction fraction = Fraction.getFraction(this.nonEmptySlots(container), container.getContainerSize());
         return OptionalInt.of(Math.min(1 + Mth.mulAndTruncate(fraction, 12), 13));
     }
@@ -49,7 +49,7 @@ public interface VisualItemStorage extends ContainerItemStorage {
      */
     @Override
     default OptionalInt getBarColor(ItemStack itemStack, Player player) {
-        Container container = this.getItemContainer(itemStack, player, false);
+        Container container = this.getItemContainer(itemStack, player);
         boolean isFull = this.nonEmptySlots(container) < container.getContainerSize();
         return OptionalInt.of(isFull ? BundleItem.BAR_COLOR : BundleItem.FULL_BAR_COLOR);
     }

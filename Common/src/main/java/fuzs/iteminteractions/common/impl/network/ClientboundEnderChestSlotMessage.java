@@ -5,6 +5,7 @@ import fuzs.puzzleslib.common.api.network.v4.message.play.ClientboundPlayMessage
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 
 public record ClientboundEnderChestSlotMessage(int slot, ItemStack item) implements ClientboundPlayMessage {
@@ -20,12 +21,11 @@ public record ClientboundEnderChestSlotMessage(int slot, ItemStack item) impleme
         return new MessageListener<Context>() {
             @Override
             public void accept(Context context) {
-                if (ClientboundEnderChestSlotMessage.this.slot <
-                        context.player().getEnderChestInventory().getContainerSize()) {
-                    context.player()
-                            .getEnderChestInventory()
-                            .setItem(ClientboundEnderChestSlotMessage.this.slot,
-                                    ClientboundEnderChestSlotMessage.this.item);
+                Container container = context.player().getEnderChestInventory();
+                if (ClientboundEnderChestSlotMessage.this.slot >= 0
+                        && ClientboundEnderChestSlotMessage.this.slot < container.getContainerSize()) {
+                    container.setItem(ClientboundEnderChestSlotMessage.this.slot,
+                            ClientboundEnderChestSlotMessage.this.item);
                 }
             }
         };

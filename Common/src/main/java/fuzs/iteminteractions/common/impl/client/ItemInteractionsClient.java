@@ -68,7 +68,7 @@ public class ItemInteractionsClient implements ClientModConstructor {
     }
 
     private static void onPlayerLeave(LocalPlayer player, MultiPlayerGameMode multiPlayerGameMode, Connection connection) {
-        ItemStorageManager.setItemStorage(ImmutableMap.of());
+        ItemStorageManager.setItemStorageDefinitions(ImmutableMap.of());
     }
 
     @Override

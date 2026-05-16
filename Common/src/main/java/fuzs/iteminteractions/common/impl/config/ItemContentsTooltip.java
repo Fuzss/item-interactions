@@ -12,6 +12,11 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.KeyEvent;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
+/**
+ * An almost perfect mirror apart from the custom {@link #KEY_MAPPING}.
+ *
+ * @see ItemHeldByCursorTooltip
+ */
 public enum ItemContentsTooltip implements BackedKeyType {
     ALWAYS {
         @Override

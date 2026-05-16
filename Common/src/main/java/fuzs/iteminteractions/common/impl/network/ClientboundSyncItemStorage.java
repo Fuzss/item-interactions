@@ -24,7 +24,7 @@ public record ClientboundSyncItemStorage(Map<Item, ItemStorage> providers) imple
         return new MessageListener<Context>() {
             @Override
             public void accept(Context context) {
-                ItemStorageManager.setItemStorage(ClientboundSyncItemStorage.this.providers);
+                ItemStorageManager.setItemStorageDefinitions(ClientboundSyncItemStorage.this.providers);
             }
         };
     }

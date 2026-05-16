@@ -33,7 +33,7 @@ public record ItemStorageHolder(ItemStorage storage) {
      * @return the holder that may be empty
      */
     public static ItemStorageHolder ofItem(ItemStack itemStack) {
-        return itemStack.isEmpty() ? EMPTY : ItemStorageManager.get(itemStack);
+        return itemStack.isEmpty() ? EMPTY : ItemStorageManager.getHolder(itemStack);
     }
 
     /**

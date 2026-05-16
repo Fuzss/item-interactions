@@ -19,7 +19,7 @@ public class EnderChestStorage implements VisualItemStorage {
     public static final ItemStorage INSTANCE = new EnderChestStorage();
     public static final MapCodec<ItemStorage> CODEC = MapCodec.unit(INSTANCE);
     /**
-     * Pretty ender color from the <a href="https://www.curseforge.com/minecraft/mc-mods/tinted">Tinted</a> mod.
+     * Ender color from the <a href="https://www.curseforge.com/minecraft/mc-mods/tinted">Tinted</a> mod.
      */
     private static final DyeBackedColor DEFAULT_ENDER_CHEST_COLOR = DyeBackedColor.fromRgb(0X2A6255);
 
@@ -81,8 +81,7 @@ public class EnderChestStorage implements VisualItemStorage {
     public void broadcastChangesOnContainerMenu(ItemStack itemStack, Player player) {
         if (player.level().isClientSide()) {
             // Will only actually broadcast when in the creative menu as that menu needs manual syncing.
-            NonNullList<ItemStack> itemList = this.getItemContainer(itemStack, player, false).getItems();
-            EnderChestSyncHandler.broadcastCreativeState(player, itemList);
+            EnderChestSyncHandler.broadcastCreativeState(player);
         } else {
             // Sync the full state, the client ender chest will otherwise likely be messed up.
             // Useful for nested ender chests when paired with packet spam and latency.
@@ -92,6 +91,6 @@ public class EnderChestStorage implements VisualItemStorage {
 
     @Override
     public ItemStorageType<?> getType() {
-        return ModRegistry.ENDER_CHEST_ITEM_CONTENTS_PROVIDER_TYPE.value();
+        return ModRegistry.ENDER_CHEST_ITEM_STORAGE_TYPE.value();
     }
 }

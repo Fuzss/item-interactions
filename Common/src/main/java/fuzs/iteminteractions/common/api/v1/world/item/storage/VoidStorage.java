@@ -114,6 +114,6 @@ public class VoidStorage implements ItemStorage {
 
     @Override
     public ItemStorageType<?> getType() {
-        return ModRegistry.EMPTY_ITEM_CONTENTS_PROVIDER_TYPE.value();
+        return ModRegistry.EMPTY_ITEM_STORAGE_TYPE.value();
     }
 }

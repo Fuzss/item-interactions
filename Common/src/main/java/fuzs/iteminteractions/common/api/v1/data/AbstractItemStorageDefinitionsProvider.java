@@ -1,6 +1,5 @@
 package fuzs.iteminteractions.common.api.v1.data;
 
-import com.google.common.collect.Maps;
 import fuzs.iteminteractions.common.api.v1.world.item.storage.ItemStorage;
 import fuzs.iteminteractions.common.impl.world.item.container.ItemStorageManager;
 import fuzs.puzzleslib.common.api.data.v2.core.DataProviderContext;
@@ -17,21 +16,22 @@ import net.minecraft.world.item.Item;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-public abstract class AbstractItemContentsProvider implements DataProvider {
-    private final Map<Identifier, Map.Entry<HolderSet<Item>, ItemStorage>> providers = Maps.newHashMap();
+public abstract class AbstractItemStorageDefinitionsProvider implements DataProvider {
+    private final Map<Identifier, Map.Entry<HolderSet<Item>, ItemStorage>> definitions = new HashMap<>();
     private final String modId;
     private final PackOutput.PathProvider pathProvider;
     private final CompletableFuture<HolderLookup.Provider> registries;
 
-    public AbstractItemContentsProvider(DataProviderContext context) {
+    public AbstractItemStorageDefinitionsProvider(DataProviderContext context) {
         this(context.getModId(), context.getPackOutput(), context.getRegistries());
     }
 
-    public AbstractItemContentsProvider(String modId, PackOutput packOutput, CompletableFuture<HolderLookup.Provider> registries) {
+    public AbstractItemStorageDefinitionsProvider(String modId, PackOutput packOutput, CompletableFuture<HolderLookup.Provider> registries) {
         this.modId = modId;
         this.pathProvider = packOutput.createRegistryElementsPathProvider(ItemStorageManager.REGISTRY_KEY);
         this.registries = registries;
@@ -45,9 +45,9 @@ public abstract class AbstractItemContentsProvider implements DataProvider {
     }
 
     public CompletableFuture<?> run(CachedOutput output, HolderLookup.Provider registries) {
-        this.addItemProviders(registries);
+        this.addItemStorageDefinitions(registries);
         List<CompletableFuture<?>> completableFutures = new ArrayList<>();
-        for (Map.Entry<Identifier, Map.Entry<HolderSet<Item>, ItemStorage>> entry : this.providers.entrySet()) {
+        for (Map.Entry<Identifier, Map.Entry<HolderSet<Item>, ItemStorage>> entry : this.definitions.entrySet()) {
             Path path = this.pathProvider.json(entry.getKey());
             completableFutures.add(DataProvider.saveStable(output,
                     registries,
@@ -58,7 +58,7 @@ public abstract class AbstractItemContentsProvider implements DataProvider {
         return CompletableFuture.allOf(completableFutures.toArray(CompletableFuture[]::new));
     }
 
-    public abstract void addItemProviders(HolderLookup.Provider registries);
+    public abstract void addItemStorageDefinitions(HolderLookup.Provider registries);
 
     public void add(HolderLookup.RegistryLookup<Item> itemLookup, ItemStorage provider, TagKey<Item> tagKey) {
         this.add(itemLookup, tagKey.location(), provider, tagKey);
@@ -82,11 +82,11 @@ public abstract class AbstractItemContentsProvider implements DataProvider {
     }
 
     public void add(Identifier identifier, ItemStorage provider, HolderSet<Item> holderSet) {
-        this.providers.put(identifier, Map.entry(holderSet, provider));
+        this.definitions.put(identifier, Map.entry(holderSet, provider));
     }
 
     @Override
     public String getName() {
-        return "Item Contents Provider";
+        return "Item Storage Definitions";
     }
 }

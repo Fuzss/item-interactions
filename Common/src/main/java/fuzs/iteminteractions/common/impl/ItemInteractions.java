@@ -3,7 +3,7 @@ package fuzs.iteminteractions.common.impl;
 import fuzs.iteminteractions.common.api.v1.world.item.storage.ItemStorage;
 import fuzs.iteminteractions.common.impl.config.ClientConfig;
 import fuzs.iteminteractions.common.impl.config.ServerConfig;
-import fuzs.iteminteractions.common.impl.data.DynamicItemContentsProvider;
+import fuzs.iteminteractions.common.impl.data.DynamicItemStorageDefinitionsProvider;
 import fuzs.iteminteractions.common.impl.handler.EnderChestSyncHandler;
 import fuzs.iteminteractions.common.impl.init.ModRegistry;
 import fuzs.iteminteractions.common.impl.network.ClientboundEnderChestContentMessage;
@@ -84,8 +84,8 @@ public class ItemInteractions implements ModConstructor {
             return;
         }
 
-        context.registerRepositorySource(PackResourcesHelper.buildServerPack(id("item_storage"),
-                DynamicPackResources.create(DynamicItemContentsProvider::new),
+        context.registerRepositorySource(PackResourcesHelper.buildServerPack(id("item_storage_definitions"),
+                DynamicPackResources.create(DynamicItemStorageDefinitionsProvider::new),
                 true));
     }
 

@@ -6,27 +6,30 @@ import fuzs.iteminteractions.common.impl.network.client.ServerboundEnderChestCon
 import fuzs.puzzleslib.common.api.network.v4.MessageSender;
 import fuzs.puzzleslib.common.api.network.v4.PlayerSet;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
-import net.minecraft.core.NonNullList;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.*;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ChestMenu;
+import net.minecraft.world.inventory.ContainerListener;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 
 public class EnderChestSyncHandler {
 
-    public static void onPlayerJoin(ServerPlayer player) {
-        broadcastFullState(player);
+    public static void onPlayerJoin(ServerPlayer serverPlayer) {
+        broadcastFullState(serverPlayer);
     }
 
-    public static void onAfterChangeDimension(ServerPlayer player, ServerLevel from, ServerLevel to) {
-        broadcastFullState(player);
+    public static void onAfterChangeDimension(ServerPlayer serverPlayer, ServerLevel originalLevel, ServerLevel newLevel) {
+        broadcastFullState(serverPlayer);
     }
 
-    public static void onRespawn(ServerPlayer player, boolean originalStillAlive) {
-        broadcastFullState(player);
+    public static void onRespawn(ServerPlayer serverPlayer, boolean originalStillAlive) {
+        broadcastFullState(serverPlayer);
     }
 
     public static void onContainerOpen(ServerPlayer serverPlayer, AbstractContainerMenu container) {
@@ -36,8 +39,8 @@ public class EnderChestSyncHandler {
             chestMenu.addSlotListener(new ContainerListener() {
                 @Override
                 public void slotChanged(AbstractContainerMenu menu, int slotIndex, ItemStack itemStack) {
-                    // vanilla only syncs ender chest contents to open ender chest menu, but not to Player::getEnderChestInventory
-                    // but since this is what we use for item interactions make sure to sync it
+                    // Vanilla only syncs ender chest contents to the open ender chest menu, but not to the ender chest container stored on the player.
+                    // We use the player ender chest container both on the client & server, though, so we sync all contents manually.
                     Slot slot = menu.getSlot(slotIndex);
                     if (slot.container == serverPlayer.getEnderChestInventory()) {
                         MessageSender.broadcast(PlayerSet.ofPlayer(serverPlayer),
@@ -53,12 +56,13 @@ public class EnderChestSyncHandler {
         }
     }
 
-    public static void broadcastCreativeState(Player player, NonNullList<ItemStack> items) {
-        // this is only required for the creative mode inventory, as it doesn't sync contents using default menu packets,
-        // instead it uses custom packets which do not work for item interactions in a menu
+    public static void broadcastCreativeState(Player player) {
+        // This is only required for the creative mode inventory, as it doesn't sync contents using default menu packets.
+        // Instead, it uses custom packets which do not work for item interactions in a menu.
         if (player.hasInfiniteMaterials()
                 && player.containerMenu instanceof CreativeModeInventoryScreen.ItemPickerMenu) {
-            MessageSender.broadcast(new ServerboundEnderChestContentMessage(items));
+            MessageSender.broadcast(new ServerboundEnderChestContentMessage(player.getEnderChestInventory()
+                    .getItems()));
         }
     }
 
@@ -68,11 +72,11 @@ public class EnderChestSyncHandler {
     }
 
     public static void setEnderChestContent(Player player, List<ItemStack> items) {
-        PlayerEnderChestContainer enderChestInventory = player.getEnderChestInventory();
-        // safeguard against mods only changing ender chest size on one side
-        int size = Math.min(items.size(), enderChestInventory.getContainerSize());
+        Container container = player.getEnderChestInventory();
+        // Safeguard against mods only changing ender chest size on one side.
+        int size = Math.min(items.size(), container.getContainerSize());
         for (int i = 0; i < size; ++i) {
-            enderChestInventory.setItem(i, items.get(i));
+            container.setItem(i, items.get(i));
         }
     }
 }

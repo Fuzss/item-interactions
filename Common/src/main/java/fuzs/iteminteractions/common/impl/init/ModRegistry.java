@@ -18,20 +18,18 @@ public class ModRegistry {
             (DataComponentType.Builder<SelectedItem> builder) -> builder.persistent(SelectedItem.CODEC)
                     .networkSynchronized(SelectedItem.STREAM_CODEC)
                     .cacheEncoding());
-    public static final Holder.Reference<ItemStorageType<?>> EMPTY_ITEM_CONTENTS_PROVIDER_TYPE = REGISTRIES.register(
-            ItemStorage.REGISTRY_KEY,
+    public static final Holder.Reference<ItemStorageType<?>> EMPTY_ITEM_STORAGE_TYPE = REGISTRIES.register(ItemStorage.REGISTRY_KEY,
             "empty",
             () -> new ItemStorageType<>(VoidStorage.CODEC));
-    public static final Holder.Reference<ItemStorageType<?>> CONTAINER_ITEM_CONTENTS_PROVIDER_TYPE = REGISTRIES.register(
+    public static final Holder.Reference<ItemStorageType<?>> CONTAINER_ITEM_STORAGE_TYPE = REGISTRIES.register(
             ItemStorage.REGISTRY_KEY,
             "container",
             () -> new ItemStorageType<>(ContainerStorage.CODEC));
-    public static final Holder.Reference<ItemStorageType<?>> ENDER_CHEST_ITEM_CONTENTS_PROVIDER_TYPE = REGISTRIES.register(
+    public static final Holder.Reference<ItemStorageType<?>> ENDER_CHEST_ITEM_STORAGE_TYPE = REGISTRIES.register(
             ItemStorage.REGISTRY_KEY,
             "ender_chest",
             () -> new ItemStorageType<>(EnderChestStorage.CODEC));
-    public static final Holder.Reference<ItemStorageType<?>> BUNDLE_ITEM_CONTENTS_PROVIDER_TYPE = REGISTRIES.register(
-            ItemStorage.REGISTRY_KEY,
+    public static final Holder.Reference<ItemStorageType<?>> BUNDLE_ITEM_STORAGE_TYPE = REGISTRIES.register(ItemStorage.REGISTRY_KEY,
             "bundle",
             () -> new ItemStorageType<>(BundleContentsStorage.CODEC));
 
