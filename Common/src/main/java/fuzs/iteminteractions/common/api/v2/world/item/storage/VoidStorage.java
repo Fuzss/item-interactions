@@ -48,12 +48,12 @@ public class VoidStorage implements ItemStorage {
     }
 
     @Override
-    public boolean isItemAllowedInContainer(ItemStack stackToAdd) {
+    public boolean isItemAllowedInContainer(ItemStack otherItem) {
         return false;
     }
 
     @Override
-    public boolean canAddItem(ItemStack itemStack, ItemStack stackToAdd, Player player) {
+    public boolean canAddItem(ItemStack itemStack, ItemStack otherItem, Player player) {
         return false;
     }
 
@@ -63,7 +63,7 @@ public class VoidStorage implements ItemStorage {
     }
 
     @Override
-    public int getAcceptableItemCount(ItemStack itemStack, ItemStack stackToAdd, Player player) {
+    public int getAcceptableItemCount(ItemStack itemStack, ItemStack otherItem, Player player) {
         return 0;
     }
 

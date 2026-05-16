@@ -1,6 +1,8 @@
 package fuzs.iteminteractions.common.api.v2.world.item.storage;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import fuzs.iteminteractions.common.api.v2.world.inventory.tooltip.BundleContentsTooltip;
@@ -18,7 +20,6 @@ import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.BundleItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.BundleContents;
 import org.apache.commons.lang3.math.Fraction;
 
@@ -36,15 +37,16 @@ public class BundleContentsStorage extends ComponentBackedStorage {
     final int capacityMultiplier;
 
     public BundleContentsStorage() {
-        this(DEFAULT_CAPACITY_MULTIPLIER);
+        this(StorageOptions.DEFAULT);
     }
 
-    public BundleContentsStorage(int capacityMultiplier) {
-        this(capacityMultiplier, StorageOptions.DEFAULT);
+    public BundleContentsStorage(StorageOptions storageOptions) {
+        this(DEFAULT_CAPACITY_MULTIPLIER, storageOptions);
     }
 
     public BundleContentsStorage(int capacityMultiplier, StorageOptions storageOptions) {
         super(storageOptions);
+        Preconditions.checkArgument(capacityMultiplier > 0, "capacity multiplier must be positive");
         this.capacityMultiplier = capacityMultiplier;
     }
 
@@ -53,8 +55,17 @@ public class BundleContentsStorage extends ComponentBackedStorage {
                 .forGetter((T storage) -> storage.capacityMultiplier);
     }
 
-    public Fraction getCapacityMultiplier(ItemStack itemStack) {
-        return Fraction.getFraction(this.capacityMultiplier, DEFAULT_CAPACITY_MULTIPLIER);
+    public Fraction getMaxWeight(ItemStack itemStack) {
+        return Fraction.getFraction(this.capacityMultiplier, 1);
+    }
+
+    public Fraction getWeight(ItemStack itemStack) {
+        BundleContents contents = itemStack.getOrDefault(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY);
+        return BundleItem.getWeightSafe(contents);
+    }
+
+    public Fraction getRelativeWeight(ItemStack itemStack) {
+        return this.getWeight(itemStack).divideBy(this.getMaxWeight(itemStack));
     }
 
     @Override
@@ -111,14 +122,29 @@ public class BundleContentsStorage extends ComponentBackedStorage {
     }
 
     @Override
-    public boolean canAddItem(ItemStack itemStack, ItemStack stackToAdd, Player player) {
-        return this.getMaxAmountToAdd(itemStack, stackToAdd, player) > 0;
+    public boolean canAddItem(ItemStack itemStack, ItemStack otherItem, Player player) {
+        return this.getMaxAmountToAdd(itemStack, otherItem) > 0;
     }
 
     @Override
-    public int getAcceptableItemCount(ItemStack itemStack, ItemStack stackToAdd, Player player) {
-        return Math.min(this.getMaxAmountToAdd(itemStack, stackToAdd, player),
-                super.getAcceptableItemCount(itemStack, stackToAdd, player));
+    public int getAcceptableItemCount(ItemStack itemStack, ItemStack otherItem, Player player) {
+        return Math.min(this.getMaxAmountToAdd(itemStack, otherItem),
+                super.getAcceptableItemCount(itemStack, otherItem, player));
+    }
+
+    /**
+     * @see BundleContents.Mutable#getMaxAmountToAdd(Fraction)
+     * @see BundleContents.Mutable#tryInsert(ItemStack)
+     */
+    public int getMaxAmountToAdd(ItemStack itemStack, ItemStack otherItem) {
+        Fraction itemWeight = this.getWeight(itemStack);
+        Fraction remainingWeight = this.getMaxWeight(itemStack).subtract(itemWeight);
+        DataResult<Fraction> otherItemWeight = BundleContents.getWeight(otherItem);
+        if (otherItemWeight.isError()) {
+            return 0;
+        } else {
+            return Math.max(remainingWeight.divideBy(otherItemWeight.getOrThrow()).intValue(), 0);
+        }
     }
 
     /**
@@ -156,37 +182,34 @@ public class BundleContentsStorage extends ComponentBackedStorage {
     public TooltipComponent createTooltipImageComponent(ItemStack itemStack, Player player, NonNullList<ItemStack> itemList) {
         BundleContents contents = itemStack.getOrDefault(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY);
         return new BundleContentsTooltip(contents,
+                this.getRelativeWeight(itemStack),
                 this.getGridWidth(contents.size()),
                 this.getGridHeight(contents.size()));
     }
 
+    /**
+     * @see net.minecraft.world.item.BundleItem#isBarVisible(ItemStack)
+     */
     @Override
     public Optional<Boolean> isBarVisible(ItemStack itemStack, Player player) {
-        return Optional.of(Items.BUNDLE.isBarVisible(itemStack));
-    }
-
-    @Override
-    public OptionalInt getBarWidth(ItemStack itemStack, Player player) {
-        return OptionalInt.of(Items.BUNDLE.getBarWidth(itemStack));
-    }
-
-    @Override
-    public OptionalInt getBarColor(ItemStack itemStack, Player player) {
-        return OptionalInt.of(Items.BUNDLE.getBarColor(itemStack));
+        return Optional.of(this.getRelativeWeight(itemStack).compareTo(Fraction.ZERO) > 0);
     }
 
     /**
-     * @see BundleContents.Mutable#getMaxAmountToAdd(Fraction)
+     * @see net.minecraft.world.item.BundleItem#getBarWidth(ItemStack)
      */
-    public int getMaxAmountToAdd(ItemStack itemStack, ItemStack stackToAdd, Player player) {
-        Fraction fraction = this.getCapacityMultiplier(itemStack)
-                .subtract(this.computeContentWeight(itemStack, player));
-        return Math.max(fraction.divideBy(BundleContents.getWeight(stackToAdd).getOrThrow()).intValue(), 0);
+    @Override
+    public OptionalInt getBarWidth(ItemStack itemStack, Player player) {
+        return OptionalInt.of(Math.min(1 + Mth.mulAndTruncate(this.getRelativeWeight(itemStack), 12), 13));
     }
 
-    public Fraction computeContentWeight(ItemStack itemStack, Player player) {
-        BundleContents contents = itemStack.getOrDefault(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY);
-        return BundleContents.computeContentWeight(contents.items()).getOrThrow();
+    /**
+     * @see net.minecraft.world.item.BundleItem#getBarColor(ItemStack)
+     */
+    @Override
+    public OptionalInt getBarColor(ItemStack itemStack, Player player) {
+        boolean isFull = this.getRelativeWeight(itemStack).compareTo(Fraction.ONE) >= 0;
+        return OptionalInt.of(isFull ? BundleItem.FULL_BAR_COLOR : BundleItem.BAR_COLOR);
     }
 
     @Override

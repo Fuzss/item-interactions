@@ -114,7 +114,7 @@ public interface ContainerItemStorage extends ItemStorage {
     }
 
     @Override
-    default boolean isItemAllowedInContainer(ItemStack stackToAdd) {
+    default boolean isItemAllowedInContainer(ItemStack otherItem) {
         return true;
     }
 
@@ -126,13 +126,13 @@ public interface ContainerItemStorage extends ItemStorage {
     SimpleContainer getItemContainer(ItemStack itemStack, Player player, boolean isMutable);
 
     @Override
-    default boolean canAddItem(ItemStack itemStack, ItemStack stackToAdd, Player player) {
-        return this.getItemContainer(itemStack, player, false).canAddItem(stackToAdd);
+    default boolean canAddItem(ItemStack itemStack, ItemStack otherItem, Player player) {
+        return this.getItemContainer(itemStack, player, false).canAddItem(otherItem);
     }
 
     @Override
-    default int getAcceptableItemCount(ItemStack itemStack, ItemStack stackToAdd, Player player) {
-        return stackToAdd.getCount();
+    default int getAcceptableItemCount(ItemStack itemStack, ItemStack otherItem, Player player) {
+        return otherItem.getCount();
     }
 
     /**

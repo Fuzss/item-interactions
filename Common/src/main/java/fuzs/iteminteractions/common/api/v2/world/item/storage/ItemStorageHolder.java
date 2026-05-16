@@ -81,46 +81,46 @@ public record ItemStorageHolder(ItemStorage storage) {
      * Can the container item accept another item, checks for the player being allowed to interact as well as the
      * container item being able to hold the other item.
      *
-     * @param itemStack  the item stack providing the container to add <code>stackToAdd</code> to
-     * @param stackToAdd the stack to be added to the container
-     * @param player     the player interacting with both item stacks
+     * @param itemStack the item stack providing the container to add <code>stackToAdd</code> to
+     * @param otherItem the stack to be added to the container
+     * @param player    the player interacting with both item stacks
      * @return can the item be added
      */
-    public boolean canAcceptItem(ItemStack itemStack, ItemStack stackToAdd, Player player) {
-        return !stackToAdd.isEmpty() && this.isPresentFor(itemStack, player) && this.storage()
-                .isItemAllowedInContainer(stackToAdd);
+    public boolean canAcceptItem(ItemStack itemStack, ItemStack otherItem, Player player) {
+        return !otherItem.isEmpty() && this.isPresentFor(itemStack, player) && this.storage()
+                .isItemAllowedInContainer(otherItem);
     }
 
     /**
      * Is there enough space in the container provided by <code>containerStack</code> to add <code>stack</code> (not
      * necessarily the full stack).
      *
-     * @param itemStack  the item stack providing the container to add <code>stack</code> to
-     * @param stackToAdd the stack to be added to the container
-     * @param player     the player interacting with both items
+     * @param itemStack the item stack providing the container to add <code>stack</code> to
+     * @param otherItem the stack to be added to the container
+     * @param player    the player interacting with both items
      * @return is adding any portion of <code>stackToAdd</code> to the container possible
      */
-    public boolean canAddItem(ItemStack itemStack, ItemStack stackToAdd, Player player) {
-        return this.canAcceptItem(itemStack, stackToAdd, player) && this.storage()
-                .canAddItem(itemStack, stackToAdd, player);
+    public boolean canAddItem(ItemStack itemStack, ItemStack otherItem, Player player) {
+        return this.canAcceptItem(itemStack, otherItem, player) && this.storage()
+                .canAddItem(itemStack, otherItem, player);
     }
 
     /**
      * Is there any item of the same type as <code>stackToAdd</code> already in the container provided by
      * <code>containerStack</code>.
      *
-     * @param itemStack  the item stack providing the container to add <code>stack</code> to
-     * @param stackToAdd the stack to be searched for in the container
-     * @param player     the player interacting with both items
+     * @param itemStack the item stack providing the container to add <code>stack</code> to
+     * @param otherItem the stack to be searched for in the container
+     * @param player    the player interacting with both items
      * @return is any item of the same type as <code>stackToAdd</code> already in the container
      */
-    public boolean hasAnyOf(ItemStack itemStack, ItemStack stackToAdd, Player player, boolean isSameComponents) {
-        return this.canAcceptItem(itemStack, stackToAdd, player) && this.getItemContainer(itemStack, player)
+    public boolean hasAnyOf(ItemStack itemStack, ItemStack otherItem, Player player, boolean isSameComponents) {
+        return this.canAcceptItem(itemStack, otherItem, player) && this.getItemContainer(itemStack, player)
                 .hasAnyMatching((ItemStack item) -> {
                     if (isSameComponents) {
-                        return ItemStack.isSameItemSameComponents(item, stackToAdd);
+                        return ItemStack.isSameItemSameComponents(item, otherItem);
                     } else {
-                        return ItemStack.isSameItem(item, stackToAdd);
+                        return ItemStack.isSameItem(item, otherItem);
                     }
                 });
     }

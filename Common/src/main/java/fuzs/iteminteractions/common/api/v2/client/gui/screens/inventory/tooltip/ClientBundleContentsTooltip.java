@@ -15,11 +15,13 @@ import org.apache.commons.lang3.math.Fraction;
 import java.util.List;
 
 public class ClientBundleContentsTooltip extends ClientBundleTooltip {
+    private final Fraction weight;
     private final int gridWidth;
     private final int gridHeight;
 
     public ClientBundleContentsTooltip(BundleContentsTooltip tooltip) {
         super(tooltip.contents());
+        this.weight = tooltip.weight();
         this.gridWidth = tooltip.gridWidth();
         this.gridHeight = tooltip.gridHeight();
     }
@@ -27,6 +29,11 @@ public class ClientBundleContentsTooltip extends ClientBundleTooltip {
     @Override
     public int getWidth(Font font) {
         return this.contents.isEmpty() ? super.getWidth(font) : this.gridSizeX() * SLOT_SIZE;
+    }
+
+    @Override
+    public boolean showTooltipWithItemInHand() {
+        return !ItemInteractions.CONFIG.get(ClientConfig.class).itemHeldByCursorTooltip.isUsed();
     }
 
     /**
@@ -50,9 +57,16 @@ public class ClientBundleContentsTooltip extends ClientBundleTooltip {
         return this.contents.size();
     }
 
+    /**
+     * @see ClientBundleTooltip#extractImage(Font, int, int, int, int, GuiGraphicsExtractor)
+     */
     @Override
-    public boolean showTooltipWithItemInHand() {
-        return !ItemInteractions.CONFIG.get(ClientConfig.class).itemHeldByCursorTooltip.isUsed();
+    public void extractImage(Font font, int x, int y, int w, int h, GuiGraphicsExtractor graphics) {
+        if (this.contents.isEmpty()) {
+            extractEmptyBundleTooltip(font, x, y, w, h, graphics);
+        } else {
+            this.extractBundleWithItemsTooltip(font, x, y, w, h, graphics, this.weight);
+        }
     }
 
     @Override

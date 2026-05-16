@@ -91,10 +91,10 @@ public interface ItemStorage {
      * <p>
      * This should be the same behavior as vanilla's {@link Item#canFitInsideContainerItems()}.
      *
-     * @param stackToAdd the stack to be added to the container
+     * @param otherItem the stack to be added to the container
      * @return is <code>stack</code> allowed to be added to the container
      */
-    boolean isItemAllowedInContainer(ItemStack stackToAdd);
+    boolean isItemAllowedInContainer(ItemStack otherItem);
 
     /**
      * Get the container implementation provided by <code>containerStack</code> as a {@link SimpleContainer}, must not
@@ -110,12 +110,12 @@ public interface ItemStorage {
      * Is there enough space in the container provided by <code>containerStack</code> to add <code>stack</code> (not
      * necessarily the full stack).
      *
-     * @param itemStack  the item stack providing the container to add <code>stack</code> to
-     * @param stackToAdd the stack to be added to the container
-     * @param player     the player interacting with both items
+     * @param itemStack the item stack providing the container to add <code>stack</code> to
+     * @param otherItem the stack to be added to the container
+     * @param player    the player interacting with both items
      * @return is adding any portion of <code>stackToAdd</code> to the container possible
      */
-    boolean canAddItem(ItemStack itemStack, ItemStack stackToAdd, Player player);
+    boolean canAddItem(ItemStack itemStack, ItemStack otherItem, Player player);
 
     /**
      * How much space is available in the container provided by <code>containerStack</code> to add
@@ -126,12 +126,12 @@ public interface ItemStorage {
      * Before this is called {@link #canPlayerInteractWith(ItemStack, Player)} and
      * {@link #isItemAllowedInContainer(ItemStack)} are checked.
      *
-     * @param itemStack  the item stack providing the container to add <code>stackToAdd</code> to
-     * @param stackToAdd the stack to be added to the container
-     * @param player     the player interacting with both item stacks
+     * @param itemStack the item stack providing the container to add <code>stackToAdd</code> to
+     * @param otherItem the stack to be added to the container
+     * @param player    the player interacting with both item stacks
      * @return the portion of <code>stackToAdd</code> that can be added to the container
      */
-    int getAcceptableItemCount(ItemStack itemStack, ItemStack stackToAdd, Player player);
+    int getAcceptableItemCount(ItemStack itemStack, ItemStack otherItem, Player player);
 
     /**
      * The image tooltip provided by the item stack.

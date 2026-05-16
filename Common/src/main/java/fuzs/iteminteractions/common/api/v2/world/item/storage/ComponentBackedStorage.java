@@ -21,8 +21,8 @@ public abstract class ComponentBackedStorage implements VisualItemStorage {
     public abstract boolean hasContents(ItemStack itemStack);
 
     @Override
-    public boolean isItemAllowedInContainer(ItemStack stackToAdd) {
-        return this.storageOptions.canFitInsideContainerItem(stackToAdd);
+    public boolean isItemAllowedInContainer(ItemStack otherItem) {
+        return this.storageOptions.canFitInsideContainerItem(otherItem);
     }
 
     @Override
