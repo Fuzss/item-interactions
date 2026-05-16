@@ -7,6 +7,7 @@ import fuzs.iteminteractions.common.impl.world.item.component.SelectedItem;
 import it.unimi.dsi.fastutil.ints.IntLinkedOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.ints.IntSets;
+import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -28,7 +29,7 @@ public final class ItemStackingContext {
      * @see BundleContents.Mutable#tryInsert(ItemStack)
      */
     public int tryInsert(ItemStack itemStack, ItemStack otherItem) {
-        return this.tryInsert(itemStack, otherItem, this.storage.getSelectedItem(itemStack));
+        return this.tryInsert(itemStack, otherItem, this.storage.getPrioritizedSlot(itemStack));
     }
 
     public int tryInsert(ItemStack itemStack, ItemStack otherItem, int prioritizedSlot) {
@@ -37,7 +38,7 @@ public final class ItemStackingContext {
             Container container = this.storage.getItemContainer(itemStack, this.player, true);
             ItemStack item = otherItem.copyWithCount(itemLimit);
             ItemSlot itemSlot = this.addItem(container, item, prioritizedSlot);
-            this.storage.setSelectedItem(itemStack, itemSlot.slotNum());
+            this.storage.setPrioritizedSlot(itemStack, itemSlot.slotNum());
             return item.getCount() - itemSlot.item().getCount();
         } else {
             return 0;
@@ -55,7 +56,7 @@ public final class ItemStackingContext {
      */
     public ItemSlot removeOne(ItemStack itemStack, ItemStack otherItem) {
         Container container = this.storage.getItemContainer(itemStack, this.player, true);
-        int slotNum = this.updateSelectedSlot(container, itemStack, otherItem);
+        int slotNum = this.updatePrioritizedSlot(container, itemStack, otherItem);
         if (slotNum != SelectedItem.DEFAULT_SELECTED_ITEM) {
             ItemStack item = container.getItem(slotNum);
             int removalCount = this.getItemCountLimit(item);
@@ -70,21 +71,24 @@ public final class ItemStackingContext {
         return this.storage.extractSingleItemOnly(this.player) ? Math.min(1, itemLimit) : itemLimit;
     }
 
-    private int updateSelectedSlot(Container container, ItemStack itemStack, ItemStack otherItem) {
-        int selectedItem = this.updatePreviousSelectedSlot(container, itemStack, otherItem);
-        if (selectedItem != SelectedItem.DEFAULT_SELECTED_ITEM) {
-            return selectedItem;
+    private int updatePrioritizedSlot(Container container, ItemStack itemStack, ItemStack otherItem) {
+        int prioritizedSlot = this.updatePreviousPrioritizedSlot(container, itemStack, otherItem);
+        if (prioritizedSlot != SelectedItem.DEFAULT_SELECTED_ITEM) {
+            return prioritizedSlot;
         }
 
-        for (int slotNum = container.getContainerSize() - 1; slotNum >= 0; slotNum--) {
+        int offsetDirection = this.storage.getRemovalDirection().getStep();
+        int startNum = (-1 + offsetDirection) / 2;
+        for (int i = 0; i < container.getContainerSize(); i++) {
+            int slotNum = Mth.positiveModulo(startNum + i * offsetDirection, container.getContainerSize());
             ItemStack item = container.getItem(slotNum);
             if (!item.isEmpty() && this.canCombineItemsInSlot(otherItem, container, slotNum, item)) {
                 // When we empty the slot, cycle to a different one.
                 if (item.getCount() <= this.getItemCountLimit(item)) {
-                    this.storage.setSelectedItem(itemStack, SelectedItem.DEFAULT_SELECTED_ITEM);
+                    this.storage.setPrioritizedSlot(itemStack, SelectedItem.DEFAULT_SELECTED_ITEM);
                 } else {
                     // Otherwise, when not empty, set this as the newly selected item.
-                    this.storage.setSelectedItem(itemStack, slotNum);
+                    this.storage.setPrioritizedSlot(itemStack, slotNum);
                 }
 
                 return slotNum;
@@ -94,20 +98,20 @@ public final class ItemStackingContext {
         return SelectedItem.DEFAULT_SELECTED_ITEM;
     }
 
-    private int updatePreviousSelectedSlot(Container container, ItemStack itemStack, ItemStack otherItem) {
-        int selectedItem = this.storage.getSelectedItem(itemStack);
-        if (selectedItem >= 0 && selectedItem < container.getContainerSize()) {
-            ItemStack item = container.getItem(selectedItem);
-            if (!item.isEmpty() && this.canCombineItemsInSlot(otherItem, container, selectedItem, item)) {
+    private int updatePreviousPrioritizedSlot(Container container, ItemStack itemStack, ItemStack otherItem) {
+        int prioritizedSlot = this.storage.getPrioritizedSlot(itemStack);
+        if (prioritizedSlot >= 0 && prioritizedSlot < container.getContainerSize()) {
+            ItemStack item = container.getItem(prioritizedSlot);
+            if (!item.isEmpty() && this.canCombineItemsInSlot(otherItem, container, prioritizedSlot, item)) {
                 // When we empty the slot, cycle to a different one.
                 if (item.getCount() <= this.getItemCountLimit(item)) {
                     int updatedSelectedItem = this.storage.scrollSelectedItem(itemStack,
                             container,
-                            new Vector2i(-1, 0));
-                    this.storage.setSelectedItem(itemStack, updatedSelectedItem);
+                            new Vector2i(this.storage.getRemovalDirection().getStep(), 0));
+                    this.storage.setPrioritizedSlot(itemStack, updatedSelectedItem);
                 }
 
-                return selectedItem;
+                return prioritizedSlot;
             }
         }
 
@@ -153,7 +157,7 @@ public final class ItemStackingContext {
             }
         }
 
-        return -1;
+        return SelectedItem.DEFAULT_SELECTED_ITEM;
     }
 
     /**
@@ -174,7 +178,7 @@ public final class ItemStackingContext {
             }
         }
 
-        return -1;
+        return SelectedItem.DEFAULT_SELECTED_ITEM;
     }
 
     /**

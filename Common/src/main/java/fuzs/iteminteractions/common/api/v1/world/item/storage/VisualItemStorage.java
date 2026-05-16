@@ -50,8 +50,8 @@ public interface VisualItemStorage extends ContainerItemStorage {
     @Override
     default OptionalInt getBarColor(ItemStack itemStack, Player player) {
         Container container = this.getItemContainer(itemStack, player);
-        boolean isFull = this.nonEmptySlots(container) < container.getContainerSize();
-        return OptionalInt.of(isFull ? BundleItem.BAR_COLOR : BundleItem.FULL_BAR_COLOR);
+        boolean hasRemainingCapacity = this.nonEmptySlots(container) < container.getContainerSize();
+        return OptionalInt.of(hasRemainingCapacity ? BundleItem.BAR_COLOR : BundleItem.FULL_BAR_COLOR);
     }
 
     private int nonEmptySlots(Container container) {

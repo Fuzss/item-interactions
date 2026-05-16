@@ -6,6 +6,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import fuzs.iteminteractions.common.api.v1.world.inventory.tooltip.BundleContentsTooltip;
 import fuzs.iteminteractions.common.impl.init.ModRegistry;
 import fuzs.puzzleslib.common.api.container.v1.ContainerMenuHelper;
+import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.util.ExtraCodecs;
@@ -30,11 +31,12 @@ public class BundleContentsStorage extends ComponentBackedStorage {
         return instance.group(capacityMultiplierCodec(), itemContentsCodec())
                 .apply(instance, BundleContentsStorage::new);
     });
+    public static final int DEFAULT_CAPACITY_MULTIPLIER = 1;
 
     final int capacityMultiplier;
 
     public BundleContentsStorage() {
-        this(1);
+        this(DEFAULT_CAPACITY_MULTIPLIER);
     }
 
     public BundleContentsStorage(int capacityMultiplier) {
@@ -52,7 +54,7 @@ public class BundleContentsStorage extends ComponentBackedStorage {
     }
 
     public Fraction getCapacityMultiplier(ItemStack itemStack) {
-        return Fraction.getFraction(this.capacityMultiplier, 1);
+        return Fraction.getFraction(this.capacityMultiplier, DEFAULT_CAPACITY_MULTIPLIER);
     }
 
     @Override
@@ -67,35 +69,45 @@ public class BundleContentsStorage extends ComponentBackedStorage {
 
     @Override
     public SimpleContainer getItemContainer(ItemStack itemStack, boolean isMutable) {
-        BundleContents contents = itemStack.getOrDefault(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY);
-        // TODO make this add in front again
-        // Add one additional slot at the front, so we can add items in the inventory.
-        // Adding items at the front is consistent with vanilla behavior.
-        ItemStack[] itemStacks = Stream.concat(contents.itemCopyStream(), Stream.of(ItemStack.EMPTY))
-                .toArray(ItemStack[]::new);
-        NonNullList<ItemStack> itemList = NonNullList.of(ItemStack.EMPTY, itemStacks);
+        NonNullList<ItemStack> itemList = NonNullList.of(ItemStack.EMPTY,
+                this.getItemStream(itemStack, isMutable).toArray(ItemStack[]::new));
         return ContainerMenuHelper.createListBackedContainer(itemList, (Container container) -> {
-            if (!isMutable) {
+            if (isMutable) {
+                itemStack.set(DataComponents.BUNDLE_CONTENTS, this.createUpdatedContents(container, itemList));
+            } else {
                 throw new UnsupportedOperationException();
             }
+        });
+    }
 
-            BundleContents updatedContents;
-            if (container.isEmpty()) {
-                updatedContents = BundleContents.EMPTY;
-            } else {
-                // empty stacks must not get in here, the codec will fail otherwise
-                ImmutableList.Builder<ItemStackTemplate> builder = ImmutableList.builder();
-                for (ItemStack item : itemList) {
-                    if (!item.isEmpty()) {
-                        builder.add(ItemStackTemplate.fromNonEmptyStack(item));
-                    }
+    private Stream<ItemStack> getItemStream(ItemStack itemStack, boolean isMutable) {
+        Stream<ItemStack> itemStream = itemStack.getOrDefault(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY)
+                .itemCopyStream();
+        if (isMutable) {
+            // Add one additional slot, so we can add items in the inventory.
+            return switch (this.getRemovalDirection()) {
+                case POSITIVE -> Stream.concat(Stream.of(ItemStack.EMPTY), itemStream);
+                case NEGATIVE -> Stream.concat(itemStream, Stream.of(ItemStack.EMPTY));
+            };
+        } else {
+            return itemStream;
+        }
+    }
+
+    private BundleContents createUpdatedContents(Container container, NonNullList<ItemStack> itemList) {
+        if (container.isEmpty()) {
+            return BundleContents.EMPTY;
+        } else {
+            ImmutableList.Builder<ItemStackTemplate> builder = ImmutableList.builder();
+            for (ItemStack item : itemList) {
+                if (!item.isEmpty()) {
+                    builder.add(ItemStackTemplate.fromNonEmptyStack(item));
                 }
-
-                updatedContents = new BundleContents(builder.build());
             }
 
-            itemStack.set(DataComponents.BUNDLE_CONTENTS, updatedContents);
-        });
+            // We discard the selected item, but as this is only triggered when the container has changed, the selected item would have been erased anyways in vanilla.
+            return new BundleContents(builder.build());
+        }
     }
 
     @Override
@@ -107,6 +119,16 @@ public class BundleContentsStorage extends ComponentBackedStorage {
     public int getAcceptableItemCount(ItemStack itemStack, ItemStack stackToAdd, Player player) {
         return Math.min(this.getMaxAmountToAdd(itemStack, stackToAdd, player),
                 super.getAcceptableItemCount(itemStack, stackToAdd, player));
+    }
+
+    /**
+     * Adding items at the front is consistent with vanilla behavior.
+     * <p>
+     * This requires additional handling when dealing with the selected item.
+     */
+    @Override
+    public Direction.AxisDirection getRemovalDirection() {
+        return Direction.AxisDirection.POSITIVE;
     }
 
     @Override

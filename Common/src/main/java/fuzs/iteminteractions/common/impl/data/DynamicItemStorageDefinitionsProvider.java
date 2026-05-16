@@ -25,7 +25,8 @@ public class DynamicItemStorageDefinitionsProvider extends AbstractItemStorageDe
                 new ContainerStorage(9, 3, null, StorageOptions.DEFAULT.setFilterContainerItems()),
                 ItemTags.SHULKER_BOXES);
         this.add(ItemInteractions.id("bundle"),
-                new BundleContentsStorage(1, StorageOptions.DEFAULT.setFilterContainerItems()),
+                new BundleContentsStorage(BundleContentsStorage.DEFAULT_CAPACITY_MULTIPLIER,
+                        StorageOptions.DEFAULT.setFilterContainerItems()),
                 Items.BUNDLE);
     }
 }

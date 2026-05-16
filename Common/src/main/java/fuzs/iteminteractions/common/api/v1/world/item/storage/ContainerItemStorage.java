@@ -4,6 +4,7 @@ import fuzs.iteminteractions.common.impl.init.ModRegistry;
 import fuzs.iteminteractions.common.impl.world.inventory.ItemSlot;
 import fuzs.iteminteractions.common.impl.world.item.component.SelectedItem;
 import fuzs.iteminteractions.common.impl.world.item.container.ItemStackingContext;
+import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
@@ -45,6 +46,25 @@ public interface ContainerItemStorage extends ItemStorage {
         }
     }
 
+    default int getPrioritizedSlot(ItemStack itemStack) {
+        int prioritizedSlot = this.getSelectedItem(itemStack);
+        if (this.offsetPrioritizedSlot(prioritizedSlot)) {
+            return prioritizedSlot + 1;
+        } else {
+            return prioritizedSlot;
+        }
+    }
+
+    default void setPrioritizedSlot(ItemStack itemStack, int prioritizedSlot) {
+        this.setSelectedItem(itemStack,
+                this.offsetPrioritizedSlot(prioritizedSlot) ? prioritizedSlot - 1 : prioritizedSlot);
+    }
+
+    default boolean offsetPrioritizedSlot(int prioritizedSlot) {
+        return prioritizedSlot != SelectedItem.DEFAULT_SELECTED_ITEM
+                && this.getRemovalDirection() == Direction.AxisDirection.POSITIVE;
+    }
+
     @Override
     default int scrollSelectedItem(ItemStack itemStack, Container container, Vector2ic scrollXY) {
         int selectedItem = this.getSelectedItem(itemStack);
@@ -79,7 +99,8 @@ public interface ContainerItemStorage extends ItemStorage {
             }
 
             selectedItem = y * gridWidth + x;
-            if (selectedItem < container.getContainerSize() && !container.getItem(selectedItem).isEmpty()) {
+            if (selectedItem >= 0 && selectedItem < container.getContainerSize() && !container.getItem(selectedItem)
+                    .isEmpty()) {
                 return selectedItem;
             }
         }
@@ -219,6 +240,10 @@ public interface ContainerItemStorage extends ItemStorage {
      */
     default void broadcastChangesOnContainerMenu(ItemStack itemStack, Player player) {
         player.containerMenu.slotsChanged(player.getInventory());
+    }
+
+    default Direction.AxisDirection getRemovalDirection() {
+        return Direction.AxisDirection.NEGATIVE;
     }
 
     /**
