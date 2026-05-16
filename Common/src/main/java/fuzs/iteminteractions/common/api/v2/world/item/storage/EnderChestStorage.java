@@ -1,8 +1,8 @@
-package fuzs.iteminteractions.common.api.v1.world.item.storage;
+package fuzs.iteminteractions.common.api.v2.world.item.storage;
 
 import com.mojang.serialization.MapCodec;
-import fuzs.iteminteractions.common.api.v1.world.inventory.tooltip.ItemContentsTooltip;
-import fuzs.iteminteractions.common.api.v1.world.item.DyeBackedColor;
+import fuzs.iteminteractions.common.api.v2.world.inventory.tooltip.ItemContentsTooltip;
+import fuzs.iteminteractions.common.api.v2.world.item.DyeBackedColor;
 import fuzs.iteminteractions.common.impl.handler.EnderChestSyncHandler;
 import fuzs.iteminteractions.common.impl.init.ModRegistry;
 import net.minecraft.core.NonNullList;

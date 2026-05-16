@@ -1,7 +1,7 @@
-package fuzs.iteminteractions.common.api.v1.client.gui.screens.inventory.tooltip;
+package fuzs.iteminteractions.common.api.v2.client.gui.screens.inventory.tooltip;
 
-import fuzs.iteminteractions.common.api.v1.world.inventory.tooltip.ItemContentsTooltip;
-import fuzs.iteminteractions.common.api.v1.world.item.DyeBackedColor;
+import fuzs.iteminteractions.common.api.v2.world.inventory.tooltip.ItemContentsTooltip;
+import fuzs.iteminteractions.common.api.v2.world.item.DyeBackedColor;
 import fuzs.iteminteractions.common.impl.ItemInteractions;
 import fuzs.iteminteractions.common.impl.config.ClientConfig;
 import fuzs.iteminteractions.common.impl.config.SlotHighlight;

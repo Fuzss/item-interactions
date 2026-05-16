@@ -2,8 +2,8 @@ package fuzs.iteminteractions.common.impl.world.item.container;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import fuzs.iteminteractions.common.api.v1.world.item.storage.ItemStorage;
-import fuzs.iteminteractions.common.api.v1.world.item.storage.ItemStorageHolder;
+import fuzs.iteminteractions.common.api.v2.world.item.storage.ItemStorage;
+import fuzs.iteminteractions.common.api.v2.world.item.storage.ItemStorageHolder;
 import fuzs.iteminteractions.common.impl.ItemInteractions;
 import fuzs.iteminteractions.common.impl.network.ClientboundSyncItemStorage;
 import fuzs.puzzleslib.common.api.network.v4.MessageSender;

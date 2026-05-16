@@ -1,6 +1,6 @@
 package fuzs.iteminteractions.common.impl.handler;
 
-import fuzs.iteminteractions.common.api.v1.world.item.storage.ItemStorageHolder;
+import fuzs.iteminteractions.common.api.v2.world.item.storage.ItemStorageHolder;
 import fuzs.puzzleslib.common.api.event.v1.core.EventResult;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Player;

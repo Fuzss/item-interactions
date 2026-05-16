@@ -1,6 +1,6 @@
 package fuzs.iteminteractions.common.impl.network;
 
-import fuzs.iteminteractions.common.api.v1.world.item.storage.ItemStorage;
+import fuzs.iteminteractions.common.api.v2.world.item.storage.ItemStorage;
 import fuzs.iteminteractions.common.impl.world.item.container.ItemStorageManager;
 import fuzs.puzzleslib.common.api.network.v4.message.MessageListener;
 import fuzs.puzzleslib.common.api.network.v4.message.play.ClientboundPlayMessage;

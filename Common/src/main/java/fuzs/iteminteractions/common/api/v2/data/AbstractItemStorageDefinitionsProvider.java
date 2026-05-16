@@ -1,6 +1,6 @@
-package fuzs.iteminteractions.common.api.v1.data;
+package fuzs.iteminteractions.common.api.v2.data;
 
-import fuzs.iteminteractions.common.api.v1.world.item.storage.ItemStorage;
+import fuzs.iteminteractions.common.api.v2.world.item.storage.ItemStorage;
 import fuzs.iteminteractions.common.impl.world.item.container.ItemStorageManager;
 import fuzs.puzzleslib.common.api.data.v2.core.DataProviderContext;
 import net.minecraft.core.Holder;

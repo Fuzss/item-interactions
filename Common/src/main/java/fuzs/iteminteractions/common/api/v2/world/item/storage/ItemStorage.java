@@ -1,4 +1,4 @@
-package fuzs.iteminteractions.common.api.v1.world.item.storage;
+package fuzs.iteminteractions.common.api.v2.world.item.storage;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;

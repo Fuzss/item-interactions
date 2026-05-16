@@ -1,6 +1,6 @@
 package fuzs.iteminteractions.common.impl.network.client;
 
-import fuzs.iteminteractions.common.api.v1.world.item.storage.ItemStorageHolder;
+import fuzs.iteminteractions.common.api.v2.world.item.storage.ItemStorageHolder;
 import fuzs.puzzleslib.common.api.network.v4.message.MessageListener;
 import fuzs.puzzleslib.common.api.network.v4.message.play.ServerboundPlayMessage;
 import net.minecraft.network.FriendlyByteBuf;

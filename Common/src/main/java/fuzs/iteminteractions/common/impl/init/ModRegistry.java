@@ -1,6 +1,6 @@
 package fuzs.iteminteractions.common.impl.init;
 
-import fuzs.iteminteractions.common.api.v1.world.item.storage.*;
+import fuzs.iteminteractions.common.api.v2.world.item.storage.*;
 import fuzs.iteminteractions.common.impl.ItemInteractions;
 import fuzs.iteminteractions.common.impl.world.item.component.SelectedItem;
 import fuzs.puzzleslib.common.api.attachment.v4.DataAttachmentRegistry;

@@ -2,7 +2,7 @@ package fuzs.iteminteractions.common.impl.client.gui;
 
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.InputConstants;
-import fuzs.iteminteractions.common.api.v1.world.item.storage.ItemStorageHolder;
+import fuzs.iteminteractions.common.api.v2.world.item.storage.ItemStorageHolder;
 import fuzs.iteminteractions.common.impl.ItemInteractions;
 import fuzs.iteminteractions.common.impl.config.ClientConfig;
 import fuzs.iteminteractions.common.impl.config.ServerConfig;

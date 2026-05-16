@@ -1,10 +1,10 @@
 package fuzs.iteminteractions.common.impl.data;
 
-import fuzs.iteminteractions.common.api.v1.data.AbstractItemStorageDefinitionsProvider;
-import fuzs.iteminteractions.common.api.v1.world.item.storage.BundleContentsStorage;
-import fuzs.iteminteractions.common.api.v1.world.item.storage.ContainerStorage;
-import fuzs.iteminteractions.common.api.v1.world.item.storage.EnderChestStorage;
-import fuzs.iteminteractions.common.api.v1.world.item.storage.StorageOptions;
+import fuzs.iteminteractions.common.api.v2.data.AbstractItemStorageDefinitionsProvider;
+import fuzs.iteminteractions.common.api.v2.world.item.storage.BundleContentsStorage;
+import fuzs.iteminteractions.common.api.v2.world.item.storage.ContainerStorage;
+import fuzs.iteminteractions.common.api.v2.world.item.storage.EnderChestStorage;
+import fuzs.iteminteractions.common.api.v2.world.item.storage.StorageOptions;
 import fuzs.iteminteractions.common.impl.ItemInteractions;
 import fuzs.puzzleslib.common.api.data.v2.core.DataProviderContext;
 import net.minecraft.core.HolderLookup;

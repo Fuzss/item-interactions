@@ -1,9 +1,9 @@
 package fuzs.iteminteractions.common.impl.client;
 
 import com.google.common.collect.ImmutableMap;
-import fuzs.iteminteractions.common.api.v1.client.gui.screens.inventory.tooltip.ClientBundleContentsTooltip;
-import fuzs.iteminteractions.common.api.v1.client.gui.screens.inventory.tooltip.ClientItemContentsTooltip;
-import fuzs.iteminteractions.common.api.v1.world.inventory.tooltip.BundleContentsTooltip;
+import fuzs.iteminteractions.common.api.v2.client.gui.screens.inventory.tooltip.ClientBundleContentsTooltip;
+import fuzs.iteminteractions.common.api.v2.client.gui.screens.inventory.tooltip.ClientItemContentsTooltip;
+import fuzs.iteminteractions.common.api.v2.world.inventory.tooltip.BundleContentsTooltip;
 import fuzs.iteminteractions.common.impl.client.gui.ItemStorageMouseActions;
 import fuzs.iteminteractions.common.impl.client.gui.screens.inventory.tooltip.CollapsibleClientTooltipComponent;
 import fuzs.iteminteractions.common.impl.client.handler.ClientEventHandler;
@@ -79,7 +79,7 @@ public class ItemInteractionsClient implements ClientModConstructor {
 
     @Override
     public void onRegisterClientTooltipComponents(ClientTooltipComponentsContext context) {
-        context.registerClientTooltipComponent(fuzs.iteminteractions.common.api.v1.world.inventory.tooltip.ItemContentsTooltip.class,
+        context.registerClientTooltipComponent(fuzs.iteminteractions.common.api.v2.world.inventory.tooltip.ItemContentsTooltip.class,
                 CollapsibleClientTooltipComponent.wrapFactory(ClientItemContentsTooltip::new));
         context.registerClientTooltipComponent(BundleContentsTooltip.class,
                 CollapsibleClientTooltipComponent.wrapFactory(ClientBundleContentsTooltip::new));

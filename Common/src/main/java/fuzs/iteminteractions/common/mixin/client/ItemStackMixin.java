@@ -1,6 +1,6 @@
 package fuzs.iteminteractions.common.mixin.client;
 
-import fuzs.iteminteractions.common.api.v1.world.item.storage.ItemStorageHolder;
+import fuzs.iteminteractions.common.api.v2.world.item.storage.ItemStorageHolder;
 import fuzs.iteminteractions.common.impl.ItemInteractions;
 import fuzs.iteminteractions.common.impl.config.ClientConfig;
 import fuzs.puzzleslib.common.api.util.v1.CommonHelper;

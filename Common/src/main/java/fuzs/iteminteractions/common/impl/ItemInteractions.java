@@ -1,6 +1,6 @@
 package fuzs.iteminteractions.common.impl;
 
-import fuzs.iteminteractions.common.api.v1.world.item.storage.ItemStorage;
+import fuzs.iteminteractions.common.api.v2.world.item.storage.ItemStorage;
 import fuzs.iteminteractions.common.impl.config.ClientConfig;
 import fuzs.iteminteractions.common.impl.config.ServerConfig;
 import fuzs.iteminteractions.common.impl.data.DynamicItemStorageDefinitionsProvider;

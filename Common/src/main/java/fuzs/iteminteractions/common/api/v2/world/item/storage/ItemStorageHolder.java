@@ -1,4 +1,4 @@
-package fuzs.iteminteractions.common.api.v1.world.item.storage;
+package fuzs.iteminteractions.common.api.v2.world.item.storage;
 
 import fuzs.iteminteractions.common.impl.world.item.container.ItemStorageManager;
 import net.minecraft.world.Container;

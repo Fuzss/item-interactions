@@ -1,6 +1,6 @@
-package fuzs.iteminteractions.common.api.v1.client.gui.screens.inventory.tooltip;
+package fuzs.iteminteractions.common.api.v2.client.gui.screens.inventory.tooltip;
 
-import fuzs.iteminteractions.common.api.v1.world.inventory.tooltip.BundleContentsTooltip;
+import fuzs.iteminteractions.common.api.v2.world.inventory.tooltip.BundleContentsTooltip;
 import fuzs.iteminteractions.common.impl.ItemInteractions;
 import fuzs.iteminteractions.common.impl.config.ClientConfig;
 import net.minecraft.client.gui.Font;

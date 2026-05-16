@@ -1,7 +1,7 @@
 package fuzs.iteminteractions.common.impl.world.item.container;
 
-import fuzs.iteminteractions.common.api.v1.world.item.storage.ContainerItemStorage;
-import fuzs.iteminteractions.common.api.v1.world.item.storage.ItemStorageHolder;
+import fuzs.iteminteractions.common.api.v2.world.item.storage.ContainerItemStorage;
+import fuzs.iteminteractions.common.api.v2.world.item.storage.ItemStorageHolder;
 import fuzs.iteminteractions.common.impl.world.inventory.ItemSlot;
 import fuzs.iteminteractions.common.impl.world.item.component.SelectedItem;
 import it.unimi.dsi.fastutil.ints.IntLinkedOpenHashSet;
