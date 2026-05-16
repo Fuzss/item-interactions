@@ -70,17 +70,20 @@ public interface ItemStorage {
      * @param player    the player performing the interaction
      * @return are inventory interactions allowed?
      */
-    boolean canPlayerInteractWith(ItemStack itemStack, Player player);
+    boolean allowModification(ItemStack itemStack, Player player);
 
     /**
      * does the item stack have data for stored items
-     * <p>an easy check if the corresponding container is empty without having to create a container instance
-     * <p>mainly used by tooltip image and client-side mouse scroll handler
+     * <p>
+     * an easy check if the corresponding container is empty without having to create a container instance
+     * <p>
+     * mainly used by tooltip image and client-side mouse scroll handler
      *
      * @param itemStack the container stack
+     * @param player    the player
      * @return is the item stack tag with stored item data present
      */
-    boolean hasContents(ItemStack itemStack);
+    boolean hasContents(ItemStack itemStack, Player player);
 
     boolean overrideStackedOnOther(ItemStorageHolder holder, ItemStack itemStack, Slot slot, ClickAction clickAction, Player player);
 
@@ -122,9 +125,6 @@ public interface ItemStorage {
      * <code>stackToAdd</code>.
      * <p>
      * Mainly used by bundles, otherwise {@link ItemStorage#canAddItem} should be enough.
-     * <p>
-     * Before this is called {@link #canPlayerInteractWith(ItemStack, Player)} and
-     * {@link #isItemAllowedInContainer(ItemStack)} are checked.
      *
      * @param itemStack the item stack providing the container to add <code>stackToAdd</code> to
      * @param otherItem the stack to be added to the container
@@ -134,12 +134,6 @@ public interface ItemStorage {
     int getAcceptableItemCount(ItemStack itemStack, ItemStack otherItem, Player player);
 
     /**
-     * The image tooltip provided by the item stack.
-     *
-     * @param itemStack the item stack providing the item storage
-     * @param player    the player
-     * @return the image tooltip provided by the item stack
-     *
      * @see Item#getTooltipImage(ItemStack)
      */
     Optional<Optional<TooltipComponent>> getTooltipImage(ItemStack itemStack, Player player);

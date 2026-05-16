@@ -50,9 +50,7 @@ public interface CustomItemSlotMouseAction extends ItemSlotMouseAction {
     boolean isDragging();
 
     default boolean onMouseScrolled(double scrollX, double scrollY, int slotIndex, ItemStack itemStack) {
-        this.onMouseScrolled(scrollX, scrollY, OptionalInt.of(slotIndex), itemStack);
-        // Handle this always on purpose, so that other existing behavior for the same item will not run instead.
-        return true;
+        return this.onMouseScrolled(scrollX, scrollY, OptionalInt.of(slotIndex), itemStack);
     }
 
     boolean onMouseScrolled(double scrollX, double scrollY, OptionalInt slotIndex, ItemStack itemStack);

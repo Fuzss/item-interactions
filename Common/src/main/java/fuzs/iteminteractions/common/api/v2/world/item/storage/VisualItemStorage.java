@@ -16,12 +16,8 @@ public interface VisualItemStorage extends ContainerItemStorage {
 
     @Override
     default Optional<Optional<TooltipComponent>> getTooltipImage(ItemStack itemStack, Player player) {
-        if (this.hasContents(itemStack) && !this.getItemContainer(itemStack, player).isEmpty()) {
-            NonNullList<ItemStack> itemList = this.getItemContainer(itemStack, player, false).getItems();
-            return Optional.of(Optional.of(this.createTooltipImageComponent(itemStack, player, itemList)));
-        } else {
-            return Optional.empty();
-        }
+        NonNullList<ItemStack> itemList = this.getItemContainer(itemStack, player, false).getItems();
+        return Optional.of(Optional.of(this.createTooltipImageComponent(itemStack, player, itemList)));
     }
 
     TooltipComponent createTooltipImageComponent(ItemStack itemStack, Player player, NonNullList<ItemStack> itemList);

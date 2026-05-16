@@ -50,8 +50,8 @@ public class ClientEventHandler {
 
         ItemStack itemHeldByCursor = screen.getMenu().getCarried();
         ItemStorageHolder holder = ItemStorageHolder.ofItem(itemHeldByCursor);
-        if (holder.isPresentFor(itemHeldByCursor, screen.minecraft.player) && holder.storage()
-                .hasContents(itemHeldByCursor)) {
+        if (holder.allowModification(itemHeldByCursor, screen.minecraft.player) && holder.hasContents(itemHeldByCursor,
+                screen.minecraft.player)) {
             guiGraphics.setTooltipForNextFrame(screen.getFont(),
                     screen.getTooltipFromContainerItem(itemHeldByCursor),
                     itemHeldByCursor.getTooltipImage(),

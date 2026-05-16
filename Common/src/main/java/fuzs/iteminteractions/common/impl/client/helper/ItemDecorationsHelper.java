@@ -31,7 +31,7 @@ public class ItemDecorationsHelper {
         }
 
         ItemStorageHolder holder = ItemStorageHolder.ofItem(itemStack);
-        if (holder.isPresentFor(itemStack, minecraft.player) && isValidSlot(slotBeingRendered,
+        if (holder.allowModification(itemStack, minecraft.player) && allowSlotModification(slotBeingRendered,
                 itemStack,
                 minecraft.player)) {
             ItemStack itemHeldByCursor = screen.getMenu().getCarried();
@@ -51,13 +51,13 @@ public class ItemDecorationsHelper {
      * Prevent rendering on items used as icons for creative mode tabs and for backpacks in locked slots (like the Inmis
      * mod).
      */
-    private static boolean isValidSlot(@Nullable Slot slot, ItemStack itemStack, Player player) {
+    public static boolean allowSlotModification(@Nullable Slot slot, ItemStack itemStack, Player player) {
         if (slot == null || slot.getItem() != itemStack) {
             return false;
         } else if (!slot.allowModification(player)) {
             return false;
         } else if (slot instanceof CreativeModeInventoryScreen.CustomCreativeSlot) {
-            // filter out creative mode inventory slots on the client
+            // Filter out creative mode inventory slots on the client.
             return false;
         } else {
             return true;

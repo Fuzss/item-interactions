@@ -56,7 +56,7 @@ public class BundleContentsStorage extends ComponentBackedStorage {
     }
 
     public Fraction getMaxWeight(ItemStack itemStack) {
-        return Fraction.getFraction(this.capacityMultiplier, 1);
+        return Fraction.getFraction(this.capacityMultiplier, DEFAULT_CAPACITY_MULTIPLIER);
     }
 
     public Fraction getWeight(ItemStack itemStack) {
@@ -69,13 +69,14 @@ public class BundleContentsStorage extends ComponentBackedStorage {
     }
 
     @Override
-    public boolean hasContents(ItemStack itemStack) {
-        return !itemStack.getOrDefault(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY).isEmpty();
+    public boolean allowModification(ItemStack itemStack, Player player) {
+        return itemStack.has(DataComponents.BUNDLE_CONTENTS);
     }
 
     @Override
-    public boolean canPlayerInteractWith(ItemStack itemStack, Player player) {
-        return itemStack.has(DataComponents.BUNDLE_CONTENTS) && super.canPlayerInteractWith(itemStack, player);
+    public boolean hasContents(ItemStack itemStack, Player player) {
+        BundleContents contents = itemStack.getOrDefault(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY);
+        return contents != BundleContents.EMPTY && !contents.isEmpty();
     }
 
     @Override
@@ -171,11 +172,6 @@ public class BundleContentsStorage extends ComponentBackedStorage {
     public void toggleSelectedItem(ItemStack itemStack, int selectedItem, boolean slotClicked) {
         this.setSelectedItem(itemStack, selectedItem);
         BundleItem.toggleSelectedItem(itemStack, selectedItem);
-    }
-
-    @Override
-    public Optional<Optional<TooltipComponent>> getTooltipImage(ItemStack itemStack, Player player) {
-        return Optional.of(Optional.of(this.createTooltipImageComponent(itemStack, player, NonNullList.create())));
     }
 
     @Override

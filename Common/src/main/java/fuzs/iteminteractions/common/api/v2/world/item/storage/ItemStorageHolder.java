@@ -43,6 +43,29 @@ public record ItemStorageHolder(ItemStorage storage) {
         return storage != null ? new ItemStorageHolder(storage) : EMPTY;
     }
 
+    /**
+     * @return is the holder empty
+     */
+    public boolean isEmpty() {
+        return this.storage == VoidStorage.INSTANCE;
+    }
+
+    /**
+     * Does this provider support item inventory interactions (extracting and adding items) on the given
+     * <code>containterStack</code>.
+     *
+     * @param itemStack the container stack
+     * @param player    the player
+     * @return are inventory interactions allowed (is a container present on this item)
+     */
+    public boolean allowModification(ItemStack itemStack, Player player) {
+        return itemStack.getCount() == 1 && this.storage().allowModification(itemStack, player);
+    }
+
+    public boolean hasContents(ItemStack itemStack, Player player) {
+        return itemStack.getCount() == 1 && this.storage().hasContents(itemStack, player);
+    }
+
     public boolean overrideStackedOnOther(ItemStack itemStack, Slot slot, ClickAction clickAction, Player player) {
         return this.storage().overrideStackedOnOther(this, itemStack, slot, clickAction, player);
     }
@@ -59,25 +82,6 @@ public record ItemStorageHolder(ItemStorage storage) {
     }
 
     /**
-     * @return is the holder empty
-     */
-    public boolean isEmpty() {
-        return this.storage == VoidStorage.INSTANCE;
-    }
-
-    /**
-     * Does this provider support item inventory interactions (extracting and adding items) on the given
-     * <code>containterStack</code>.
-     *
-     * @param itemStack the container stack
-     * @param player    the player
-     * @return are inventory interactions allowed (is a container present on this item)
-     */
-    public boolean isPresentFor(ItemStack itemStack, Player player) {
-        return this.storage().canPlayerInteractWith(itemStack, player);
-    }
-
-    /**
      * Can the container item accept another item, checks for the player being allowed to interact as well as the
      * container item being able to hold the other item.
      *
@@ -87,7 +91,7 @@ public record ItemStorageHolder(ItemStorage storage) {
      * @return can the item be added
      */
     public boolean canAcceptItem(ItemStack itemStack, ItemStack otherItem, Player player) {
-        return !otherItem.isEmpty() && this.isPresentFor(itemStack, player) && this.storage()
+        return !otherItem.isEmpty() && this.allowModification(itemStack, player) && this.storage()
                 .isItemAllowedInContainer(otherItem);
     }
 
@@ -154,21 +158,21 @@ public record ItemStorageHolder(ItemStorage storage) {
     }
 
     public Optional<Optional<TooltipComponent>> getTooltipImage(ItemStack itemStack, Player player) {
-        return this.isPresentFor(itemStack, player) ? this.storage().getTooltipImage(itemStack, player) :
+        return this.hasContents(itemStack, player) ? this.storage().getTooltipImage(itemStack, player) :
                 Optional.empty();
     }
 
     public Optional<Boolean> isBarVisible(ItemStack itemStack, Player player) {
-        return this.isPresentFor(itemStack, player) ? this.storage().isBarVisible(itemStack, player) : Optional.empty();
+        return this.hasContents(itemStack, player) ? this.storage().isBarVisible(itemStack, player) : Optional.empty();
     }
 
     public OptionalInt getBarWidth(ItemStack itemStack, Player player) {
-        return this.isPresentFor(itemStack, player) ? this.storage().getBarWidth(itemStack, player) :
+        return this.hasContents(itemStack, player) ? this.storage().getBarWidth(itemStack, player) :
                 OptionalInt.empty();
     }
 
     public OptionalInt getBarColor(ItemStack itemStack, Player player) {
-        return this.isPresentFor(itemStack, player) ? this.storage().getBarColor(itemStack, player) :
+        return this.hasContents(itemStack, player) ? this.storage().getBarColor(itemStack, player) :
                 OptionalInt.empty();
     }
 }

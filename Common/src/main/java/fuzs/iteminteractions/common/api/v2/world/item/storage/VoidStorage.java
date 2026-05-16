@@ -28,12 +28,12 @@ public class VoidStorage implements ItemStorage {
     }
 
     @Override
-    public boolean canPlayerInteractWith(ItemStack itemStack, Player player) {
+    public boolean allowModification(ItemStack itemStack, Player player) {
         return false;
     }
 
     @Override
-    public boolean hasContents(ItemStack itemStack) {
+    public boolean hasContents(ItemStack itemStack, Player player) {
         return false;
     }
 

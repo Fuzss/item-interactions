@@ -18,7 +18,7 @@ public abstract class ComponentBackedStorage implements VisualItemStorage {
     }
 
     @Override
-    public abstract boolean hasContents(ItemStack itemStack);
+    public abstract boolean hasContents(ItemStack itemStack, Player player);
 
     @Override
     public boolean isItemAllowedInContainer(ItemStack otherItem) {

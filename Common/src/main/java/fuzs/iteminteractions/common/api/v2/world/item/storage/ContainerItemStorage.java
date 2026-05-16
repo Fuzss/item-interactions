@@ -109,11 +109,6 @@ public interface ContainerItemStorage extends ItemStorage {
     }
 
     @Override
-    default boolean canPlayerInteractWith(ItemStack itemStack, Player player) {
-        return itemStack.getCount() == 1;
-    }
-
-    @Override
     default boolean isItemAllowedInContainer(ItemStack otherItem) {
         return true;
     }

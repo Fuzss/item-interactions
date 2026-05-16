@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fix bundle capacity multiplier not being respected sometimes
+- Fix items with contents blocking scrolling in screens when hovered under some circumstances
 
 ## [v26.1.0-mc26.1.x] - 2026-05-16
 

@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.InputConstants;
 import fuzs.iteminteractions.common.api.v2.world.item.storage.ItemStorageHolder;
 import fuzs.iteminteractions.common.impl.ItemInteractions;
+import fuzs.iteminteractions.common.impl.client.helper.ItemDecorationsHelper;
 import fuzs.iteminteractions.common.impl.config.ClientConfig;
 import fuzs.iteminteractions.common.impl.config.ServerConfig;
 import fuzs.iteminteractions.common.impl.network.client.ServerboundSelectedItemMessage;
@@ -97,7 +98,7 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
         }
 
         this.clearDraggingSlots();
-        if (ItemStorageHolder.ofItem(itemStack).isPresentFor(itemStack, this.screen.minecraft.player)) {
+        if (ItemStorageHolder.ofItem(itemStack).allowModification(itemStack, this.screen.minecraft.player)) {
             Slot slot = this.screen.getHoveredSlot(event.x(), event.y());
             if (slot != null) {
                 this.clickAction = event.button() == InputConstants.MOUSE_BUTTON_LEFT ? ClickAction.PRIMARY :
@@ -155,7 +156,7 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
 
         if (this.clickAction != null) {
             ItemStorageHolder holder = ItemStorageHolder.ofItem(itemStack);
-            if (!holder.isPresentFor(itemStack, this.screen.minecraft.player)) {
+            if (!holder.allowModification(itemStack, this.screen.minecraft.player)) {
                 this.clearDraggingSlots();
                 return false;
             }
@@ -225,7 +226,7 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
         }
 
         ItemStorageHolder holder = ItemStorageHolder.ofItem(itemStack);
-        if (holder.storage().hasContents(itemStack)) {
+        if (this.canInteractWith(holder, slotIndex, itemStack)) {
             int wheel = this.onMouseScroll(scrollX, scrollY);
             if (wheel != 0) {
                 Vector2ic scrollXY;
@@ -242,6 +243,16 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
         }
 
         return false;
+    }
+
+    private boolean canInteractWith(ItemStorageHolder holder, OptionalInt slotIndex, ItemStack itemStack) {
+        if (holder.allowModification(itemStack, this.screen.minecraft.player) && holder.hasContents(itemStack,
+                this.screen.minecraft.player)) {
+            return slotIndex.isEmpty() || ItemDecorationsHelper.allowSlotModification(this.screen.getMenu()
+                    .getSlot(slotIndex.getAsInt()), itemStack, this.screen.minecraft.player);
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -281,7 +292,7 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
         }
 
         ItemStorageHolder holder = ItemStorageHolder.ofItem(itemStack);
-        if (holder.storage().hasContents(itemStack)) {
+        if (this.canInteractWith(holder, slotIndex, itemStack)) {
             int scrollX = 0;
             int scrollY = 0;
             if (event.isLeft()) {

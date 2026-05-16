@@ -12,13 +12,13 @@ public class ContainerClickInputHandler {
 
     public static EventResult onContainerItemClicked(ItemStack hoveredItem, Slot hoveredSlot, ItemStack itemHeldByCursor, SlotAccess slotHeldByCursor, ClickAction clickAction, Player player) {
         ItemStorageHolder holderHeldByCursor = ItemStorageHolder.ofItem(itemHeldByCursor);
-        if (holderHeldByCursor.isPresentFor(itemHeldByCursor, player)) {
+        if (holderHeldByCursor.allowModification(itemHeldByCursor, player)) {
             return holderHeldByCursor.overrideStackedOnOther(itemHeldByCursor, hoveredSlot, clickAction, player) ?
                     EventResult.ALLOW : EventResult.DENY;
         }
 
         ItemStorageHolder hoveredHolder = ItemStorageHolder.ofItem(hoveredItem);
-        if (hoveredHolder.isPresentFor(hoveredItem, player)) {
+        if (hoveredHolder.allowModification(hoveredItem, player)) {
             return hoveredHolder.overrideOtherStackedOnMe(hoveredItem,
                     itemHeldByCursor,
                     hoveredSlot,

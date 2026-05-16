@@ -131,16 +131,8 @@ public class ContainerStorage extends ComponentBackedStorage {
     }
 
     @Override
-    public boolean hasContents(ItemStack itemStack) {
-        return itemStack.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY)
-                != ItemContainerContents.EMPTY;
-    }
-
-    @Override
-    public boolean canPlayerInteractWith(ItemStack itemStack, Player player) {
+    public boolean allowModification(ItemStack itemStack, Player player) {
         if (!itemStack.has(DataComponents.CONTAINER)) {
-            return false;
-        } else if (!super.canPlayerInteractWith(itemStack, player)) {
             return false;
         } else if (!this.interactionPermissions.allowsPlayerInteractions(player)) {
             return false;
@@ -166,6 +158,12 @@ public class ContainerStorage extends ComponentBackedStorage {
 
             return false;
         }
+    }
+
+    @Override
+    public boolean hasContents(ItemStack itemStack, Player player) {
+        ItemContainerContents contents = itemStack.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY);
+        return contents != ItemContainerContents.EMPTY && contents.nonEmptyItemCopyStream().findAny().isPresent();
     }
 
     @Override

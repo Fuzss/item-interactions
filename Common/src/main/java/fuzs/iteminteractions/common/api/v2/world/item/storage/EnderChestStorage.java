@@ -28,8 +28,13 @@ public class EnderChestStorage implements VisualItemStorage {
     }
 
     @Override
-    public boolean hasContents(ItemStack itemStack) {
+    public boolean allowModification(ItemStack itemStack, Player player) {
         return true;
+    }
+
+    @Override
+    public boolean hasContents(ItemStack itemStack, Player player) {
+        return !this.getItemContainer(itemStack, player).isEmpty();
     }
 
     @Override
