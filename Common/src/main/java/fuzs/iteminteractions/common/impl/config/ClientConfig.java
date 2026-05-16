@@ -22,7 +22,7 @@ public class ClientConfig implements ConfigCore {
     @Config(description = "Show an plus sign indicator on container items when the item stack held by the cursor can be added.")
     public boolean itemStorageIndicator = true;
     @Config(description = "Show a bar on container items indicating the current fill level.")
-    public boolean itemStorageBar = false;
+    public boolean overrideItemStorageBar = false;
     @Config(description = "Select a modifier key required to be held to use single item movement when enabled in the server config.")
     public SimpleKeyType singleItemMovement = SimpleKeyType.CONTROL_OR_COMMAND;
     @Config(description = "Invert scroll wheel direction for moving items with a container item for single item movement.")

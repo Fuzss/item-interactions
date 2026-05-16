@@ -1,10 +1,12 @@
 package fuzs.iteminteractions.common.mixin.client;
 
+import fuzs.iteminteractions.common.impl.client.handler.ClientEventHandler;
 import fuzs.iteminteractions.common.impl.client.helper.ItemDecorationsHelper;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -26,5 +28,10 @@ abstract class AbstractContainerScreenMixin extends Screen {
     @Inject(method = "extractSlot", at = @At("RETURN"))
     private void extractSlot$1(GuiGraphicsExtractor graphics, Slot slot, int mouseX, int mouseY, CallbackInfo callback) {
         ItemDecorationsHelper.setSlotBeingRendered(null);
+    }
+
+    @Inject(method = "onMouseClickAction", at = @At("HEAD"))
+    void onMouseClickAction(Slot slot, ContainerInput containerInput, CallbackInfo callback) {
+        ClientEventHandler.ensureHasSentContainerClientInput(this.minecraft.player);
     }
 }

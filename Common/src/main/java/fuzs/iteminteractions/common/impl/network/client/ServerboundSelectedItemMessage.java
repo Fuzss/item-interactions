@@ -15,13 +15,14 @@ import java.util.OptionalInt;
  * @see net.minecraft.network.protocol.game.ServerboundSelectBundleItemPacket
  */
 public record ServerboundSelectedItemMessage(OptionalInt slotId,
-                                             int selectedItemIndex) implements ServerboundPlayMessage {
+                                             int selectedItemIndex,
+                                             boolean slotClicked) implements ServerboundPlayMessage {
     public static final StreamCodec<FriendlyByteBuf, ServerboundSelectedItemMessage> STREAM_CODEC = StreamCodec.ofMember(
             ServerboundSelectedItemMessage::write,
             ServerboundSelectedItemMessage::new);
 
     private ServerboundSelectedItemMessage(FriendlyByteBuf input) {
-        this(ByteBufCodecs.OPTIONAL_VAR_INT.decode(input), input.readVarInt());
+        this(ByteBufCodecs.OPTIONAL_VAR_INT.decode(input), input.readVarInt(), input.readBoolean());
         if (this.selectedItemIndex < 0 && this.selectedItemIndex != -1) {
             throw new IllegalArgumentException("Invalid selectedItemIndex: " + this.selectedItemIndex);
         }
@@ -30,6 +31,7 @@ public record ServerboundSelectedItemMessage(OptionalInt slotId,
     private void write(FriendlyByteBuf output) {
         ByteBufCodecs.OPTIONAL_VAR_INT.encode(output, this.slotId);
         output.writeVarInt(this.selectedItemIndex);
+        output.writeBoolean(this.slotClicked);
     }
 
     @Override
@@ -41,7 +43,9 @@ public record ServerboundSelectedItemMessage(OptionalInt slotId,
                 if (!itemStack.isEmpty()) {
                     ItemStorageHolder.ofItem(itemStack)
                             .storage()
-                            .toggleSelectedItem(itemStack, ServerboundSelectedItemMessage.this.selectedItemIndex);
+                            .toggleSelectedItem(itemStack,
+                                    ServerboundSelectedItemMessage.this.selectedItemIndex,
+                                    ServerboundSelectedItemMessage.this.slotClicked);
                 }
             }
 

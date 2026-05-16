@@ -12,6 +12,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.Optional;
+import java.util.OptionalInt;
+
 public class EnderChestStorage implements VisualItemStorage {
     public static final ItemStorage INSTANCE = new EnderChestStorage();
     public static final MapCodec<ItemStorage> CODEC = MapCodec.unit(INSTANCE);
@@ -57,6 +60,21 @@ public class EnderChestStorage implements VisualItemStorage {
                 this.getGridWidth(itemList.size()),
                 this.getGridHeight(itemList.size()),
                 DEFAULT_ENDER_CHEST_COLOR);
+    }
+
+    @Override
+    public Optional<Boolean> isBarVisible(ItemStack itemStack, Player player) {
+        return Optional.empty();
+    }
+
+    @Override
+    public OptionalInt getBarWidth(ItemStack itemStack, Player player) {
+        return OptionalInt.empty();
+    }
+
+    @Override
+    public OptionalInt getBarColor(ItemStack itemStack, Player player) {
+        return OptionalInt.empty();
     }
 
     @Override

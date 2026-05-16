@@ -14,6 +14,7 @@ import net.minecraft.world.item.ItemStack;
 import org.joml.Vector2ic;
 
 import java.util.Optional;
+import java.util.OptionalInt;
 
 /**
  * A bare-bones implementation of {@link ItemStorage}.
@@ -72,6 +73,21 @@ public class VoidStorage implements ItemStorage {
     }
 
     @Override
+    public Optional<Boolean> isBarVisible(ItemStack itemStack, Player player) {
+        return Optional.empty();
+    }
+
+    @Override
+    public OptionalInt getBarWidth(ItemStack itemStack, Player player) {
+        return OptionalInt.empty();
+    }
+
+    @Override
+    public OptionalInt getBarColor(ItemStack itemStack, Player player) {
+        return OptionalInt.empty();
+    }
+
+    @Override
     public int getSelectedItem(ItemStack itemStack) {
         return SelectedItem.DEFAULT_SELECTED_ITEM;
     }
@@ -82,7 +98,7 @@ public class VoidStorage implements ItemStorage {
     }
 
     @Override
-    public void toggleSelectedItem(ItemStack itemStack, int selectedItem) {
+    public void toggleSelectedItem(ItemStack itemStack, int selectedItem, boolean slotClicked) {
         // NO-OP
     }
 

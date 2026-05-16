@@ -26,7 +26,7 @@ abstract class ItemStackMixin {
 
     @Inject(method = "isBarVisible", at = @At("HEAD"), cancellable = true)
     public void isBarVisible(CallbackInfoReturnable<Boolean> callback) {
-        if (!ItemInteractions.CONFIG.get(ClientConfig.class).itemStorageBar) {
+        if (!ItemInteractions.CONFIG.get(ClientConfig.class).overrideItemStorageBar) {
             return;
         }
 
@@ -38,7 +38,7 @@ abstract class ItemStackMixin {
 
     @Inject(method = "getBarWidth", at = @At("HEAD"), cancellable = true)
     public void getBarWidth(CallbackInfoReturnable<Integer> callback) {
-        if (!ItemInteractions.CONFIG.get(ClientConfig.class).itemStorageBar) {
+        if (!ItemInteractions.CONFIG.get(ClientConfig.class).overrideItemStorageBar) {
             return;
         }
 
@@ -50,7 +50,7 @@ abstract class ItemStackMixin {
 
     @Inject(method = "getBarColor", at = @At("HEAD"), cancellable = true)
     public void getBarColor(CallbackInfoReturnable<Integer> callback) {
-        if (!ItemInteractions.CONFIG.get(ClientConfig.class).itemStorageBar) {
+        if (!ItemInteractions.CONFIG.get(ClientConfig.class).overrideItemStorageBar) {
             return;
         }
 

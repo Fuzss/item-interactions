@@ -39,8 +39,10 @@ public interface ContainerItemStorage extends ItemStorage {
     }
 
     @Override
-    default void toggleSelectedItem(ItemStack itemStack, int selectedItem) {
-        this.setSelectedItem(itemStack, selectedItem);
+    default void toggleSelectedItem(ItemStack itemStack, int selectedItem, boolean slotClicked) {
+        if (!slotClicked) {
+            this.setSelectedItem(itemStack, selectedItem);
+        }
     }
 
     @Override
@@ -159,7 +161,7 @@ public interface ContainerItemStorage extends ItemStorage {
     default boolean overrideOtherStackedOnMe(ItemStorageHolder holder, ItemStack itemStack, ItemStack itemHeldByCursor, Slot slot, ClickAction clickAction, Player player, SlotAccess slotHeldByCursor) {
         if (clickAction == ClickAction.PRIMARY && itemHeldByCursor.isEmpty()) {
             if (!this.extractSingleItemOnly(player)) {
-                this.toggleSelectedItem(itemStack, SelectedItem.DEFAULT_SELECTED_ITEM);
+                this.toggleSelectedItem(itemStack, SelectedItem.DEFAULT_SELECTED_ITEM, true);
                 return false;
             } else {
                 return true;
@@ -202,7 +204,7 @@ public interface ContainerItemStorage extends ItemStorage {
                 this.broadcastChangesOnContainerMenu(itemStack, player);
                 return true;
             } else {
-                this.toggleSelectedItem(itemStack, SelectedItem.DEFAULT_SELECTED_ITEM);
+                this.toggleSelectedItem(itemStack, SelectedItem.DEFAULT_SELECTED_ITEM, true);
                 return false;
             }
         }

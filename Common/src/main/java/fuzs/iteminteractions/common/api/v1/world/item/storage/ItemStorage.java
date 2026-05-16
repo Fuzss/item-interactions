@@ -32,9 +32,6 @@ import java.util.OptionalInt;
  * An interface that when implemented, represents a provider for any item to enable bundle-like inventory item
  * interactions (extracting and adding items via right-clicking on the item) and bundle-like tooltips.
  * <p>
- * A container does not necessarily need to provide both item interactions and tooltips, what is provided is defined by
- * implementing {@link ItemStorage#canPlayerInteractWith} and {@link ItemStorage#canProvideTooltipImage}.
- * <p>
  * This overrides any already implemented behavior (the default providers in Easy Shulker Boxes actually do this for
  * vanilla bundles).
  */
@@ -105,8 +102,6 @@ public interface ItemStorage {
      *
      * @param itemStack item stack providing the container
      * @param player    player involved in the interaction
-     * @param isMutable attach a saving listener to the container (this is set to <code>false</code> when creating a
-     *                  container e.g. for rendering a tooltip)
      * @return the provided container
      */
     Container getItemContainer(ItemStack itemStack, Player player);
@@ -144,20 +139,25 @@ public interface ItemStorage {
      * @param itemStack the item stack providing the item storage
      * @param player    the player
      * @return the image tooltip provided by the item stack
+     *
+     * @see Item#getTooltipImage(ItemStack)
      */
     Optional<Optional<TooltipComponent>> getTooltipImage(ItemStack itemStack, Player player);
 
-    default Optional<Boolean> isBarVisible(ItemStack itemStack, Player player) {
-        return Optional.empty();
-    }
+    /**
+     * @see Item#isBarVisible(ItemStack)
+     */
+    Optional<Boolean> isBarVisible(ItemStack itemStack, Player player);
 
-    default OptionalInt getBarWidth(ItemStack itemStack, Player player) {
-        return OptionalInt.empty();
-    }
+    /**
+     * @see Item#getBarWidth(ItemStack)
+     */
+    OptionalInt getBarWidth(ItemStack itemStack, Player player);
 
-    default OptionalInt getBarColor(ItemStack itemStack, Player player) {
-        return OptionalInt.empty();
-    }
+    /**
+     * @see Item#getBarColor(ItemStack)
+     */
+    OptionalInt getBarColor(ItemStack itemStack, Player player);
 
     int getSelectedItem(ItemStack itemStack);
 
@@ -168,8 +168,10 @@ public interface ItemStorage {
      *
      * @param itemStack    the item stack providing the container
      * @param selectedItem the updated selected slot inside the container item
+     * @param slotClicked  the action was triggered by clicking on the item slot
+     * @see net.minecraft.world.item.BundleItem#toggleSelectedItem(ItemStack, int)
      */
-    void toggleSelectedItem(ItemStack itemStack, int selectedItem);
+    void toggleSelectedItem(ItemStack itemStack, int selectedItem, boolean slotClicked);
 
     void playRemoveOneSound(Player player);
 

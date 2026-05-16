@@ -7,6 +7,7 @@ import fuzs.iteminteractions.common.impl.ItemInteractions;
 import fuzs.iteminteractions.common.impl.config.ClientConfig;
 import fuzs.iteminteractions.common.impl.config.ServerConfig;
 import fuzs.iteminteractions.common.impl.network.client.ServerboundSelectedItemMessage;
+import fuzs.iteminteractions.common.impl.world.item.component.SelectedItem;
 import fuzs.puzzleslib.common.api.network.v4.MessageSender;
 import net.minecraft.client.gui.BundleMouseActions;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -264,7 +265,7 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
         int updatedSelectedItem = holder.storage().scrollSelectedItem(itemStack, container, scrollXY);
         int previousSelectedItem = holder.storage().getSelectedItem(itemStack);
         if (previousSelectedItem != updatedSelectedItem) {
-            this.toggleSelectedItem(itemStack, slotIndex, updatedSelectedItem);
+            this.toggleSelectedItem(itemStack, slotIndex, updatedSelectedItem, false);
         }
     }
 
@@ -309,13 +310,26 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
         return false;
     }
 
+    /**
+     * @see BundleMouseActions#onSlotClicked(Slot, ContainerInput)
+     */
     @Override
-    public void toggleSelectedBundleItem(ItemStack bundleItem, int slotIndex, int updatedSelectedItem) {
-        this.toggleSelectedItem(bundleItem, OptionalInt.of(slotIndex), updatedSelectedItem);
+    public void onSlotClicked(Slot slot, ContainerInput containerInput) {
+        if (containerInput == ContainerInput.QUICK_MOVE || containerInput == ContainerInput.SWAP) {
+            this.toggleSelectedItem(slot.getItem(),
+                    OptionalInt.of(slot.index),
+                    SelectedItem.DEFAULT_SELECTED_ITEM,
+                    true);
+        }
     }
 
-    private void toggleSelectedItem(ItemStack bundleItem, OptionalInt slotIndex, int updatedSelectedItem) {
-        ItemStorageHolder.ofItem(bundleItem).storage().toggleSelectedItem(bundleItem, updatedSelectedItem);
-        MessageSender.broadcast(new ServerboundSelectedItemMessage(slotIndex, updatedSelectedItem));
+    @Override
+    public void toggleSelectedBundleItem(ItemStack bundleItem, int slotIndex, int updatedSelectedItem) {
+        this.toggleSelectedItem(bundleItem, OptionalInt.of(slotIndex), updatedSelectedItem, false);
+    }
+
+    private void toggleSelectedItem(ItemStack bundleItem, OptionalInt slotIndex, int updatedSelectedItem, boolean slotClicked) {
+        ItemStorageHolder.ofItem(bundleItem).storage().toggleSelectedItem(bundleItem, updatedSelectedItem, slotClicked);
+        MessageSender.broadcast(new ServerboundSelectedItemMessage(slotIndex, updatedSelectedItem, slotClicked));
     }
 }

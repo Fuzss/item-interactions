@@ -23,6 +23,8 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Unit;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.ContainerInput;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
@@ -84,6 +86,15 @@ public class ClientEventHandler {
     }
 
     /**
+     * This must be sent before any slot click action is performed server side. For vanilla this can be caused by either
+     * mouse clicks (normal menu interactions) or key presses (hotbar keys for swapping items to those slots).
+     * <p>
+     * All screens sending the normal click packet are handled via
+     * {@link MultiPlayerGameMode#handleInventoryButtonClick(int, int)}, only the creative screen needs additional
+     * handling which happens in {@link AbstractContainerScreen#onMouseClickAction(Slot, ContainerInput)}.
+     * <p>
+     * While the latter option works for all screens, we keep both to be extra safe, especially with other mods.
+     *
      * @see MultiPlayerGameMode#ensureHasSentCarriedItem()
      */
     public static void ensureHasSentContainerClientInput(Player player) {
