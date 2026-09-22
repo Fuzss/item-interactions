@@ -3,7 +3,6 @@ package fuzs.iteminteractions.common.impl;
 import fuzs.iteminteractions.common.api.v2.world.item.storage.ItemStorage;
 import fuzs.iteminteractions.common.impl.config.ClientConfig;
 import fuzs.iteminteractions.common.impl.config.ServerConfig;
-import fuzs.iteminteractions.common.impl.data.DynamicItemStorageDefinitionsProvider;
 import fuzs.iteminteractions.common.impl.handler.EnderChestSyncHandler;
 import fuzs.iteminteractions.common.impl.init.ModRegistry;
 import fuzs.iteminteractions.common.impl.network.ClientboundEnderChestContentMessage;
@@ -16,7 +15,7 @@ import fuzs.iteminteractions.common.impl.world.item.container.ItemStorageManager
 import fuzs.puzzleslib.common.api.config.v3.ConfigHolder;
 import fuzs.puzzleslib.common.api.core.v1.ModConstructor;
 import fuzs.puzzleslib.common.api.core.v1.ModLoaderEnvironment;
-import fuzs.puzzleslib.common.api.core.v1.context.DataPackReloadListenersContext;
+import fuzs.puzzleslib.common.api.core.v1.context.DataPackRegistriesContext;
 import fuzs.puzzleslib.common.api.core.v1.context.GameRegistriesContext;
 import fuzs.puzzleslib.common.api.core.v1.context.PackRepositorySourcesContext;
 import fuzs.puzzleslib.common.api.core.v1.context.PayloadTypesContext;
@@ -26,11 +25,8 @@ import fuzs.puzzleslib.common.api.event.v1.entity.player.PlayerCopyEvents;
 import fuzs.puzzleslib.common.api.event.v1.entity.player.PlayerNetworkEvents;
 import fuzs.puzzleslib.common.api.event.v1.server.ServerResourcesLoadCallback;
 import fuzs.puzzleslib.common.api.event.v1.server.SyncDataPackContentsCallback;
-import fuzs.puzzleslib.common.api.resources.v1.DynamicPackResources;
-import fuzs.puzzleslib.common.api.resources.v1.PackResourcesHelper;
-import net.minecraft.core.HolderLookup;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import net.minecraft.server.ReloadableServerResources;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,6 +38,7 @@ public class ItemInteractions implements ModConstructor {
     public static final ConfigHolder CONFIG = ConfigHolder.builder(MOD_ID)
             .client(ClientConfig.class)
             .server(ServerConfig.class);
+    public static final Identifier DEVELOPMENT_ID = id("development");
 
     @Override
     public void onConstructMod() {
@@ -77,22 +74,18 @@ public class ItemInteractions implements ModConstructor {
     }
 
     @Override
+    public void onRegisterDataPackRegistries(DataPackRegistriesContext context) {
+        // TODO This should be registered as a reloadable registry; when possible in NeoForge.
+        context.registerRegistry(ItemStorage.Definition.REGISTRY_KEY, ItemStorage.Definition.DIRECT_CODEC);
+    }
+
+    @Override
     public void onAddDataPackFinders(PackRepositorySourcesContext context) {
         if (!ModLoaderEnvironment.INSTANCE.isDevelopmentEnvironment(MOD_ID)) {
             return;
         }
 
-        context.registerRepositorySource(PackResourcesHelper.buildServerPack(id("item_storage_definitions"),
-                DynamicPackResources.create(DynamicItemStorageDefinitionsProvider::new),
-                true));
-    }
-
-    @Override
-    public void onAddDataPackReloadListeners(DataPackReloadListenersContext context) {
-        context.registerReloadListener(ItemStorageManager.REGISTRY_KEY.identifier(),
-                (DataPackReloadListenersContext.PreparableReloadListenerFactory) (ReloadableServerResources serverResources, HolderLookup.Provider lookupWithUpdatedTags) -> {
-                    return new ItemStorageManager(lookupWithUpdatedTags);
-                });
+        context.registerBuiltInPack(DEVELOPMENT_ID, Component.literal("Development"), true);
     }
 
     public static Identifier id(String path) {

@@ -94,7 +94,7 @@ public class BundleContentsStorage extends ComponentBackedStorage {
 
     private Stream<ItemStack> getItemStream(ItemStack itemStack, boolean isMutable) {
         Stream<ItemStack> itemStream = itemStack.getOrDefault(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY)
-                .itemCopyStream();
+                .itemCopies();
         if (isMutable) {
             // Add one additional slot, so we can add items in the inventory.
             return switch (this.getRemovalDirection()) {

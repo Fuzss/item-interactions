@@ -11,9 +11,6 @@ accessible  field   net/minecraft/world/item/BundleItem BAR_COLOR   I
 accessible  method  net/minecraft/world/item/BundleItem getWeightSafe   (Lnet/minecraft/world/item/component/BundleContents;)Lorg/apache/commons/lang3/math/Fraction;
 accessible  method  net/minecraft/world/item/component/BundleContents   getWeight   (Lnet/minecraft/world/item/ItemInstance;)Lcom/mojang/serialization/DataResult;
 accessible  method  net/minecraft/world/item/component/BundleContents   computeContentWeight    (Ljava/util/List;)Lcom/mojang/serialization/DataResult;
-accessible  field   net/minecraft/server/packs/resources/SimpleJsonResourceReloadListener   ops Lcom/mojang/serialization/DynamicOps;
-accessible  field   net/minecraft/server/packs/resources/SimpleJsonResourceReloadListener   codec   Lcom/mojang/serialization/Codec;
-accessible  field   net/minecraft/server/packs/resources/SimpleJsonResourceReloadListener   lister  Lnet/minecraft/resources/FileToIdConverter;
 accessible	field	net/minecraft/client/gui/BundleMouseActions	minecraft	Lnet/minecraft/client/Minecraft;
 accessible	field	net/minecraft/client/gui/BundleMouseActions	scrollWheelHandler	Lnet/minecraft/client/ScrollWheelHandler;
 extendable  method	net/minecraft/client/gui/BundleMouseActions	toggleSelectedBundleItem	(Lnet/minecraft/world/item/ItemStack;II)V

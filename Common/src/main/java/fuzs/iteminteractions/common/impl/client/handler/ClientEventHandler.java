@@ -16,7 +16,6 @@ import fuzs.puzzleslib.common.api.event.v1.data.MutableValue;
 import fuzs.puzzleslib.common.api.network.v4.MessageSender;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ItemSlotMouseAction;
-import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
@@ -41,8 +40,6 @@ import org.jspecify.annotations.Nullable;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Consumer;
-import java.util.function.UnaryOperator;
 
 public class ClientEventHandler {
     private static final Set<SoundEvent> BUNDLE_SOUNDS = Set.of(SoundEvents.BUNDLE_INSERT,
@@ -89,7 +86,7 @@ public class ClientEventHandler {
         }
     }
 
-    public static void onAfterInit(AbstractContainerScreen<?> screen, int screenWidth, int screenHeight, List<AbstractWidget> widgets, UnaryOperator<AbstractWidget> addWidget, Consumer<AbstractWidget> removeWidget) {
+    public static void onAfterInit(AbstractContainerScreen<?> screen, int screenWidth, int screenHeight) {
         screen.itemSlotMouseActions.addFirst(new ItemStorageMouseActions(screen));
     }
 

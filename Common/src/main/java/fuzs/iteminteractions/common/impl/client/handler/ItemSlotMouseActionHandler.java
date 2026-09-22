@@ -1,7 +1,6 @@
 package fuzs.iteminteractions.common.impl.client.handler;
 
 import fuzs.iteminteractions.common.impl.client.gui.CustomItemSlotMouseAction;
-import fuzs.puzzleslib.common.api.client.gui.v2.ScreenHelper;
 import fuzs.puzzleslib.common.api.event.v1.core.EventResult;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.ItemSlotMouseAction;
@@ -22,10 +21,10 @@ public class ItemSlotMouseActionHandler {
         }
     }
 
-    public static void onAfterForeground(AbstractContainerScreen<?> screen, GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY) {
+    public static void onAfterForeground(AbstractContainerScreen<?> screen, GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTicks) {
         for (ItemSlotMouseAction itemMouseAction : screen.itemSlotMouseActions) {
             if (itemMouseAction instanceof CustomItemSlotMouseAction customMouseAction) {
-                customMouseAction.onExtractForeground(guiGraphics, mouseX, mouseY, ScreenHelper.getPartialTick());
+                customMouseAction.onExtractForeground(guiGraphics, mouseX, mouseY, partialTicks);
             }
         }
     }

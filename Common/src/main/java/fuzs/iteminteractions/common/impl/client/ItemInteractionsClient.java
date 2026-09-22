@@ -32,7 +32,8 @@ public class ItemInteractionsClient implements ClientModConstructor {
                 .register(ItemStorageTooltip::onBeforeKeyPressed);
         ScreenEvents.afterBackground(AbstractContainerScreen.class)
                 .register(ItemSlotMouseActionHandler::onAfterBackground);
-        ExtractContainerScreenContentsCallback.EVENT.register(ItemSlotMouseActionHandler::onAfterForeground);
+        ScreenEvents.afterForeground(AbstractContainerScreen.class)
+                .register(ItemSlotMouseActionHandler::onAfterForeground);
         ScreenMouseEvents.beforeMouseClick(AbstractContainerScreen.class)
                 .register(EventPhase.BEFORE, ItemSlotMouseActionHandler::onBeforeMouseClicked);
         ScreenMouseEvents.beforeMouseRelease(AbstractContainerScreen.class)

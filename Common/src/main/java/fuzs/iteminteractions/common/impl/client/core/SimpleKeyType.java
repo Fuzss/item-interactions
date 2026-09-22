@@ -1,7 +1,6 @@
 package fuzs.iteminteractions.common.impl.client.core;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.platform.Window;
 import fuzs.puzzleslib.common.api.util.v1.CommonHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.input.InputQuirks;
@@ -68,9 +67,8 @@ public enum SimpleKeyType implements KeyType {
         @Override
         public boolean isUsed() {
             if (InputQuirks.REPLACE_CTRL_KEY_WITH_CMD_KEY) {
-                Window window = Minecraft.getInstance().getWindow();
-                return InputConstants.isKeyDown(window, InputConstants.KEY_LSUPER) || InputConstants.isKeyDown(window,
-                        InputConstants.KEY_RSUPER);
+                return InputConstants.isKeyDown(InputConstants.KEY_LGUI) || InputConstants.isKeyDown(
+                        InputConstants.KEY_RGUI);
             } else {
                 return CommonHelper.hasControlDown();
             }

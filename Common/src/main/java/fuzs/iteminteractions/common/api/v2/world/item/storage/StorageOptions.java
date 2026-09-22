@@ -3,8 +3,8 @@ package fuzs.iteminteractions.common.api.v2.world.item.storage;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.HolderSet;
-import net.minecraft.core.RegistryCodecs;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.core.registries.codec.RegistryCodecs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
@@ -13,7 +13,7 @@ import java.util.Optional;
 public record StorageOptions(Optional<HolderSet<Item>> items, boolean disallowed, boolean filterContainerItems) {
     public static final StorageOptions DEFAULT = new StorageOptions(Optional.empty(), true, true);
     public static final Codec<StorageOptions> CODEC = RecordCodecBuilder.create((RecordCodecBuilder.Instance<StorageOptions> instance) -> instance.group(
-            RegistryCodecs.homogeneousList(Registries.ITEM)
+            RegistryCodecs.holderSet(Registries.ITEM)
                     .lenientOptionalFieldOf("items")
                     .forGetter(StorageOptions::items),
             Codec.BOOL.fieldOf("disallowed").orElse(Boolean.TRUE).forGetter(StorageOptions::disallowed),

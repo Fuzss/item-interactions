@@ -4,10 +4,11 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import fuzs.iteminteractions.common.impl.ItemInteractions;
-import fuzs.iteminteractions.common.impl.world.item.container.ItemStorageManager;
 import fuzs.puzzleslib.common.api.init.v3.registry.RegistryFactory;
+import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.codec.RegistryCodecs;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -24,7 +25,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import org.joml.Vector2ic;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
 
@@ -39,7 +39,8 @@ public interface ItemStorage {
     /**
      * The {@link ItemStorageType} registry key.
      */
-    ResourceKey<Registry<ItemStorageType<?>>> REGISTRY_KEY = ResourceKey.createRegistryKey(ItemStorageManager.REGISTRY_KEY.identifier());
+    ResourceKey<Registry<ItemStorageType<?>>> REGISTRY_KEY = ResourceKey.createRegistryKey(ItemInteractions.id(
+            "item_storage_type"));
     /**
      * The {@link ItemStorageType} registry.
      */
@@ -49,14 +50,6 @@ public interface ItemStorage {
      * Codec that additionally to the provider itself also includes the provider type.
      */
     MapCodec<ItemStorage> CODEC = REGISTRY.byNameCodec().dispatchMap(ItemStorage::getType, ItemStorageType::codec);
-    /**
-     * Codec that includes a list of supported items.
-     */
-    Codec<Map.Entry<HolderSet<Item>, ItemStorage>> WITH_ITEMS_CODEC = RecordCodecBuilder.create(instance -> {
-        return instance.group(Ingredient.NON_AIR_HOLDER_SET_CODEC.lenientOptionalFieldOf("supported_items",
-                        HolderSet.empty()).forGetter(Map.Entry::getKey), CODEC.forGetter(Map.Entry::getValue))
-                .apply(instance, Map::entry);
-    });
     /**
      * Stream codec that additionally to the provider itself also includes the provider type.
      */
@@ -180,4 +173,21 @@ public interface ItemStorage {
      * @return the item container provider type
      */
     ItemStorageType<?> getType();
+
+    /**
+     * @see net.minecraft.world.item.crafting.Recipe
+     */
+    record Definition(HolderSet<Item> items, ItemStorage storage) {
+        public static final ResourceKey<Registry<Definition>> REGISTRY_KEY = ResourceKey.createRegistryKey(
+                ItemInteractions.id("item_storage"));
+        public static final Codec<Definition> DIRECT_CODEC = RecordCodecBuilder.create(instance -> {
+            return instance.group(Ingredient.NON_AIR_HOLDER_SET_CODEC.lenientOptionalFieldOf("supported_items",
+                            HolderSet.empty()).forGetter(Definition::items), ItemStorage.CODEC.forGetter(Definition::storage))
+                    .apply(instance, Definition::new);
+        });
+        public static final Codec<ResourceKey<Definition>> KEY_CODEC = ResourceKey.codec(REGISTRY_KEY);
+        public static final Codec<Holder<Definition>> CODEC = RegistryCodecs.holder(REGISTRY_KEY, DIRECT_CODEC);
+        public static final Codec<HolderSet<Definition>> LIST_CODEC = RegistryCodecs.holderSet(REGISTRY_KEY,
+                DIRECT_CODEC);
+    }
 }

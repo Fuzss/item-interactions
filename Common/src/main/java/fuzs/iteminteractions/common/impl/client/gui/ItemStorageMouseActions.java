@@ -64,13 +64,7 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
 
     @Override
     public void onExtractBackground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTicks) {
-        if (!this.clickedDraggingSlots.isEmpty()) {
-            guiGraphics.pose().pushMatrix();
-            guiGraphics.pose().translate(this.screen.leftPos, this.screen.topPos);
-            this.extractSlotHighlights(guiGraphics, mouseX, mouseY, AbstractContainerScreen.SLOT_HIGHLIGHT_BACK_SPRITE);
-            guiGraphics.pose().popMatrix();
-        }
-
+        this.extractSlotHighlights(guiGraphics, mouseX, mouseY, AbstractContainerScreen.SLOT_HIGHLIGHT_BACK_SPRITE);
         ItemStack itemStack = this.getHoveredSlotTooltipItem();
         ItemStorageHolder holder = ItemStorageHolder.ofItem(itemStack);
         if (holder.allowModification(itemStack, this.minecraft.player) && holder.hasContents(itemStack,
@@ -82,6 +76,25 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
                     mouseY,
                     itemStack.get(DataComponents.TOOLTIP_STYLE));
         }
+    }
+
+    private void extractSlotHighlights(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, Identifier sprite) {
+        if (this.clickedDraggingSlots.isEmpty()) {
+            return;
+        }
+
+        guiGraphics.pose().pushMatrix();
+        guiGraphics.pose().translate(this.screen.leftPos, this.screen.topPos);
+        for (Slot slot : this.screen.getMenu().slots) {
+            if (slot.isHighlightable() && this.clickedDraggingSlots.contains(slot)) {
+                // slots will sometimes be added to dragged slots when simply clicking on a slot, so don't render our overlay then
+                if (this.clickedDraggingSlots.size() > 1 || !this.screen.isHovering(slot, mouseX, mouseY)) {
+                    guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, slot.x - 4, slot.y - 4, 24, 24);
+                }
+            }
+        }
+
+        guiGraphics.pose().popMatrix();
     }
 
     /**
@@ -103,28 +116,7 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
 
     @Override
     public void onExtractForeground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTicks) {
-        if (!this.clickedDraggingSlots.isEmpty()) {
-            this.extractSlotHighlights(guiGraphics,
-                    mouseX,
-                    mouseY,
-                    AbstractContainerScreen.SLOT_HIGHLIGHT_FRONT_SPRITE);
-        }
-    }
-
-    private void extractSlotHighlights(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, Identifier slotHighlightSprite) {
-        for (Slot slot : this.screen.getMenu().slots) {
-            if (slot.isHighlightable() && this.clickedDraggingSlots.contains(slot)) {
-                // slots will sometimes be added to dragged slots when simply clicking on a slot, so don't render our overlay then
-                if (this.clickedDraggingSlots.size() > 1 || !this.screen.isHovering(slot, mouseX, mouseY)) {
-                    guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED,
-                            slotHighlightSprite,
-                            slot.x - 4,
-                            slot.y - 4,
-                            24,
-                            24);
-                }
-            }
-        }
+        this.extractSlotHighlights(guiGraphics, mouseX, mouseY, AbstractContainerScreen.SLOT_HIGHLIGHT_FRONT_SPRITE);
     }
 
     @Override
