@@ -338,7 +338,7 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
             if (wheel != 0) {
                 Vector2ic scrollXY;
                 if (ItemInteractions.CONFIG.get(ClientConfig.class).verticalTooltipScrolling.isUsed()) {
-                    scrollXY = new Vector2i(0, wheel);
+                    scrollXY = new Vector2i(0, -wheel);
                 } else {
                     scrollXY = new Vector2i(-wheel, 0);
                 }
