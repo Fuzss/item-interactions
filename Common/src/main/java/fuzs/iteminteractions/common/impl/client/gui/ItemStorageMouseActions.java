@@ -17,6 +17,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.Identifier;
@@ -268,7 +269,8 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
             if (slot != null && this.screen.getMenu().canDragTo(slot) && !this.allDraggingSlots.contains(slot)) {
                 if (this.shouldSlotBeClicked(this.clickAction, slot, holder, itemStack, this.minecraft.player)) {
                     this.clickedDraggingSlots.add(slot);
-                    this.screen.slotClicked(slot, slot.index, event.button(), ContainerInput.PICKUP);
+                    int buttonNum = AbstractContainerScreen.getContainerClickButton(event);
+                    this.screen.slotClicked(slot, slot.index, buttonNum, ContainerInput.PICKUP);
                 }
 
                 this.allDraggingSlots.add(slot);
@@ -316,7 +318,8 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
             if (this.allowModification(ItemStorageHolder.ofItem(itemStack), slot, slotIndex, itemStack)) {
                 int wheel = this.onMouseScroll(scrollX, scrollY);
                 if (wheel != 0) {
-                    int buttonNum = this.getMouseButtonFromWheel(wheel);
+                    int buttonNum = AbstractContainerScreen.getContainerClickButton(this.getMouseButtonEventFromWheel(
+                            wheel));
                     this.screen.slotClicked(slot, slot.index, buttonNum, ContainerInput.PICKUP);
                 }
 
@@ -373,6 +376,11 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
     private int onMouseScroll(double scrollX, double scrollY) {
         Vector2i wheelXY = this.scrollWheelHandler.onMouseScroll(scrollX, scrollY);
         return wheelXY.y == 0 ? -wheelXY.x : wheelXY.y;
+    }
+
+    private MouseButtonEvent getMouseButtonEventFromWheel(int wheel) {
+        int buttonNum = this.getMouseButtonFromWheel(wheel);
+        return new MouseButtonEvent(0, 0, new MouseButtonInfo(buttonNum, 0));
     }
 
     private int getMouseButtonFromWheel(int wheel) {

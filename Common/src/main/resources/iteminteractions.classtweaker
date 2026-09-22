@@ -4,6 +4,7 @@ accessible  field   net/minecraft/client/gui/screens/inventory/AbstractContainer
 accessible  field   net/minecraft/client/gui/screens/inventory/AbstractContainerScreen  doubleclick Z
 accessible  method  net/minecraft/client/gui/screens/inventory/AbstractContainerScreen  slotClicked (Lnet/minecraft/world/inventory/Slot;IILnet/minecraft/world/inventory/ContainerInput;)V
 accessible  method  net/minecraft/client/gui/screens/inventory/AbstractContainerScreen  showTooltipWithItemInHand   (Lnet/minecraft/world/item/ItemStack;)Z
+accessible  method  net/minecraft/client/gui/screens/inventory/AbstractContainerScreen  getContainerClickButton (Lnet/minecraft/client/input/MouseButtonEvent;)I
 accessible  method  net/minecraft/client/gui/screens/inventory/AbstractContainerScreen  getTooltipFromContainerItem (Lnet/minecraft/world/item/ItemStack;)Ljava/util/List;
 accessible  class   net/minecraft/client/gui/screens/inventory/CreativeModeInventoryScreen$CustomCreativeSlot
 accessible  field   net/minecraft/world/item/BundleItem FULL_BAR_COLOR  I
