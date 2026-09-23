@@ -17,12 +17,12 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
@@ -318,8 +318,7 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
             if (this.allowModification(ItemStorageHolder.ofItem(itemStack), slot, slotIndex, itemStack)) {
                 int wheel = this.onMouseScroll(scrollX, scrollY);
                 if (wheel != 0) {
-                    int buttonNum = AbstractContainerScreen.getContainerClickButton(this.getMouseButtonEventFromWheel(
-                            wheel));
+                    int buttonNum = this.getMouseButtonFromWheel(wheel);
                     this.screen.slotClicked(slot, slot.index, buttonNum, ContainerInput.PICKUP);
                 }
 
@@ -378,16 +377,11 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
         return wheelXY.y == 0 ? -wheelXY.x : wheelXY.y;
     }
 
-    private MouseButtonEvent getMouseButtonEventFromWheel(int wheel) {
-        int buttonNum = this.getMouseButtonFromWheel(wheel);
-        return new MouseButtonEvent(0, 0, new MouseButtonInfo(buttonNum, 0));
-    }
-
     private int getMouseButtonFromWheel(int wheel) {
         if (ItemInteractions.CONFIG.get(ClientConfig.class).reverseSingleItemScrolling ? wheel < 0 : wheel > 0) {
-            return InputConstants.MOUSE_BUTTON_RIGHT;
+            return AbstractContainerMenu.CONTAINER_CLICK_SECONDARY;
         } else {
-            return InputConstants.MOUSE_BUTTON_LEFT;
+            return AbstractContainerMenu.CONTAINER_CLICK_PRIMARY;
         }
     }
 
