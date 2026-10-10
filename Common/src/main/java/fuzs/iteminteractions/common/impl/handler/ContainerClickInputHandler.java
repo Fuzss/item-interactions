@@ -21,21 +21,33 @@ public class ContainerClickInputHandler {
         }
 
         ItemStorageHolder holderHeldByCursor = ItemStorageHolder.ofItem(itemHeldByCursor);
-        if (holderHeldByCursor.allowModification(itemHeldByCursor, player)) {
-            return holderHeldByCursor.overrideStackedOnOther(itemHeldByCursor, hoveredSlot, clickAction, player) ?
-                    EventResult.ALLOW : EventResult.DENY;
-        }
-
         ItemStorageHolder hoveredHolder = ItemStorageHolder.ofItem(hoveredItem);
-        if (hoveredHolder.allowModification(hoveredItem, player)) {
+        if (holderHeldByCursor.allowModification(itemHeldByCursor, player)) {
+            if (holderHeldByCursor.overrideStackedOnOther(itemHeldByCursor, hoveredSlot, clickAction, player)) {
+                return EventResult.ALLOW;
+            }
+
+            // The item held by the cursor did not handle the interaction, so try the hovered item instead.
+            if (hoveredHolder.allowModification(hoveredItem, player) && hoveredHolder.overrideOtherStackedOnMe(
+                    hoveredItem,
+                    itemHeldByCursor,
+                    hoveredSlot,
+                    clickAction,
+                    player,
+                    slotHeldByCursor)) {
+                return EventResult.ALLOW;
+            } else {
+                return EventResult.DENY;
+            }
+        } else if (hoveredHolder.allowModification(hoveredItem, player)) {
             return hoveredHolder.overrideOtherStackedOnMe(hoveredItem,
                     itemHeldByCursor,
                     hoveredSlot,
                     clickAction,
                     player,
                     slotHeldByCursor) ? EventResult.ALLOW : EventResult.DENY;
+        } else {
+            return EventResult.PASS;
         }
-
-        return EventResult.PASS;
     }
 }
