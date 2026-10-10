@@ -160,6 +160,10 @@ public interface ContainerItemStorage extends ItemStorage {
             this.broadcastChangesOnContainerMenu(itemStack, player);
             return true;
         } else if (scheme.insertStackedOnOther(clickAction) && (!otherItem.isEmpty() || extractSingleItemOnly)) {
+            if (!otherItem.isEmpty() && !holder.canAcceptItem(itemStack, otherItem, player)) {
+                return false;
+            }
+
             otherItem = slot.safeTake(otherItem.getCount(), otherItem.getCount(), player);
             int transferredCount = context.tryInsert(itemStack, otherItem);
             otherItem.shrink(transferredCount);
