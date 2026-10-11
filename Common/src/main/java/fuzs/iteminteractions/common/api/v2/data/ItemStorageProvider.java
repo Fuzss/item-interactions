@@ -11,12 +11,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 
-/**
- * A base implementation of {@link SingleRegistryBootstrap} for generating the item storage definitions of the mod.
- * <p>
- * Subclasses implement {@link #addItemStorageDefinitions(BootstrapContext)} and register definitions via the various
- * {@code add} methods, mirroring the vanilla storages.
- */
 public interface ItemStorageProvider extends SingleRegistryBootstrap<ItemStorage.Definition> {
     default void add(BootstrapContext<ItemStorage.Definition> output, ItemStorage storage, TagKey<Item> tag) {
         this.add(output, tag.location(), storage, tag);
