@@ -89,10 +89,13 @@ public class ClientEventHandler {
             });
         }
 
-        if (!tooltipLines.isEmpty() && ItemInteractions.CONFIG.get(ClientConfig.class).itemStorageContentsCount) {
-            SelectedItemPreviewProvider tooltipProvider = SelectedItemPreviewProvider.getSelectedItemTooltipProvider(
-                    itemStack);
-            tooltipLines.set(0, tooltipProvider.getItemNameWithCount(tooltipLines.getFirst()));
+        if (player != null && !tooltipLines.isEmpty()
+                && ItemInteractions.CONFIG.get(ClientConfig.class).itemStorageContentsCount) {
+            int contentsCount = ItemStorageHolder.ofItem(itemStack).getContentsCount(itemStack, player);
+            if (contentsCount > 0) {
+                tooltipLines.set(0,
+                        SelectedItemPreviewProvider.getItemNameWithCount(tooltipLines.getFirst(), contentsCount));
+            }
         }
     }
 

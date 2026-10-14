@@ -1,5 +1,6 @@
 package fuzs.iteminteractions.common.api.v2.client.gui.screens.inventory.tooltip;
 
+import fuzs.iteminteractions.common.api.v2.world.item.storage.ItemStorageHolder;
 import fuzs.iteminteractions.common.impl.ItemInteractions;
 import fuzs.iteminteractions.common.impl.config.ClientConfig;
 import fuzs.iteminteractions.common.impl.config.ContentsPreview;
@@ -12,7 +13,6 @@ import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPosition
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.item.ItemInstance;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
@@ -32,9 +32,12 @@ public interface ClientItemStorageTooltip extends ClientTooltipComponent, Select
     default void extractSelectedItemTooltip(Font font, GuiGraphicsExtractor graphics, int x, int y, int w) {
         ItemStack selectedItem = this.getSelectedItem();
         if (!selectedItem.isEmpty()) {
+            ItemStorageHolder holder = ItemStorageHolder.ofItem(selectedItem);
             SelectedItemPreviewProvider tooltipProvider = SelectedItemPreviewProvider.getSelectedItemTooltipProvider(
+                    holder,
                     selectedItem);
-            List<ClientTooltipComponent> components = tooltipProvider.createSelectedItemComponents(selectedItem);
+            List<ClientTooltipComponent> components = tooltipProvider.createSelectedItemComponents(holder,
+                    selectedItem);
             int tooltipWidth = 0;
             int tooltipHeight = components.size() > 1 ? 2 : 0;
             for (ClientTooltipComponent component : components) {
@@ -56,8 +59,9 @@ public interface ClientItemStorageTooltip extends ClientTooltipComponent, Select
     ItemStack getSelectedItem();
 
     @Override
-    default List<ClientTooltipComponent> createSelectedItemComponents(ItemStack selectedItem) {
+    default List<ClientTooltipComponent> createSelectedItemComponents(ItemStorageHolder holder, ItemStack selectedItem) {
         List<ClientTooltipComponent> tooltipComponents = SelectedItemPreviewProvider.super.createSelectedItemComponents(
+                holder,
                 selectedItem);
         ContentsPreview contentsPreview = ItemInteractions.CONFIG.get(ClientConfig.class).contentsPreview;
         if (contentsPreview != ContentsPreview.NAME_ONLY) {
@@ -80,11 +84,6 @@ public interface ClientItemStorageTooltip extends ClientTooltipComponent, Select
     }
 
     ClientTooltipComponent createItemPreview(NonNullList<ItemStack> previewItems, int gridWidth, boolean overflow, boolean combined);
-
-    @Override
-    default int getContentsCount() {
-        return this.getAllItems().mapToInt(ItemInstance::count).sum();
-    }
 
     Stream<ItemStack> getAllItems();
 }

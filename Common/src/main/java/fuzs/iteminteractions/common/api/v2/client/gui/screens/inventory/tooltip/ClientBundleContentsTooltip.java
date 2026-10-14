@@ -10,7 +10,6 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
-import net.minecraft.world.item.ItemInstance;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.component.BundleContents;
@@ -25,18 +24,20 @@ public class ClientBundleContentsTooltip extends ClientBundleTooltip implements 
     private final int gridHeight;
     private final boolean overflow;
     private final boolean combined;
+    private final boolean drawProgressBar;
 
     public ClientBundleContentsTooltip(BundleContentsTooltip tooltip) {
-        this(tooltip.contents(), tooltip.weight(), tooltip.gridWidth(), tooltip.gridHeight(), false, false);
+        this(tooltip.contents(), tooltip.weight(), tooltip.gridWidth(), tooltip.gridHeight(), false, false, true);
     }
 
-    private ClientBundleContentsTooltip(BundleContents contents, Fraction weight, int gridWidth, int gridHeight, boolean overflow, boolean combined) {
+    private ClientBundleContentsTooltip(BundleContents contents, Fraction weight, int gridWidth, int gridHeight, boolean overflow, boolean combined, boolean drawProgressBar) {
         super(contents);
         this.weight = weight;
         this.gridWidth = gridWidth;
         this.gridHeight = gridHeight;
         this.overflow = overflow;
         this.combined = combined;
+        this.drawProgressBar = drawProgressBar;
     }
 
     @Override
@@ -46,7 +47,7 @@ public class ClientBundleContentsTooltip extends ClientBundleTooltip implements 
 
     @Override
     public int backgroundHeight() {
-        return this.hasProgressbar(this.weight) ? super.backgroundHeight() : this.itemGridHeight();
+        return this.drawProgressBar ? super.backgroundHeight() : this.itemGridHeight();
     }
 
     @Override
@@ -98,17 +99,13 @@ public class ClientBundleContentsTooltip extends ClientBundleTooltip implements 
         }
 
         this.extractSelectedItemTooltip(font, graphics, x, y, w);
-        if (this.hasProgressbar(weight)) {
+        if (this.drawProgressBar) {
             this.extractCustomProgressbar(x + this.getCustomContentXOffset(font, w),
                     y + this.itemGridHeight() + 4,
                     font,
                     graphics,
                     weight);
         }
-    }
-
-    private boolean hasProgressbar(Fraction weight) {
-        return weight.compareTo(Fraction.ZERO) >= 0;
     }
 
     /**
@@ -159,11 +156,6 @@ public class ClientBundleContentsTooltip extends ClientBundleTooltip implements 
     }
 
     @Override
-    public int getContentsCount() {
-        return this.contents.items().stream().mapToInt(ItemInstance::count).sum();
-    }
-
-    @Override
     public Stream<ItemStack> getAllItems() {
         return this.contents.itemCopyStream();
     }
@@ -172,7 +164,7 @@ public class ClientBundleContentsTooltip extends ClientBundleTooltip implements 
     public ClientTooltipComponent createItemPreview(NonNullList<ItemStack> previewItems, int gridWidth, boolean overflow, boolean combined) {
         return new ClientBundleContentsTooltip(new BundleContents(previewItems.stream()
                 .map(ItemStackTemplate::fromNonEmptyStack)
-                .toList()), Fraction.ONE.negate(), gridWidth, 1, overflow, combined);
+                .toList()), Fraction.ZERO, gridWidth, 1, overflow, combined, false);
     }
 
     /**
@@ -220,59 +212,6 @@ public class ClientBundleContentsTooltip extends ClientBundleTooltip implements 
             return progressBarFillText;
         } else {
             return Component.translatable("loading.progress", (int) (weight.doubleValue() * 100.0));
-        }
-    }
-
-    private record ClientBundleContentsPreview(NonNullList<ItemStack> items,
-                                               int gridWidth,
-                                               boolean overflow,
-                                               boolean combined) implements ClientTooltipComponent {
-
-        @Override
-        public int getHeight(Font font) {
-            return ClientBundleTooltip.SLOT_SIZE;
-        }
-
-        @Override
-        public int getWidth(Font font) {
-            return this.gridWidth * ClientBundleTooltip.SLOT_SIZE;
-        }
-
-        @Override
-        public void extractImage(Font font, int x, int y, int w, int h, GuiGraphicsExtractor graphics) {
-            for (int slotNum = 0; slotNum < this.gridWidth; ++slotNum) {
-                int drawX = x + slotNum * ClientBundleTooltip.SLOT_SIZE;
-                int drawY = y;
-                if (this.overflow && slotNum == this.gridWidth - 1) {
-                    this.extractSlotBackground(graphics, drawX, drawY);
-                    graphics.blitSprite(RenderPipelines.GUI_TEXTURED,
-                            ClientItemStorageTooltip.ELLIPSIS_SPRITE,
-                            drawX + 4,
-                            drawY + 4,
-                            16,
-                            16);
-                } else {
-                    ItemStack item = this.items.get(slotNum);
-                    if (!item.isEmpty()) {
-                        this.extractSlotBackground(graphics, drawX, drawY);
-                        graphics.item(item, drawX + 4, drawY + 4, slotNum);
-                        if (this.combined) {
-                            ItemStorageTooltipHelper.itemDecorations(graphics, font, item, drawX + 4, drawY + 4);
-                        } else {
-                            graphics.itemDecorations(font, item, drawX + 4, drawY + 4);
-                        }
-                    }
-                }
-            }
-        }
-
-        private void extractSlotBackground(GuiGraphicsExtractor graphics, int drawX, int drawY) {
-            graphics.blitSprite(RenderPipelines.GUI_TEXTURED,
-                    ClientBundleTooltip.SLOT_BACKGROUND_SPRITE,
-                    drawX,
-                    drawY,
-                    ClientBundleTooltip.SLOT_SIZE,
-                    ClientBundleTooltip.SLOT_SIZE);
         }
     }
 }

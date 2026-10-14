@@ -156,6 +156,19 @@ public record ItemStorageHolder(ItemStorage storage) {
         return this.storage().getItemContainer(itemStack, player);
     }
 
+    public int getContentsCount(ItemStack itemStack, Player player) {
+        if (this.hasContents(itemStack, player)) {
+            int count = 0;
+            for (ItemStack item : this.getItemContainer(itemStack, player)) {
+                count += item.getCount();
+            }
+
+            return count;
+        } else {
+            return 0;
+        }
+    }
+
     public Optional<Optional<TooltipComponent>> getTooltipImage(ItemStack itemStack, Player player) {
         return this.hasContents(itemStack, player) ? this.storage().getTooltipImage(itemStack, player) :
                 Optional.empty();
