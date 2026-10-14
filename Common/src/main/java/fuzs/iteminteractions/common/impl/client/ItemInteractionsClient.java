@@ -3,7 +3,8 @@ package fuzs.iteminteractions.common.impl.client;
 import fuzs.iteminteractions.common.api.v2.client.gui.screens.inventory.tooltip.ClientBundleContentsTooltip;
 import fuzs.iteminteractions.common.api.v2.client.gui.screens.inventory.tooltip.ClientItemContentsTooltip;
 import fuzs.iteminteractions.common.api.v2.world.inventory.tooltip.BundleContentsTooltip;
-import fuzs.iteminteractions.common.impl.client.gui.screens.inventory.tooltip.CollapsibleClientTooltipComponent;
+import fuzs.iteminteractions.common.api.v2.world.inventory.tooltip.ItemContentsTooltip;
+import fuzs.iteminteractions.common.impl.client.gui.screens.inventory.tooltip.DynamicClientTooltipComponent;
 import fuzs.iteminteractions.common.impl.client.handler.ClientEventHandler;
 import fuzs.iteminteractions.common.impl.client.handler.ItemSlotMouseActionHandler;
 import fuzs.iteminteractions.common.impl.config.ItemHeldByCursorTooltip;
@@ -12,7 +13,10 @@ import fuzs.puzzleslib.common.api.client.core.v1.ClientModConstructor;
 import fuzs.puzzleslib.common.api.client.core.v1.context.ClientTooltipComponentsContext;
 import fuzs.puzzleslib.common.api.client.core.v1.context.KeyMappingsContext;
 import fuzs.puzzleslib.common.api.client.event.v1.entity.player.ClientPlayerNetworkEvents;
-import fuzs.puzzleslib.common.api.client.event.v1.gui.*;
+import fuzs.puzzleslib.common.api.client.event.v1.gui.ItemTooltipCallback;
+import fuzs.puzzleslib.common.api.client.event.v1.gui.ScreenEvents;
+import fuzs.puzzleslib.common.api.client.event.v1.gui.ScreenKeyboardEvents;
+import fuzs.puzzleslib.common.api.client.event.v1.gui.ScreenMouseEvents;
 import fuzs.puzzleslib.common.api.client.key.v1.KeyActivationContext;
 import fuzs.puzzleslib.common.api.event.v1.core.EventPhase;
 import fuzs.puzzleslib.common.api.event.v1.level.PlaySoundEvents;
@@ -58,9 +62,9 @@ public class ItemInteractionsClient implements ClientModConstructor {
 
     @Override
     public void onRegisterClientTooltipComponents(ClientTooltipComponentsContext context) {
-        context.registerClientTooltipComponent(fuzs.iteminteractions.common.api.v2.world.inventory.tooltip.ItemContentsTooltip.class,
-                CollapsibleClientTooltipComponent.wrapFactory(ClientItemContentsTooltip::new));
+        context.registerClientTooltipComponent(ItemContentsTooltip.class,
+                DynamicClientTooltipComponent.wrapFactory(ClientItemContentsTooltip::new));
         context.registerClientTooltipComponent(BundleContentsTooltip.class,
-                CollapsibleClientTooltipComponent.wrapFactory(ClientBundleContentsTooltip::new));
+                DynamicClientTooltipComponent.wrapFactory(ClientBundleContentsTooltip::new));
     }
 }

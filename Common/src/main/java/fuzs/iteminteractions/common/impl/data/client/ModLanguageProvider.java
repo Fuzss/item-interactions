@@ -1,8 +1,9 @@
 package fuzs.iteminteractions.common.impl.data.client;
 
+import fuzs.iteminteractions.common.api.v2.client.gui.screens.inventory.tooltip.SelectedItemPreviewProvider;
 import fuzs.iteminteractions.common.impl.ItemInteractions;
 import fuzs.iteminteractions.common.impl.client.core.KeyType;
-import fuzs.iteminteractions.common.impl.client.gui.screens.inventory.tooltip.CollapsibleClientTooltipComponent;
+import fuzs.iteminteractions.common.impl.client.gui.screens.inventory.tooltip.DynamicClientTooltipComponent;
 import fuzs.iteminteractions.common.impl.config.ItemHeldByCursorTooltip;
 import fuzs.iteminteractions.common.impl.config.ItemStorageTooltip;
 import fuzs.puzzleslib.common.api.client.data.v3.language.AbstractLanguageProvider;
@@ -16,7 +17,8 @@ public class ModLanguageProvider extends AbstractLanguageProvider {
 
     @Override
     public void addTranslations() {
-        this.add(CollapsibleClientTooltipComponent.REVEAL_CONTENTS_TRANSLATION_KEY, "%s %s to reveal contents");
+        this.add(DynamicClientTooltipComponent.REVEAL_CONTENTS_TRANSLATION_KEY, "%s %s to reveal contents");
+        this.add(SelectedItemPreviewProvider.ITEM_COUNT_KEY, "%s (%s)");
         this.add(KeyType.HOLD_COMPONENT, "Hold");
         this.add(KeyType.TOGGLE_COMPONENT, "Toggle");
         this.add(KeyType.SHIFT_COMPONENT, "Shift");

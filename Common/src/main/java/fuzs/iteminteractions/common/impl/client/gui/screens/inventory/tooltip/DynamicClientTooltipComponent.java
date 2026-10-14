@@ -1,5 +1,7 @@
 package fuzs.iteminteractions.common.impl.client.gui.screens.inventory.tooltip;
 
+import fuzs.iteminteractions.common.api.v2.client.gui.screens.inventory.tooltip.ClientItemStorageTooltip;
+import fuzs.iteminteractions.common.api.v2.client.gui.screens.inventory.tooltip.SelectedItemPreviewProvider;
 import fuzs.iteminteractions.common.impl.ItemInteractions;
 import fuzs.iteminteractions.common.impl.client.core.KeyType;
 import fuzs.iteminteractions.common.impl.config.ClientConfig;
@@ -12,12 +14,12 @@ import net.minecraft.world.inventory.tooltip.TooltipComponent;
 
 import java.util.function.Function;
 
-public record CollapsibleClientTooltipComponent(ClientTooltipComponent component) implements ClientTooltipComponent {
+public record DynamicClientTooltipComponent(ClientItemStorageTooltip component) implements ClientTooltipComponent, SelectedItemPreviewProvider {
     public static final String REVEAL_CONTENTS_TRANSLATION_KEY = ItemInteractions.id("container")
             .toLanguageKey(Registries.elementsDirPath(Registries.ITEM), "tooltip.reveal_contents");
 
-    public static <T extends TooltipComponent> Function<? super T, CollapsibleClientTooltipComponent> wrapFactory(Function<? super T, ? extends ClientTooltipComponent> factory) {
-        return (T tooltipComponent) -> new CollapsibleClientTooltipComponent(factory.apply(tooltipComponent));
+    public static <T extends TooltipComponent> Function<? super T, DynamicClientTooltipComponent> wrapFactory(Function<? super T, ? extends ClientItemStorageTooltip> factory) {
+        return (T tooltipComponent) -> new DynamicClientTooltipComponent(factory.apply(tooltipComponent));
     }
 
     @Override
@@ -66,5 +68,10 @@ public record CollapsibleClientTooltipComponent(ClientTooltipComponent component
         if (ItemInteractions.CONFIG.get(ClientConfig.class).itemStorageTooltip.isUsed()) {
             this.component.extractImage(font, x, y, width, height, guiGraphics);
         }
+    }
+
+    @Override
+    public SelectedItemPreviewProvider unwrap() {
+        return this.component;
     }
 }
