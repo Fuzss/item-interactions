@@ -18,8 +18,11 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.Identifier;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickAction;
@@ -417,9 +420,11 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
         if (this.allowModification(holder, this.screen.hoveredSlot, slotIndex, storageItem)) {
             if (ItemInteractions.CONFIG.get(ClientConfig.class).nestedItemTooltips) {
                 if (event.isSelection()) {
+                    this.playButtonClickSound(SoundEvents.ITEM_FRAME_ADD_ITEM);
                     this.pushNestedStorageItem(holder, slotIndex, storageItem);
                     return true;
                 } else if (event.key() == InputConstants.KEY_BACKSPACE) {
+                    this.playButtonClickSound(SoundEvents.ITEM_FRAME_REMOVE_ITEM);
                     this.popNestedStorageItem(slotIndex, itemStack);
                     return true;
                 }
@@ -456,6 +461,10 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
     private ItemStack getStorageItem(OptionalInt slotIndex, ItemStack originalItem) {
         return this.nestedStorageItem.isEmpty() || !Objects.equals(slotIndex, this.nestedStorageItemSlot) ?
                 originalItem : this.nestedStorageItem.peek().item();
+    }
+
+    private void playButtonClickSound(SoundEvent itemFrameRemoveItem) {
+        this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(itemFrameRemoveItem, 1.0F));
     }
 
     private void pushNestedStorageItem(ItemStorageHolder holder, OptionalInt slotIndex, ItemStack itemStack) {
