@@ -75,7 +75,8 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
                     itemStack.getTooltipImage(),
                     mouseX,
                     mouseY,
-                    itemStack.get(DataComponents.TOOLTIP_STYLE));
+                    itemStack.get(DataComponents.TOOLTIP_STYLE),
+                    true);
         }
     }
 
