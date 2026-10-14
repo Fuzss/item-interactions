@@ -1,27 +1,42 @@
 package fuzs.iteminteractions.common.api.v2.client.gui.screens.inventory.tooltip;
 
 import fuzs.iteminteractions.common.api.v2.world.inventory.tooltip.BundleContentsTooltip;
+import fuzs.iteminteractions.common.impl.client.helper.ItemStorageTooltipHelper;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientBundleTooltip;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
+import net.minecraft.world.item.ItemInstance;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
+import net.minecraft.world.item.component.BundleContents;
 import org.apache.commons.lang3.math.Fraction;
 
 import java.util.List;
+import java.util.stream.Stream;
 
-public class ClientBundleContentsTooltip extends ClientBundleTooltip {
+public class ClientBundleContentsTooltip extends ClientBundleTooltip implements ClientItemStorageTooltip {
     private final Fraction weight;
     private final int gridWidth;
     private final int gridHeight;
+    private final boolean overflow;
+    private final boolean combined;
 
     public ClientBundleContentsTooltip(BundleContentsTooltip tooltip) {
-        super(tooltip.contents());
-        this.weight = tooltip.weight();
-        this.gridWidth = tooltip.gridWidth();
-        this.gridHeight = tooltip.gridHeight();
+        this(tooltip.contents(), tooltip.weight(), tooltip.gridWidth(), tooltip.gridHeight(), false, false);
+    }
+
+    private ClientBundleContentsTooltip(BundleContents contents, Fraction weight, int gridWidth, int gridHeight, boolean overflow, boolean combined) {
+        super(contents);
+        this.weight = weight;
+        this.gridWidth = gridWidth;
+        this.gridHeight = gridHeight;
+        this.overflow = overflow;
+        this.combined = combined;
     }
 
     @Override
@@ -29,13 +44,12 @@ public class ClientBundleContentsTooltip extends ClientBundleTooltip {
         return this.contents.isEmpty() ? super.getWidth(font) : this.gridSizeX() * SLOT_SIZE;
     }
 
-    /**
-     * @see ClientBundleTooltip#getContentXOffset(int)
-     */
-    public int getCustomContentXOffset(Font font, int tooltipWidth) {
-        return (tooltipWidth - this.getWidth(font)) / 2;
+    @Override
+    public int backgroundHeight() {
+        return this.hasProgressbar(this.weight) ? super.backgroundHeight() : this.itemGridHeight();
     }
 
+    @Override
     public int gridSizeX() {
         return this.gridWidth;
     }
@@ -62,30 +76,110 @@ public class ClientBundleContentsTooltip extends ClientBundleTooltip {
         }
     }
 
+    /**
+     * @see ClientBundleTooltip#extractBundleWithItemsTooltip(Font, int, int, int, int, GuiGraphicsExtractor,
+     *         Fraction)
+     */
     @Override
     public void extractBundleWithItemsTooltip(Font font, int x, int y, int w, int h, GuiGraphicsExtractor graphics, Fraction weight) {
         List<ItemStackTemplate> shownItems = this.getShownItems(this.contents.size());
         int xStartPos = x + this.getCustomContentXOffset(font, w) + this.getWidth(font);
         int yStartPos = y + this.gridSizeY() * SLOT_SIZE;
-        int slotNumber = 1;
-
-        for (int rowNumber = 1; rowNumber <= this.gridSizeY(); rowNumber++) {
-            for (int columnNumber = 1; columnNumber <= this.gridSizeX(); columnNumber++) {
-                int drawX = xStartPos - columnNumber * SLOT_SIZE;
-                int drawY = yStartPos - rowNumber * SLOT_SIZE;
-                if (shouldRenderItemSlot(shownItems, slotNumber)) {
-                    this.extractSlot(slotNumber, drawX, drawY, shownItems, slotNumber, font, graphics);
-                    slotNumber++;
+        int slotNum = 1;
+        for (int rowNum = 1; rowNum <= this.gridSizeY(); rowNum++) {
+            for (int columnNum = 1; columnNum <= this.gridSizeX(); columnNum++) {
+                int drawX = xStartPos - columnNum * SLOT_SIZE;
+                int drawY = yStartPos - rowNum * SLOT_SIZE;
+                if (shouldRenderItemSlot(shownItems, slotNum)) {
+                    this.extractSlot(slotNum, drawX, drawY, shownItems, slotNum, font, graphics);
+                    slotNum++;
                 }
             }
         }
 
         this.extractSelectedItemTooltip(font, graphics, x, y, w);
-        this.extractCustomProgressbar(x + this.getCustomContentXOffset(font, w),
-                y + this.itemGridHeight() + 4,
-                font,
-                graphics,
-                weight);
+        if (this.hasProgressbar(weight)) {
+            this.extractCustomProgressbar(x + this.getCustomContentXOffset(font, w),
+                    y + this.itemGridHeight() + 4,
+                    font,
+                    graphics,
+                    weight);
+        }
+    }
+
+    private boolean hasProgressbar(Fraction weight) {
+        return weight.compareTo(Fraction.ZERO) >= 0;
+    }
+
+    /**
+     * @see ClientBundleTooltip#extractSlot(int, int, int, List, int, Font, GuiGraphicsExtractor)
+     */
+    @Override
+    public void extractSlot(int slotNum, int drawX, int drawY, List<ItemStackTemplate> shownItems, int seed, Font font, GuiGraphicsExtractor graphics) {
+        boolean hasOverflowSprite = this.overflow && slotNum == 1;
+        int itemVisualOrderIndex = shownItems.size() - slotNum;
+        boolean hasHighlight = !hasOverflowSprite && itemVisualOrderIndex == this.contents.getSelectedItemIndex();
+        if (hasHighlight) {
+            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT_HIGHLIGHT_BACK_SPRITE, drawX, drawY, 24, 24);
+        } else {
+            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT_BACKGROUND_SPRITE, drawX, drawY, 24, 24);
+        }
+
+        if (hasOverflowSprite) {
+            graphics.blitSprite(RenderPipelines.GUI_TEXTURED,
+                    ClientItemStorageTooltip.ELLIPSIS_SPRITE,
+                    drawX + 4,
+                    drawY + 4,
+                    16,
+                    16);
+        } else {
+            ItemStack item = shownItems.get(itemVisualOrderIndex).create();
+            graphics.item(item, drawX + 4, drawY + 4, seed);
+            if (this.combined) {
+                ItemStorageTooltipHelper.itemDecorations(graphics, font, item, drawX + 4, drawY + 4);
+            } else {
+                graphics.itemDecorations(font, item, drawX + 4, drawY + 4);
+            }
+        }
+
+        if (hasHighlight) {
+            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT_HIGHLIGHT_FRONT_SPRITE, drawX, drawY, 24, 24);
+        }
+    }
+
+    @Override
+    public void extractSelectedItemTooltip(Font font, GuiGraphicsExtractor graphics, int x, int y, int w) {
+        ClientItemStorageTooltip.super.extractSelectedItemTooltip(font, graphics, x, y, w);
+    }
+
+    @Override
+    public ItemStack getSelectedItem() {
+        ItemStackTemplate selectedItem = this.contents.getSelectedItem();
+        return selectedItem != null ? selectedItem.create() : ItemStack.EMPTY;
+    }
+
+    @Override
+    public int getContentsCount() {
+        return this.contents.items().stream().mapToInt(ItemInstance::count).sum();
+    }
+
+    @Override
+    public Stream<ItemStack> getAllItems() {
+        return this.contents.itemCopyStream();
+    }
+
+    @Override
+    public ClientTooltipComponent createItemPreview(NonNullList<ItemStack> previewItems, int gridWidth, boolean overflow, boolean combined) {
+        return new ClientBundleContentsTooltip(new BundleContents(previewItems.stream()
+                .map(ItemStackTemplate::fromNonEmptyStack)
+                .toList()), Fraction.ONE.negate(), gridWidth, 1, overflow, combined);
+    }
+
+    /**
+     * @see ClientBundleTooltip#getContentXOffset(int)
+     */
+    public int getCustomContentXOffset(Font font, int tooltipWidth) {
+        return (tooltipWidth - this.getWidth(font)) / 2;
     }
 
     /**
@@ -126,6 +220,59 @@ public class ClientBundleContentsTooltip extends ClientBundleTooltip {
             return progressBarFillText;
         } else {
             return Component.translatable("loading.progress", (int) (weight.doubleValue() * 100.0));
+        }
+    }
+
+    private record ClientBundleContentsPreview(NonNullList<ItemStack> items,
+                                               int gridWidth,
+                                               boolean overflow,
+                                               boolean combined) implements ClientTooltipComponent {
+
+        @Override
+        public int getHeight(Font font) {
+            return ClientBundleTooltip.SLOT_SIZE;
+        }
+
+        @Override
+        public int getWidth(Font font) {
+            return this.gridWidth * ClientBundleTooltip.SLOT_SIZE;
+        }
+
+        @Override
+        public void extractImage(Font font, int x, int y, int w, int h, GuiGraphicsExtractor graphics) {
+            for (int slotNum = 0; slotNum < this.gridWidth; ++slotNum) {
+                int drawX = x + slotNum * ClientBundleTooltip.SLOT_SIZE;
+                int drawY = y;
+                if (this.overflow && slotNum == this.gridWidth - 1) {
+                    this.extractSlotBackground(graphics, drawX, drawY);
+                    graphics.blitSprite(RenderPipelines.GUI_TEXTURED,
+                            ClientItemStorageTooltip.ELLIPSIS_SPRITE,
+                            drawX + 4,
+                            drawY + 4,
+                            16,
+                            16);
+                } else {
+                    ItemStack item = this.items.get(slotNum);
+                    if (!item.isEmpty()) {
+                        this.extractSlotBackground(graphics, drawX, drawY);
+                        graphics.item(item, drawX + 4, drawY + 4, slotNum);
+                        if (this.combined) {
+                            ItemStorageTooltipHelper.itemDecorations(graphics, font, item, drawX + 4, drawY + 4);
+                        } else {
+                            graphics.itemDecorations(font, item, drawX + 4, drawY + 4);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void extractSlotBackground(GuiGraphicsExtractor graphics, int drawX, int drawY) {
+            graphics.blitSprite(RenderPipelines.GUI_TEXTURED,
+                    ClientBundleTooltip.SLOT_BACKGROUND_SPRITE,
+                    drawX,
+                    drawY,
+                    ClientBundleTooltip.SLOT_SIZE,
+                    ClientBundleTooltip.SLOT_SIZE);
         }
     }
 }

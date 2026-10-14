@@ -56,3 +56,5 @@ extendable	method	net/minecraft/client/gui/screens/inventory/tooltip/ClientBundl
 extendable	method	net/minecraft/client/gui/screens/inventory/tooltip/ClientBundleTooltip	extractCount	(IIILnet/minecraft/client/gui/Font;Lnet/minecraft/client/gui/GuiGraphicsExtractor;)V
 extendable	method	net/minecraft/client/gui/screens/inventory/tooltip/ClientBundleTooltip	getProgressBarFill	(Lorg/apache/commons/lang3/math/Fraction;)I
 extendable	method	net/minecraft/client/gui/screens/inventory/tooltip/ClientBundleTooltip	getEmptyBundleDescriptionTextHeight	(Lnet/minecraft/client/gui/Font;)I
+accessible  method  net/minecraft/client/gui/GuiGraphicsExtractor   itemBar (Lnet/minecraft/world/item/ItemStack;II)V
+accessible  method  net/minecraft/client/gui/GuiGraphicsExtractor   itemCooldown    (Lnet/minecraft/world/item/ItemStack;II)V

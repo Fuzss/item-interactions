@@ -1,6 +1,7 @@
 package fuzs.iteminteractions.common.impl.client.handler;
 
 import com.google.common.collect.ImmutableMap;
+import fuzs.iteminteractions.common.api.v2.client.gui.screens.inventory.tooltip.SelectedItemPreviewProvider;
 import fuzs.iteminteractions.common.api.v2.world.item.storage.ItemStorageHolder;
 import fuzs.iteminteractions.common.impl.ItemInteractions;
 import fuzs.iteminteractions.common.impl.client.gui.CustomItemSlotMouseAction;
@@ -86,6 +87,12 @@ public class ClientEventHandler {
                     return false;
                 }
             });
+        }
+
+        if (!tooltipLines.isEmpty() && ItemInteractions.CONFIG.get(ClientConfig.class).itemStorageContentsCount) {
+            SelectedItemPreviewProvider tooltipProvider = SelectedItemPreviewProvider.getSelectedItemTooltipProvider(
+                    itemStack);
+            tooltipLines.set(0, tooltipProvider.getItemNameWithCount(tooltipLines.getFirst()));
         }
     }
 

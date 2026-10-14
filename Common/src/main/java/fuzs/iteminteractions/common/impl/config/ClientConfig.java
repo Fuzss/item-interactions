@@ -11,6 +11,13 @@ public class ClientConfig implements ConfigCore {
 
     @Config(description = {"Expand item tooltips to show their contents.", KEY_MESSAGE_TYPE_DESCRIPTION})
     public ItemStorageTooltip itemStorageTooltip = ItemStorageTooltip.ALWAYS;
+    @Config(description = {
+            "Select how the contents of the selected item are previewed on an item contents tooltip, when that item provides an item storage itself.",
+            "The preview only ever shows a single row of the selected item's contents."
+    })
+    public ContentsPreview contentsPreview = ContentsPreview.COMBINED_ITEMS;
+    @Config(description = "Display the total number of items contained inside the selected storage item after its name on any item tooltip.")
+    public boolean itemStorageContentsCount = false;
     @Config(description = "Color item inventories on tooltips according to the container item's color.")
     public boolean itemStorageColors = true;
     @Config(description = "Pick the sprite used for highlighting the currently selected item in item content tooltips.")
