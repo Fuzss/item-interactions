@@ -414,12 +414,16 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
         if (this.allowModification(holder, this.screen.hoveredSlot, slotIndex, storageItem)) {
             if (ItemInteractions.CONFIG.get(ClientConfig.class).nestedItemTooltips) {
                 if (event.isSelection()) {
-                    this.playButtonClickSound(SoundEvents.ITEM_FRAME_ADD_ITEM);
-                    this.pushNestedStorageItem(holder, slotIndex, storageItem);
+                    if (this.pushNestedStorageItem(holder, slotIndex, storageItem)) {
+                        this.playButtonClickSound(SoundEvents.ITEM_FRAME_ADD_ITEM);
+                    }
+
                     return true;
                 } else if (event.key() == InputConstants.KEY_BACKSPACE) {
-                    this.playButtonClickSound(SoundEvents.ITEM_FRAME_REMOVE_ITEM);
-                    this.popNestedStorageItem(slotIndex, itemStack);
+                    if (this.popNestedStorageItem(slotIndex, itemStack)) {
+                        this.playButtonClickSound(SoundEvents.ITEM_FRAME_REMOVE_ITEM);
+                    }
+
                     return true;
                 }
             }
@@ -461,7 +465,7 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
         this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(itemFrameRemoveItem, 1.0F));
     }
 
-    private void pushNestedStorageItem(ItemStorageHolder holder, OptionalInt slotIndex, ItemStack itemStack) {
+    private boolean pushNestedStorageItem(ItemStorageHolder holder, OptionalInt slotIndex, ItemStack itemStack) {
         Container container = holder.getItemContainer(itemStack, this.minecraft.player);
         int selectedItem = holder.storage().getSelectedItem(itemStack, this.minecraft.player);
         ItemStack item = container.getItem(selectedItem);
@@ -475,10 +479,13 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
             itemHolder.storage()
                     .toggleSelectedItem(itemStack, this.minecraft.player, SelectedItem.DEFAULT_SELECTED_ITEM, false);
             this.nestedStorageItem.push(new ItemSlot(item.copy(), selectedItem));
+            return true;
         }
+
+        return false;
     }
 
-    private void popNestedStorageItem(OptionalInt slotIndex, ItemStack originalItem) {
+    private boolean popNestedStorageItem(OptionalInt slotIndex, ItemStack originalItem) {
         if (!this.nestedStorageItem.isEmpty()) {
             int slotNum = this.nestedStorageItem.pop().slotNum();
             ItemStack item = this.getStorageItem(slotIndex, originalItem);
@@ -487,7 +494,11 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
             if (this.nestedStorageItem.isEmpty()) {
                 this.nestedStorageItemSlot = OptionalInt.of(-1);
             }
+
+            return true;
         }
+
+        return false;
     }
 
     @Override
