@@ -11,11 +11,11 @@ public class ClientConfig implements ConfigCore {
 
     @Config(description = {"Expand item tooltips to show their contents.", KEY_MESSAGE_TYPE_DESCRIPTION})
     public ItemStorageTooltip itemStorageTooltip = ItemStorageTooltip.ALWAYS;
-    @Config(description = {
-            "Select how the contents of the selected item are previewed on an item contents tooltip, when that item provides an item storage itself.",
-            "The preview only ever shows a single row of the selected item's contents."
-    })
+    @Config(description = "Select how the contents of the selected item are previewed on an item contents tooltip, when that item provides an item storage itself.")
     public ContentsPreview contentsPreview = ContentsPreview.COMBINED_ITEMS;
+    @Config(description = "Maximum number of rows shown for the previewed contents of a selected item on an item contents tooltip.")
+    @Config.IntRange(min = 1, max = 9)
+    public int maxContentsPreviewHeight = 3;
     @Config(description = "Display the total number of items contained inside the selected storage item after its name on any item tooltip.")
     public boolean itemStorageContentsCount = false;
     @Config(description = "Color item inventories on tooltips according to the container item's color.")

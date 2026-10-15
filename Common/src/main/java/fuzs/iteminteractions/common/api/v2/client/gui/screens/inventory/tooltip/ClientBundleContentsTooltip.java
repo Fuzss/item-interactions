@@ -61,6 +61,11 @@ public class ClientBundleContentsTooltip extends ClientBundleTooltip implements 
     }
 
     @Override
+    public int maxGridSizeX() {
+        return 7;
+    }
+
+    @Override
     public int slotCount() {
         return this.contents.size();
     }
@@ -161,10 +166,10 @@ public class ClientBundleContentsTooltip extends ClientBundleTooltip implements 
     }
 
     @Override
-    public ClientTooltipComponent createItemPreview(NonNullList<ItemStack> previewItems, int gridWidth, boolean overflow, boolean combined) {
+    public ClientTooltipComponent createItemPreview(NonNullList<ItemStack> previewItems, int gridWidth, int gridHeight, boolean overflow, boolean combined) {
         return new ClientBundleContentsTooltip(new BundleContents(previewItems.stream()
                 .map(ItemStackTemplate::fromNonEmptyStack)
-                .toList()), Fraction.ZERO, gridWidth, 1, overflow, combined, false);
+                .toList()), Fraction.ZERO, gridWidth, gridHeight, overflow, combined, false);
     }
 
     /**
