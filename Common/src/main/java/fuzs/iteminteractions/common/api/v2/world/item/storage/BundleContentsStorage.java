@@ -7,7 +7,6 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import fuzs.iteminteractions.common.api.v2.world.inventory.tooltip.BundleContentsTooltip;
 import fuzs.iteminteractions.common.impl.init.ModRegistry;
-import fuzs.puzzleslib.common.api.container.v1.ContainerMenuHelper;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
@@ -15,6 +14,7 @@ import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.BundleItem;
@@ -22,6 +22,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.component.BundleContents;
 import org.apache.commons.lang3.math.Fraction;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -80,22 +81,31 @@ public class BundleContentsStorage extends ComponentBackedStorage {
     }
 
     @Override
-    public SimpleContainer getItemContainer(ItemStack itemStack, boolean isMutable) {
-        NonNullList<ItemStack> itemList = NonNullList.of(ItemStack.EMPTY,
-                this.getItemStream(itemStack, isMutable).toArray(ItemStack[]::new));
-        return ContainerMenuHelper.createListBackedContainer(itemList, (Container container) -> {
-            if (isMutable) {
-                itemStack.set(DataComponents.BUNDLE_CONTENTS, this.createUpdatedContents(container, itemList));
-            } else {
-                throw new UnsupportedOperationException();
+    public SimpleContainer getWritableContainer(ItemStack itemStack, Player player, @Nullable SlotAccess slotAccess) {
+        return new SimpleContainer(this.getItemStream(itemStack, slotAccess != null).toArray(ItemStack[]::new)) {
+            @Override
+            public void setChanged() {
+                if (slotAccess != null) {
+                    if (this.stillValid(player)) {
+                        itemStack.set(DataComponents.BUNDLE_CONTENTS,
+                                BundleContentsStorage.this.createUpdatedContents(this, this.getItems()));
+                    }
+                } else {
+                    throw new UnsupportedOperationException();
+                }
             }
-        });
+
+            @Override
+            public boolean stillValid(Player player) {
+                return slotAccess == null || slotAccess.get() == itemStack;
+            }
+        };
     }
 
-    private Stream<ItemStack> getItemStream(ItemStack itemStack, boolean isMutable) {
+    private Stream<ItemStack> getItemStream(ItemStack itemStack, boolean acceptItems) {
         Stream<ItemStack> itemStream = itemStack.getOrDefault(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY)
-                .itemCopyStream();
-        if (isMutable) {
+                .itemCopies();
+        if (acceptItems) {
             // Add one additional slot, so we can add items in the inventory.
             return switch (this.getRemovalDirection()) {
                 case POSITIVE -> Stream.concat(Stream.of(ItemStack.EMPTY), itemStream);

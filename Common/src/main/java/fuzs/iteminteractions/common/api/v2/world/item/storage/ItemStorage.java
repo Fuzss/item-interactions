@@ -111,7 +111,9 @@ public interface ItemStorage {
      * @param player    player involved in the interaction
      * @return the provided container
      */
-    Container getItemContainer(ItemStack itemStack, Player player);
+    Container getReadOnlyContainer(ItemStack itemStack, Player player);
+
+    Container getWritableContainer(ItemStack itemStack, Player player, SlotAccess slotAccess);
 
     /**
      * Is there enough space in the container provided by <code>containerStack</code> to add <code>stack</code> (not

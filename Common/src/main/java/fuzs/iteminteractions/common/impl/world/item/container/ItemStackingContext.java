@@ -9,6 +9,7 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.ints.IntSets;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
+import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.BundleContents;
@@ -28,14 +29,17 @@ public final class ItemStackingContext {
     /**
      * @see BundleContents.Mutable#tryInsert(ItemStack)
      */
-    public int tryInsert(ItemStack itemStack, ItemStack otherItem) {
-        return this.tryInsert(itemStack, otherItem, this.storage.getPrioritizedSlot(itemStack, this.player));
+    public int tryInsert(ItemStack itemStack, ItemStack otherItem, SlotAccess slotAccess) {
+        return this.tryInsert(itemStack,
+                otherItem,
+                this.storage.getPrioritizedSlot(itemStack, this.player),
+                slotAccess);
     }
 
-    public int tryInsert(ItemStack itemStack, ItemStack otherItem, int prioritizedSlot) {
+    public int tryInsert(ItemStack itemStack, ItemStack otherItem, int prioritizedSlot, SlotAccess slotAccess) {
         int countLimit = this.getInsertCountLimit(itemStack, otherItem);
         if (countLimit > 0 && otherItem.getCount() > 0) {
-            Container container = this.storage.getItemContainer(itemStack, this.player, true);
+            Container container = this.storage.getWritableContainer(itemStack, this.player, slotAccess);
             ItemStack item = otherItem.copyWithCount(countLimit);
             ItemSlot itemSlot = this.addItem(container, item, prioritizedSlot);
             this.storage.setPrioritizedSlot(itemStack, this.player, itemSlot.slotNum());
@@ -54,8 +58,8 @@ public final class ItemStackingContext {
     /**
      * @see BundleContents.Mutable#removeOne()
      */
-    public ItemSlot removeOne(ItemStack itemStack, ItemStack otherItem) {
-        Container container = this.storage.getItemContainer(itemStack, this.player, true);
+    public ItemSlot removeOne(ItemStack itemStack, ItemStack otherItem, SlotAccess slotAccess) {
+        Container container = this.storage.getWritableContainer(itemStack, this.player, slotAccess);
         int slotNum = this.updatePrioritizedSlot(container, itemStack, otherItem);
         if (slotNum != SelectedItem.DEFAULT_SELECTED_ITEM) {
             ItemStack slotItem = container.getItem(slotNum);

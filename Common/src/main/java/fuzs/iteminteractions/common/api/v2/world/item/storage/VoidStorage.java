@@ -58,7 +58,17 @@ public class VoidStorage implements ItemStorage {
     }
 
     @Override
-    public Container getItemContainer(ItemStack itemStack, Player player) {
+    public Container getReadOnlyContainer(ItemStack itemStack, Player player) {
+        return new SimpleContainer() {
+            @Override
+            public void setChanged() {
+                throw new UnsupportedOperationException();
+            }
+        };
+    }
+
+    @Override
+    public Container getWritableContainer(ItemStack itemStack, Player player, SlotAccess slotAccess) {
         return new SimpleContainer();
     }
 

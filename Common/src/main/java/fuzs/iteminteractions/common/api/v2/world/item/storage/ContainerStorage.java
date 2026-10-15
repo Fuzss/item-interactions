@@ -6,15 +6,14 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import fuzs.iteminteractions.common.api.v2.world.inventory.tooltip.ItemContentsTooltip;
 import fuzs.iteminteractions.common.api.v2.world.item.DyeBackedColor;
 import fuzs.iteminteractions.common.impl.init.ModRegistry;
-import fuzs.puzzleslib.common.api.container.v1.ContainerMenuHelper;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.StringRepresentable;
-import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.EquipmentSlotGroup;
+import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
@@ -181,16 +180,28 @@ public class ContainerStorage extends ComponentBackedStorage {
     }
 
     @Override
-    public SimpleContainer getItemContainer(ItemStack itemStack, boolean isMutable) {
-        NonNullList<ItemStack> itemList = NonNullList.withSize(this.getInventorySize(), ItemStack.EMPTY);
-        itemStack.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).copyInto(itemList);
-        return ContainerMenuHelper.createListBackedContainer(itemList, (Container container) -> {
-            if (isMutable) {
-                itemStack.set(DataComponents.CONTAINER, ItemContainerContents.fromItems(itemList));
-            } else {
-                throw new UnsupportedOperationException();
+    public SimpleContainer getWritableContainer(ItemStack itemStack, Player player, @Nullable SlotAccess slotAccess) {
+        return new SimpleContainer(this.getInventorySize()) {
+            {
+                itemStack.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).copyInto(this.getItems());
             }
-        });
+
+            @Override
+            public void setChanged() {
+                if (slotAccess != null) {
+                    if (this.stillValid(player)) {
+                        itemStack.set(DataComponents.CONTAINER, ItemContainerContents.fromItems(this.getItems()));
+                    }
+                } else {
+                    throw new UnsupportedOperationException();
+                }
+            }
+
+            @Override
+            public boolean stillValid(Player player) {
+                return slotAccess == null || slotAccess.get() == itemStack;
+            }
+        };
     }
 
     @Override
