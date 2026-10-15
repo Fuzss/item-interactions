@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v26.1.9-mc26.1.x] - 2026-10-16
+
+### Fixed
+
+- Fix container item contents being saved when the storage item is no longer present in the interacted slot, which could cause item loss or duplication
+
 ## [v26.1.8-mc26.1.x] - 2026-10-15
 
 ### Changed
