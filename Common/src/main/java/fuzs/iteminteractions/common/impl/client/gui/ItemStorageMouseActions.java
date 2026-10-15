@@ -421,12 +421,16 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
                 if (event.isSelection()) {
                     if (this.pushNestedStorageItem(holder, slotIndex, storageItem)) {
                         this.playButtonClickSound(SoundEvents.ITEM_FRAME_ADD_ITEM);
+                    } else {
+                        this.playButtonClickSound(SoundEvents.BUNDLE_INSERT_FAIL);
                     }
 
                     return true;
                 } else if (event.key() == InputConstants.KEY_BACKSPACE) {
                     if (this.popNestedStorageItem(slotIndex, itemStack)) {
                         this.playButtonClickSound(SoundEvents.ITEM_FRAME_REMOVE_ITEM);
+                    } else {
+                        this.playButtonClickSound(SoundEvents.BUNDLE_INSERT_FAIL);
                     }
 
                     return true;
@@ -466,8 +470,8 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
                 originalItem : this.nestedStorageItem.peek().item();
     }
 
-    private void playButtonClickSound(SoundEvent itemFrameRemoveItem) {
-        this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(itemFrameRemoveItem, 1.0F));
+    private void playButtonClickSound(SoundEvent sound) {
+        this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(sound, 1.0F));
     }
 
     private boolean pushNestedStorageItem(ItemStorageHolder holder, OptionalInt slotIndex, ItemStack itemStack) {
