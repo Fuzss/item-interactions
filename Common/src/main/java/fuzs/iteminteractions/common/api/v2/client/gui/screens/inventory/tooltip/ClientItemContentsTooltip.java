@@ -198,11 +198,11 @@ public class ClientItemContentsTooltip implements ClientItemStorageTooltip {
     }
 
     @Override
-    public ClientTooltipComponent createItemPreview(NonNullList<ItemStack> previewItems, int gridWidth, boolean overflow, boolean combined) {
+    public ClientTooltipComponent createItemPreview(NonNullList<ItemStack> previewItems, int gridWidth, int gridHeight, boolean overflow, boolean combined) {
         return new ClientItemContentsTooltip(previewItems,
                 SelectedItem.DEFAULT_SELECTED_ITEM,
                 gridWidth,
-                1,
+                gridHeight,
                 this.backgroundColor,
                 overflow,
                 combined);

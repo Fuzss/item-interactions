@@ -14,6 +14,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -24,6 +25,14 @@ public interface ClientItemStorageTooltip extends ClientTooltipComponent, Select
     int gridSizeX();
 
     int gridSizeY();
+
+    default int maxGridSizeX() {
+        return this.gridSizeX();
+    }
+
+    default int maxGridSizeY() {
+        return ItemInteractions.CONFIG.get(ClientConfig.class).maxContentsPreviewHeight;
+    }
 
     /**
      * @see ClientBundleTooltip#extractSelectedItemTooltip(Font, GuiGraphicsExtractor, int, int, int)
@@ -65,26 +74,36 @@ public interface ClientItemStorageTooltip extends ClientTooltipComponent, Select
                 holder,
                 selectedItem);
         ContentsPreview contentsPreview = ItemInteractions.CONFIG.get(ClientConfig.class).contentsPreview;
-        if (contentsPreview != ContentsPreview.NAME_ONLY) {
-            tooltipComponents.add(this.createItemPreview(contentsPreview));
+        ClientTooltipComponent itemPreview = this.createItemPreview(contentsPreview);
+        if (itemPreview != null) {
+            tooltipComponents.add(itemPreview);
         }
 
         return tooltipComponents;
     }
 
-    private ClientTooltipComponent createItemPreview(ContentsPreview contentsPreview) {
+    private @Nullable ClientTooltipComponent createItemPreview(ContentsPreview contentsPreview) {
         List<ItemStack> previewItems = contentsPreview.buildPreviewItems(this.getAllItems().toList());
-        int gridWidth = Math.min(this.gridSizeX(), previewItems.size());
+        if (previewItems.isEmpty()) {
+            return null;
+        }
+
+        int gridWidth = Math.min(this.maxGridSizeX(), previewItems.size());
+        int gridHeight = Math.min(this.maxGridSizeY(), Math.ceilDiv(previewItems.size(), gridWidth));
+        int updatedGridWidth = Math.min(gridWidth, Math.ceilDiv(previewItems.size(), gridHeight));
+        int updatedGridHeight = gridHeight;
+        int slotsNum = updatedGridWidth * updatedGridHeight;
         NonNullList<ItemStack> nonEmptyItems = NonNullList.of(ItemStack.EMPTY,
-                previewItems.subList(0, gridWidth).toArray(ItemStack[]::new));
-        boolean overflow = previewItems.size() > this.gridSizeX();
+                previewItems.subList(0, Math.min(previewItems.size(), slotsNum)).toArray(ItemStack[]::new));
+        boolean overflow = previewItems.size() > slotsNum;
         return this.createItemPreview(nonEmptyItems,
-                gridWidth,
+                updatedGridWidth,
+                updatedGridHeight,
                 overflow,
                 contentsPreview == ContentsPreview.COMBINED_ITEMS);
     }
 
-    ClientTooltipComponent createItemPreview(NonNullList<ItemStack> previewItems, int gridWidth, boolean overflow, boolean combined);
+    ClientTooltipComponent createItemPreview(NonNullList<ItemStack> previewItems, int gridWidth, int gridHeight, boolean overflow, boolean combined);
 
     Stream<ItemStack> getAllItems();
 }
