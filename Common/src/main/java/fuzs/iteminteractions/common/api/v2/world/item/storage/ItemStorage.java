@@ -80,9 +80,9 @@ public interface ItemStorage {
      */
     boolean hasContents(ItemStack itemStack, Player player);
 
-    boolean overrideStackedOnOther(ItemStorageHolder holder, ItemStack itemStack, Slot slot, ClickAction clickAction, Player player);
+    boolean overrideStackedOnOther(ItemStorageHolder holder, ItemStack itemStack, SlotAccess slot, ItemStack otherItem, Slot otherSlot, ClickAction clickAction, Player player);
 
-    boolean overrideOtherStackedOnMe(ItemStorageHolder holder, ItemStack itemStack, ItemStack itemHeldByCursor, Slot slot, ClickAction clickAction, Player player, SlotAccess slotHeldByCursor);
+    boolean overrideOtherStackedOnMe(ItemStorageHolder holder, ItemStack itemStack, Slot slot, ItemStack otherItem, SlotAccess otherSlot, ClickAction clickAction, Player player);
 
     /**
      * Is <code>stackToAdd</code> allowed to be added to the container supplied by <code>containerStack</code>.

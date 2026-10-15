@@ -38,12 +38,12 @@ public class VoidStorage implements ItemStorage {
     }
 
     @Override
-    public boolean overrideStackedOnOther(ItemStorageHolder holder, ItemStack itemStack, Slot slot, ClickAction clickAction, Player player) {
+    public boolean overrideStackedOnOther(ItemStorageHolder holder, ItemStack itemStack, SlotAccess slot, ItemStack otherItem, Slot otherSlot, ClickAction clickAction, Player player) {
         return false;
     }
 
     @Override
-    public boolean overrideOtherStackedOnMe(ItemStorageHolder holder, ItemStack itemStack, ItemStack itemHeldByCursor, Slot slot, ClickAction clickAction, Player player, SlotAccess slotHeldByCursor) {
+    public boolean overrideOtherStackedOnMe(ItemStorageHolder holder, ItemStack itemStack, Slot slot, ItemStack otherItem, SlotAccess otherSlot, ClickAction clickAction, Player player) {
         return false;
     }
 

@@ -143,15 +143,14 @@ public interface ContainerItemStorage extends ItemStorage {
      * @see net.minecraft.world.item.BundleItem#overrideStackedOnOther(ItemStack, Slot, ClickAction, Player)
      */
     @Override
-    default boolean overrideStackedOnOther(ItemStorageHolder holder, ItemStack itemStack, Slot slot, ClickAction clickAction, Player player) {
+    default boolean overrideStackedOnOther(ItemStorageHolder holder, ItemStack itemStack, SlotAccess slot, ItemStack otherItem, Slot otherSlot, ClickAction clickAction, Player player) {
         boolean extractSingleItemOnly = this.extractSingleItemOnly(itemStack, player);
         ClickActionScheme scheme = this.controlScheme(itemStack, player);
         ItemStackingContext context = new ItemStackingContext(holder, this, player);
-        ItemStack otherItem = slot.getItem();
         if (scheme.removeStackedOnOther(clickAction) && (otherItem.isEmpty() || extractSingleItemOnly)) {
             ItemSlot itemSlot = context.removeOne(itemStack, otherItem);
             if (!itemSlot.item().isEmpty()) {
-                context.tryInsert(itemStack, slot.safeInsert(itemSlot.item()), itemSlot.slotNum());
+                context.tryInsert(itemStack, otherSlot.safeInsert(itemSlot.item()), itemSlot.slotNum());
                 if (!extractSingleItemOnly) {
                     this.playRemoveOneSound(player);
                 }
@@ -164,7 +163,7 @@ public interface ContainerItemStorage extends ItemStorage {
                 return false;
             }
 
-            otherItem = slot.safeTake(otherItem.getCount(), otherItem.getCount(), player);
+            otherItem = otherSlot.safeTake(otherItem.getCount(), otherItem.getCount(), player);
             int transferredCount = context.tryInsert(itemStack, otherItem);
             otherItem.shrink(transferredCount);
             if (!extractSingleItemOnly) {
@@ -175,7 +174,7 @@ public interface ContainerItemStorage extends ItemStorage {
                 }
             }
 
-            slot.safeInsert(otherItem);
+            otherSlot.safeInsert(otherItem);
             this.broadcastChangesOnContainerMenu(itemStack, player);
             return true;
         } else {
@@ -188,10 +187,10 @@ public interface ContainerItemStorage extends ItemStorage {
      *         Player, SlotAccess)
      */
     @Override
-    default boolean overrideOtherStackedOnMe(ItemStorageHolder holder, ItemStack itemStack, ItemStack itemHeldByCursor, Slot slot, ClickAction clickAction, Player player, SlotAccess slotHeldByCursor) {
+    default boolean overrideOtherStackedOnMe(ItemStorageHolder holder, ItemStack itemStack, Slot slot, ItemStack otherItem, SlotAccess otherSlot, ClickAction clickAction, Player player) {
         boolean extractSingleItemOnly = this.extractSingleItemOnly(itemStack, player);
         ClickActionScheme scheme = this.controlScheme(itemStack, player);
-        if (clickAction == ClickAction.PRIMARY && itemHeldByCursor.isEmpty()) {
+        if (clickAction == ClickAction.PRIMARY && otherItem.isEmpty()) {
             if (!extractSingleItemOnly) {
                 this.toggleSelectedItem(itemStack, player, SelectedItem.DEFAULT_SELECTED_ITEM, true);
                 slot.set(itemStack);
@@ -201,15 +200,15 @@ public interface ContainerItemStorage extends ItemStorage {
             }
         } else {
             ItemStackingContext context = new ItemStackingContext(holder, this, player);
-            if (scheme.removeOtherStackedOnMe(clickAction) && (itemHeldByCursor.isEmpty() || extractSingleItemOnly)) {
+            if (scheme.removeOtherStackedOnMe(clickAction) && (otherItem.isEmpty() || extractSingleItemOnly)) {
                 if (slot.allowModification(player)) {
-                    ItemStack itemRemainder = context.removeOne(itemStack, itemHeldByCursor).item();
+                    ItemStack itemRemainder = context.removeOne(itemStack, otherItem).item();
                     if (!itemRemainder.isEmpty()) {
                         // When extracting single items only, the item held by cursor may not be empty, so we cannot just replace it straight away.
-                        if (itemHeldByCursor.isEmpty()) {
-                            slotHeldByCursor.set(itemRemainder);
+                        if (otherItem.isEmpty()) {
+                            otherSlot.set(itemRemainder);
                         } else {
-                            itemHeldByCursor.grow(itemRemainder.getCount());
+                            otherItem.grow(itemRemainder.getCount());
                         }
 
                         if (!extractSingleItemOnly) {
@@ -221,10 +220,10 @@ public interface ContainerItemStorage extends ItemStorage {
                 slot.set(itemStack);
                 this.broadcastChangesOnContainerMenu(itemStack, player);
                 return true;
-            } else if (scheme.insertOtherStackedOnMe(clickAction) && !itemHeldByCursor.isEmpty()) {
+            } else if (scheme.insertOtherStackedOnMe(clickAction) && !otherItem.isEmpty()) {
                 if (slot.allowModification(player)) {
-                    int transferredCount = context.tryInsert(itemStack, itemHeldByCursor);
-                    itemHeldByCursor.shrink(transferredCount);
+                    int transferredCount = context.tryInsert(itemStack, otherItem);
+                    otherItem.shrink(transferredCount);
                     if (!extractSingleItemOnly) {
                         if (transferredCount > 0) {
                             this.playInsertSound(player);

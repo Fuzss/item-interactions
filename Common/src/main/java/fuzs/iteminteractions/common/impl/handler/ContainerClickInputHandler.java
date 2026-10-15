@@ -23,29 +23,34 @@ public class ContainerClickInputHandler {
         ItemStorageHolder holderHeldByCursor = ItemStorageHolder.ofItem(itemHeldByCursor);
         ItemStorageHolder hoveredHolder = ItemStorageHolder.ofItem(hoveredItem);
         if (holderHeldByCursor.allowModification(itemHeldByCursor, player)) {
-            if (holderHeldByCursor.overrideStackedOnOther(itemHeldByCursor, hoveredSlot, clickAction, player)) {
+            if (holderHeldByCursor.overrideStackedOnOther(itemHeldByCursor,
+                    slotHeldByCursor,
+                    hoveredItem,
+                    hoveredSlot,
+                    clickAction,
+                    player)) {
                 return EventResult.ALLOW;
             }
 
             // The item held by the cursor did not handle the interaction, so try the hovered item instead.
             if (hoveredHolder.allowModification(hoveredItem, player) && hoveredHolder.overrideOtherStackedOnMe(
                     hoveredItem,
-                    itemHeldByCursor,
                     hoveredSlot,
+                    itemHeldByCursor,
+                    slotHeldByCursor,
                     clickAction,
-                    player,
-                    slotHeldByCursor)) {
+                    player)) {
                 return EventResult.ALLOW;
             } else {
                 return EventResult.DENY;
             }
         } else if (hoveredHolder.allowModification(hoveredItem, player)) {
             return hoveredHolder.overrideOtherStackedOnMe(hoveredItem,
-                    itemHeldByCursor,
                     hoveredSlot,
+                    itemHeldByCursor,
+                    slotHeldByCursor,
                     clickAction,
-                    player,
-                    slotHeldByCursor) ? EventResult.ALLOW : EventResult.DENY;
+                    player) ? EventResult.ALLOW : EventResult.DENY;
         } else {
             return EventResult.PASS;
         }
