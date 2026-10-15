@@ -1,8 +1,6 @@
 package fuzs.iteminteractions.common.api.v2.world.item.storage;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.world.SimpleContainer;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 public abstract class ComponentBackedStorage implements VisualItemStorage {
@@ -21,11 +19,4 @@ public abstract class ComponentBackedStorage implements VisualItemStorage {
     public boolean mayPlace(ItemStack otherItem) {
         return this.storageOptions.mayPlace(otherItem);
     }
-
-    @Override
-    public final SimpleContainer getItemContainer(ItemStack itemStack, Player player, boolean isMutable) {
-        return this.getItemContainer(itemStack, isMutable);
-    }
-
-    public abstract SimpleContainer getItemContainer(ItemStack itemStack, boolean isMutable);
 }

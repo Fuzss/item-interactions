@@ -16,7 +16,7 @@ public interface VisualItemStorage extends ContainerItemStorage {
 
     @Override
     default Optional<Optional<TooltipComponent>> getTooltipImage(ItemStack itemStack, Player player) {
-        NonNullList<ItemStack> itemList = this.getItemContainer(itemStack, player, false).getItems();
+        NonNullList<ItemStack> itemList = this.getReadOnlyContainer(itemStack, player).getItems();
         return Optional.of(Optional.of(this.createTooltipImageComponent(itemStack, player, itemList)));
     }
 
@@ -27,7 +27,7 @@ public interface VisualItemStorage extends ContainerItemStorage {
      */
     @Override
     default Optional<Boolean> isBarVisible(ItemStack itemStack, Player player) {
-        return Optional.of(!this.getItemContainer(itemStack, player).isEmpty());
+        return Optional.of(!this.getReadOnlyContainer(itemStack, player).isEmpty());
     }
 
     /**
@@ -35,7 +35,7 @@ public interface VisualItemStorage extends ContainerItemStorage {
      */
     @Override
     default OptionalInt getBarWidth(ItemStack itemStack, Player player) {
-        Container container = this.getItemContainer(itemStack, player);
+        Container container = this.getReadOnlyContainer(itemStack, player);
         Fraction fraction = Fraction.getFraction(this.nonEmptySlots(container), container.getContainerSize());
         return OptionalInt.of(Math.min(1 + Mth.mulAndTruncate(fraction, 12), 13));
     }
@@ -45,7 +45,7 @@ public interface VisualItemStorage extends ContainerItemStorage {
      */
     @Override
     default OptionalInt getBarColor(ItemStack itemStack, Player player) {
-        Container container = this.getItemContainer(itemStack, player);
+        Container container = this.getReadOnlyContainer(itemStack, player);
         boolean isFull = this.nonEmptySlots(container) >= container.getContainerSize();
         return OptionalInt.of(isFull ? BundleItem.FULL_BAR_COLOR : BundleItem.BAR_COLOR);
     }

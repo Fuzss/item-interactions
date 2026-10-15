@@ -8,9 +8,11 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.ARGB;
 import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -34,11 +36,11 @@ public class EnderChestStorage implements VisualItemStorage {
 
     @Override
     public boolean hasContents(ItemStack itemStack, Player player) {
-        return !this.getItemContainer(itemStack, player).isEmpty();
+        return !this.getReadOnlyContainer(itemStack, player).isEmpty();
     }
 
     @Override
-    public SimpleContainer getItemContainer(ItemStack itemStack, Player player, boolean isMutable) {
+    public SimpleContainer getWritableContainer(ItemStack itemStack, Player player, @Nullable SlotAccess slotAccess) {
         return player.getEnderChestInventory();
     }
 

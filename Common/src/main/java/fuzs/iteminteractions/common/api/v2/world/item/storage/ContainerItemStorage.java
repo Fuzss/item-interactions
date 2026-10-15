@@ -18,6 +18,7 @@ import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.joml.Vector2ic;
+import org.jspecify.annotations.Nullable;
 
 public interface ContainerItemStorage extends ItemStorage {
 
@@ -123,15 +124,16 @@ public interface ContainerItemStorage extends ItemStorage {
     }
 
     @Override
-    default Container getItemContainer(ItemStack itemStack, Player player) {
-        return this.getItemContainer(itemStack, player, false);
+    default SimpleContainer getReadOnlyContainer(ItemStack itemStack, Player player) {
+        return this.getWritableContainer(itemStack, player, null);
     }
 
-    SimpleContainer getItemContainer(ItemStack itemStack, Player player, boolean isMutable);
+    @Override
+    SimpleContainer getWritableContainer(ItemStack itemStack, Player player, @Nullable SlotAccess slotAccess);
 
     @Override
     default boolean canAddItem(ItemStack itemStack, ItemStack otherItem, Player player) {
-        return this.getItemContainer(itemStack, player, false).canAddItem(otherItem);
+        return this.getReadOnlyContainer(itemStack, player).canAddItem(otherItem);
     }
 
     @Override
@@ -148,9 +150,9 @@ public interface ContainerItemStorage extends ItemStorage {
         ClickActionScheme scheme = this.controlScheme(itemStack, player);
         ItemStackingContext context = new ItemStackingContext(holder, this, player);
         if (scheme.removeStackedOnOther(clickAction) && (otherItem.isEmpty() || extractSingleItemOnly)) {
-            ItemSlot itemSlot = context.removeOne(itemStack, otherItem);
+            ItemSlot itemSlot = context.removeOne(itemStack, otherItem, slot);
             if (!itemSlot.item().isEmpty()) {
-                context.tryInsert(itemStack, otherSlot.safeInsert(itemSlot.item()), itemSlot.slotNum());
+                context.tryInsert(itemStack, otherSlot.safeInsert(itemSlot.item()), itemSlot.slotNum(), slot);
                 if (!extractSingleItemOnly) {
                     this.playRemoveOneSound(player);
                 }
@@ -164,7 +166,7 @@ public interface ContainerItemStorage extends ItemStorage {
             }
 
             otherItem = otherSlot.safeTake(otherItem.getCount(), otherItem.getCount(), player);
-            int transferredCount = context.tryInsert(itemStack, otherItem);
+            int transferredCount = context.tryInsert(itemStack, otherItem, slot);
             otherItem.shrink(transferredCount);
             if (!extractSingleItemOnly) {
                 if (transferredCount > 0) {
@@ -200,9 +202,10 @@ public interface ContainerItemStorage extends ItemStorage {
             }
         } else {
             ItemStackingContext context = new ItemStackingContext(holder, this, player);
+            SlotAccess slotAccess = SlotAccess.of(slot::getItem, slot::set);
             if (scheme.removeOtherStackedOnMe(clickAction) && (otherItem.isEmpty() || extractSingleItemOnly)) {
                 if (slot.allowModification(player)) {
-                    ItemStack itemRemainder = context.removeOne(itemStack, otherItem).item();
+                    ItemStack itemRemainder = context.removeOne(itemStack, otherItem, slotAccess).item();
                     if (!itemRemainder.isEmpty()) {
                         // When extracting single items only, the item held by cursor may not be empty, so we cannot just replace it straight away.
                         if (otherItem.isEmpty()) {
@@ -222,7 +225,7 @@ public interface ContainerItemStorage extends ItemStorage {
                 return true;
             } else if (scheme.insertOtherStackedOnMe(clickAction) && !otherItem.isEmpty()) {
                 if (slot.allowModification(player)) {
-                    int transferredCount = context.tryInsert(itemStack, otherItem);
+                    int transferredCount = context.tryInsert(itemStack, otherItem, slotAccess);
                     otherItem.shrink(transferredCount);
                     if (!extractSingleItemOnly) {
                         if (transferredCount > 0) {

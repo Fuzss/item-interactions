@@ -147,7 +147,7 @@ public record ItemStorageHolder(ItemStorage storage) {
      * @return the provided container
      */
     public Container getItemContainer(ItemStack itemStack, Player player) {
-        return this.storage().getItemContainer(itemStack, player);
+        return this.storage().getReadOnlyContainer(itemStack, player);
     }
 
     public int getContentsCount(ItemStack itemStack, Player player) {
