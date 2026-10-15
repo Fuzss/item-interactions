@@ -66,19 +66,13 @@ public record ItemStorageHolder(ItemStorage storage) {
         return itemStack.getCount() == 1 && this.storage().hasContents(itemStack, player);
     }
 
-    public boolean overrideStackedOnOther(ItemStack itemStack, Slot slot, ClickAction clickAction, Player player) {
-        return this.storage().overrideStackedOnOther(this, itemStack, slot, clickAction, player);
+    public boolean overrideStackedOnOther(ItemStack itemStack, SlotAccess slot, ItemStack otherItem, Slot otherSlot, ClickAction clickAction, Player player) {
+        return this.storage().overrideStackedOnOther(this, itemStack, slot, otherItem, otherSlot, clickAction, player);
     }
 
-    public boolean overrideOtherStackedOnMe(ItemStack itemStack, ItemStack itemHeldByCursor, Slot slot, ClickAction clickAction, Player player, SlotAccess slotHeldByCursor) {
+    public boolean overrideOtherStackedOnMe(ItemStack itemStack, Slot slot, ItemStack otherItem, SlotAccess otherSlot, ClickAction clickAction, Player player) {
         return this.storage()
-                .overrideOtherStackedOnMe(this,
-                        itemStack,
-                        itemHeldByCursor,
-                        slot,
-                        clickAction,
-                        player,
-                        slotHeldByCursor);
+                .overrideOtherStackedOnMe(this, itemStack, slot, otherItem, otherSlot, clickAction, player);
     }
 
     /**
