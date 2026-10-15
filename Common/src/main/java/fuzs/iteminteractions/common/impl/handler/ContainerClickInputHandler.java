@@ -29,7 +29,7 @@ public class ContainerClickInputHandler {
                     hoveredSlot,
                     clickAction,
                     player)) {
-                return EventResult.ALLOW;
+                return EventResult.DENY;
             }
 
             // The item held by the cursor did not handle the interaction, so try the hovered item instead.
@@ -40,9 +40,9 @@ public class ContainerClickInputHandler {
                     slotHeldByCursor,
                     clickAction,
                     player)) {
-                return EventResult.ALLOW;
-            } else {
                 return EventResult.DENY;
+            } else {
+                return EventResult.ALLOW;
             }
         } else if (hoveredHolder.allowModification(hoveredItem, player)) {
             return hoveredHolder.overrideOtherStackedOnMe(hoveredItem,
@@ -50,7 +50,7 @@ public class ContainerClickInputHandler {
                     itemHeldByCursor,
                     slotHeldByCursor,
                     clickAction,
-                    player) ? EventResult.ALLOW : EventResult.DENY;
+                    player) ? EventResult.DENY : EventResult.ALLOW;
         } else {
             return EventResult.PASS;
         }

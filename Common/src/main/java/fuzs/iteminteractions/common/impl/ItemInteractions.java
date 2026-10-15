@@ -3,6 +3,7 @@ package fuzs.iteminteractions.common.impl;
 import fuzs.iteminteractions.common.api.v2.world.item.storage.ItemStorage;
 import fuzs.iteminteractions.common.impl.config.ClientConfig;
 import fuzs.iteminteractions.common.impl.config.ServerConfig;
+import fuzs.iteminteractions.common.impl.handler.ContainerClickInputHandler;
 import fuzs.iteminteractions.common.impl.handler.EnderChestSyncHandler;
 import fuzs.iteminteractions.common.impl.init.ModRegistry;
 import fuzs.iteminteractions.common.impl.network.ClientboundEnderChestContentMessage;
@@ -19,6 +20,7 @@ import fuzs.puzzleslib.common.api.core.v1.context.DataPackRegistriesContext;
 import fuzs.puzzleslib.common.api.core.v1.context.GameRegistriesContext;
 import fuzs.puzzleslib.common.api.core.v1.context.PackRepositorySourcesContext;
 import fuzs.puzzleslib.common.api.core.v1.context.PayloadTypesContext;
+import fuzs.puzzleslib.common.api.event.v1.ItemClickBehaviorCallback;
 import fuzs.puzzleslib.common.api.event.v1.entity.player.AfterChangeDimensionCallback;
 import fuzs.puzzleslib.common.api.event.v1.entity.player.ContainerEvents;
 import fuzs.puzzleslib.common.api.event.v1.entity.player.PlayerCopyEvents;
@@ -53,6 +55,7 @@ public class ItemInteractions implements ModConstructor {
         PlayerNetworkEvents.JOIN.register(EnderChestSyncHandler::onPlayerJoin);
         AfterChangeDimensionCallback.EVENT.register(EnderChestSyncHandler::onAfterChangeDimension);
         PlayerCopyEvents.RESPAWN.register(EnderChestSyncHandler::onRespawn);
+        ItemClickBehaviorCallback.EVENT.register(ContainerClickInputHandler::onContainerItemClicked);
     }
 
     @Override

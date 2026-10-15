@@ -8,7 +8,6 @@ dependencies {
 
 multiloader {
     mixins {
-        mixin("AbstractContainerMenuMixin")
         clientMixin(
             "AbstractContainerScreenMixin",
             "GuiGraphicsExtractorMixin",
