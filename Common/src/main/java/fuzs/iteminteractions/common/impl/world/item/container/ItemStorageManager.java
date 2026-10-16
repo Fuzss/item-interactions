@@ -8,7 +8,10 @@ import fuzs.iteminteractions.common.impl.ItemInteractions;
 import fuzs.iteminteractions.common.impl.network.ClientboundSyncItemStorage;
 import fuzs.puzzleslib.common.api.network.v4.MessageSender;
 import fuzs.puzzleslib.common.api.network.v4.PlayerSet;
-import net.minecraft.core.*;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.ReloadableServerResources;
@@ -23,20 +26,20 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
-public final class ItemStorageManager extends UnconditionalSimpleJsonResourceReloadListener<Map.Entry<HolderSet<Item>, ItemStorage>> {
-    public static final ResourceKey<Registry<Map.Entry<HolderSet<Item>, ItemStorage>>> REGISTRY_KEY = ResourceKey.createRegistryKey(
+public final class ItemStorageManager extends UnconditionalSimpleJsonResourceReloadListener<ItemStorage.Definition> {
+    public static final ResourceKey<Registry<ItemStorage.Definition>> REGISTRY_KEY = ResourceKey.createRegistryKey(
             ItemInteractions.id("item_storage"));
 
     @Nullable
-    private static List<Map.Entry<HolderSet<Item>, ItemStorage>> unresolvedDefinitions;
+    private static List<ItemStorage.Definition> unresolvedDefinitions;
     private static Map<Item, ItemStorage> resolvedDefinitions = ImmutableMap.of();
 
     public ItemStorageManager(HolderLookup.Provider registries) {
-        super(registries, ItemStorage.WITH_ITEMS_CODEC, REGISTRY_KEY);
+        super(registries, ItemStorage.Definition.DIRECT_CODEC, ItemStorage.Definition.REGISTRY_KEY);
     }
 
     @Override
-    public void apply(Map<Identifier, Map.Entry<HolderSet<Item>, ItemStorage>> map, ResourceManager resourceManager, ProfilerFiller profiler) {
+    public void apply(Map<Identifier, ItemStorage.Definition> map, ResourceManager resourceManager, ProfilerFiller profiler) {
         unresolvedDefinitions = ImmutableList.copyOf(map.values());
         resolvedDefinitions = ImmutableMap.of();
     }
@@ -50,13 +53,13 @@ public final class ItemStorageManager extends UnconditionalSimpleJsonResourceRel
     }
 
     public static void onServerResourcesLoad(ReloadableServerResources serverResources, RegistryAccess registries) {
-        List<Map.Entry<HolderSet<Item>, ItemStorage>> holderSets = unresolvedDefinitions;
+        List<ItemStorage.Definition> holderSets = unresolvedDefinitions;
         if (holderSets != null) {
             Map<Item, ItemStorage> providers = new IdentityHashMap<>();
-            for (Map.Entry<HolderSet<Item>, ItemStorage> entry : holderSets) {
-                entry.getKey().forEach((Holder<Item> holder) -> {
+            for (ItemStorage.Definition entry : holderSets) {
+                entry.items().forEach((Holder<Item> holder) -> {
                     // multiple entries can define a provider for the same item, in that case just let the first one win
-                    providers.putIfAbsent(holder.value(), entry.getValue());
+                    providers.putIfAbsent(holder.value(), entry.storage());
                 });
             }
 

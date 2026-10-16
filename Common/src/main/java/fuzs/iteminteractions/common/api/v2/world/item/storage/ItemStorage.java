@@ -8,10 +8,11 @@ import fuzs.puzzleslib.common.api.init.v3.registry.RegistryFactory;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
-import net.minecraft.core.registries.codec.RegistryCodecs;
+import net.minecraft.core.RegistryCodecs;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
@@ -288,11 +289,11 @@ public interface ItemStorage {
         /**
          * Codec for a {@link Definition} holder.
          */
-        public static final Codec<Holder<Definition>> CODEC = RegistryCodecs.holder(REGISTRY_KEY, DIRECT_CODEC);
+        public static final Codec<Holder<Definition>> CODEC = RegistryFileCodec.create(REGISTRY_KEY, DIRECT_CODEC);
         /**
          * Codec for a {@link Definition} holder set.
          */
-        public static final Codec<HolderSet<Definition>> LIST_CODEC = RegistryCodecs.holderSet(REGISTRY_KEY,
+        public static final Codec<HolderSet<Definition>> LIST_CODEC = RegistryCodecs.homogeneousList(REGISTRY_KEY,
                 DIRECT_CODEC);
     }
 }

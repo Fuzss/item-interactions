@@ -62,7 +62,7 @@ public interface ClientItemStorageTooltip extends ClientTooltipComponent, Select
      * @param w        the width of the tooltip
      *
      * @see ClientBundleTooltip#extractSelectedItemTooltip(Font, GuiGraphicsExtractor, int, int, int)
-     * @see GuiGraphicsExtractor#tooltip(Font, List, int, int, ClientTooltipPositioner, Identifier, boolean)
+     * @see GuiGraphicsExtractor#tooltip(Font, List, int, int, ClientTooltipPositioner, Identifier)
      */
     default void extractSelectedItemTooltip(Font font, GuiGraphicsExtractor graphics, int x, int y, int w) {
         ItemStack selectedItem = this.getSelectedItem();

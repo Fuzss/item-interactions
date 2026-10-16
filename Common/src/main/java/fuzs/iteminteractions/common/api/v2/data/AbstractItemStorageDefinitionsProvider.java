@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 public abstract class AbstractItemStorageDefinitionsProvider implements DataProvider {
-    private final Map<Identifier, Map.Entry<HolderSet<Item>, ItemStorage>> definitions = new HashMap<>();
+    private final Map<Identifier, ItemStorage.Definition> definitions = new HashMap<>();
     private final String modId;
     private final PackOutput.PathProvider pathProvider;
     private final CompletableFuture<HolderLookup.Provider> registries;
@@ -47,11 +47,11 @@ public abstract class AbstractItemStorageDefinitionsProvider implements DataProv
     public CompletableFuture<?> run(CachedOutput output, HolderLookup.Provider registries) {
         this.addItemStorageDefinitions(registries);
         List<CompletableFuture<?>> completableFutures = new ArrayList<>();
-        for (Map.Entry<Identifier, Map.Entry<HolderSet<Item>, ItemStorage>> entry : this.definitions.entrySet()) {
+        for (Map.Entry<Identifier, ItemStorage.Definition> entry : this.definitions.entrySet()) {
             Path path = this.pathProvider.json(entry.getKey());
             completableFutures.add(DataProvider.saveStable(output,
                     registries,
-                    ItemStorage.WITH_ITEMS_CODEC,
+                    ItemStorage.Definition.DIRECT_CODEC,
                     entry.getValue(),
                     path));
         }
@@ -82,7 +82,7 @@ public abstract class AbstractItemStorageDefinitionsProvider implements DataProv
     }
 
     public void add(Identifier identifier, ItemStorage provider, HolderSet<Item> holderSet) {
-        this.definitions.put(identifier, Map.entry(holderSet, provider));
+        this.definitions.put(identifier, new ItemStorage.Definition(holderSet, provider));
     }
 
     @Override
