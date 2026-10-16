@@ -23,6 +23,9 @@ import java.util.stream.Stream;
  */
 public final class DyeBackedColor {
     private static final String CUSTOM_COLOR_PREFIX = "#";
+    /**
+     * Codec for a {@link DyeBackedColor}.
+     */
     public static final Codec<DyeBackedColor> CODEC = Codec.STRING.comapFlatMap(DyeBackedColor::parseColor,
             DyeBackedColor::serialize);
     private static final BiMap<DyeColor, DyeBackedColor> LEGACY_FORMAT_TO_COLOR = Stream.of(DyeColor.values())
@@ -46,18 +49,30 @@ public final class DyeBackedColor {
         this.name = null;
     }
 
+    /**
+     * @return the packed color value
+     */
     public int getValue() {
         return this.value;
     }
 
+    /**
+     * @return the serialized color
+     */
     public String serialize() {
         return this.name != null ? this.name : this.formatValue();
     }
 
+    /**
+     * @return the color formatted as a hex string
+     */
     public String formatValue() {
         return String.format(Locale.ROOT, "%s%06X", CUSTOM_COLOR_PREFIX, this.value);
     }
 
+    /**
+     * @return the dye color backing this color, or {@code null} if there is none
+     */
     @Nullable
     public DyeColor unwrap() {
         return LEGACY_FORMAT_TO_COLOR.inverse().get(this);
@@ -85,18 +100,34 @@ public final class DyeBackedColor {
         return this.serialize();
     }
 
+    /**
+     * @param dyeColor the dye color
+     * @return the color for the dye color
+     */
     public static DyeBackedColor fromDyeColor(DyeColor dyeColor) {
         return LEGACY_FORMAT_TO_COLOR.get(dyeColor);
     }
 
+    /**
+     * @param mapColor the map color
+     * @return the color for the map color
+     */
     public static DyeBackedColor fromMapColor(MapColor mapColor) {
         return fromRgb(mapColor.col);
     }
 
+    /**
+     * @param color the packed rgb color
+     * @return the color for the packed rgb value
+     */
     public static DyeBackedColor fromRgb(int color) {
         return new DyeBackedColor(color);
     }
 
+    /**
+     * @param color the serialized color
+     * @return the parsed color
+     */
     public static DataResult<DyeBackedColor> parseColor(String color) {
         if (color.startsWith(CUSTOM_COLOR_PREFIX)) {
             try {

@@ -11,23 +11,64 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 
+/**
+ * A data provider for registering {@link ItemStorage.Definition item storage definitions}.
+ */
 public interface ItemStorageProvider extends SingleRegistryBootstrap<ItemStorage.Definition> {
+    /**
+     * Register an item storage for all items in the provided tag.
+     *
+     * @param output  the bootstrap context
+     * @param storage the item storage provider
+     * @param tag     the tag of items the storage applies to
+     */
     default void add(BootstrapContext<ItemStorage.Definition> output, ItemStorage storage, TagKey<Item> tag) {
         this.add(output, tag.location(), storage, tag);
     }
 
+    /**
+     * Register an item storage for all items in the provided tag under a custom id.
+     *
+     * @param output  the bootstrap context
+     * @param id      the registry id
+     * @param storage the item storage provider
+     * @param tag     the tag of items the storage applies to
+     */
     default void add(BootstrapContext<ItemStorage.Definition> output, Identifier id, ItemStorage storage, TagKey<Item> tag) {
         this.add(output, id, storage, output.lookup(Registries.ITEM).getOrThrow(tag));
     }
 
+    /**
+     * Register an item storage for a single item.
+     *
+     * @param output  the bootstrap context
+     * @param storage the item storage provider
+     * @param item    the item the storage applies to
+     */
     default void add(BootstrapContext<ItemStorage.Definition> output, ItemStorage storage, Item item) {
         this.add(output, BuiltInRegistries.ITEM.getKey(item), storage, item);
     }
 
+    /**
+     * Register an item storage for a single item under a custom id.
+     *
+     * @param output  the bootstrap context
+     * @param id      the registry id
+     * @param storage the item storage provider
+     * @param item    the item the storage applies to
+     */
     default void add(BootstrapContext<ItemStorage.Definition> output, Identifier id, ItemStorage storage, Item item) {
         this.add(output, id, storage, HolderSet.direct(BuiltInRegistries.ITEM::wrapAsHolder, item));
     }
 
+    /**
+     * Register an item storage for all items in the provided holder set.
+     *
+     * @param output    the bootstrap context
+     * @param id        the registry id
+     * @param storage   the item storage provider
+     * @param holderSet the holder set of items the storage applies to
+     */
     default void add(BootstrapContext<ItemStorage.Definition> output, Identifier id, ItemStorage storage, HolderSet<Item> holderSet) {
         output.register(ResourceKey.create(ItemStorage.Definition.REGISTRY_KEY, id),
                 new ItemStorage.Definition(holderSet, storage));

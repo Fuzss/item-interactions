@@ -17,8 +17,17 @@ import org.jspecify.annotations.Nullable;
 import java.util.Optional;
 import java.util.OptionalInt;
 
+/**
+ * A {@link VisualItemStorage} implementation backed by the player's ender chest inventory.
+ */
 public class EnderChestStorage implements VisualItemStorage {
+    /**
+     * The ender chest instance.
+     */
     public static final ItemStorage INSTANCE = new EnderChestStorage();
+    /**
+     * Codec for {@link #INSTANCE}.
+     */
     public static final MapCodec<ItemStorage> CODEC = MapCodec.unit(INSTANCE);
     /**
      * Ender color from the <a href="https://www.curseforge.com/minecraft/mc-mods/tinted">Tinted</a> mod.

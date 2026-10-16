@@ -17,10 +17,16 @@ import java.util.Optional;
 import java.util.OptionalInt;
 
 /**
- * A bare-bones implementation of {@link ItemStorage}.
+ * A bare-bones {@link ItemStorage} implementation that does not accept any items, used when no provider is available.
  */
 public class VoidStorage implements ItemStorage {
+    /**
+     * The empty instance.
+     */
     public static final ItemStorage INSTANCE = new VoidStorage();
+    /**
+     * Codec for {@link #INSTANCE}.
+     */
     public static final MapCodec<ItemStorage> CODEC = MapCodec.unit(INSTANCE);
 
     protected VoidStorage() {

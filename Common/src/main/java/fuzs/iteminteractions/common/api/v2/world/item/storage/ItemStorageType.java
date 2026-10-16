@@ -6,13 +6,20 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 
 /**
- * A type for identifying and serializing item container provider implementations.
+ * A type for identifying and serializing item storage implementations.
  *
- * @param codec the item container provider codec
+ * @param <T>         the item storage type
+ * @param codec       the item storage codec
+ * @param streamCodec the item storage stream codec
  */
 public record ItemStorageType<T extends ItemStorage>(MapCodec<T> codec,
                                                      StreamCodec<? super RegistryFriendlyByteBuf, T> streamCodec) {
 
+    /**
+     * Creates a stream codec from the provided codec.
+     *
+     * @param codec the item storage codec
+     */
     public ItemStorageType(MapCodec<T> codec) {
         this(codec, ByteBufCodecs.fromCodecWithRegistries(codec.codec()));
     }

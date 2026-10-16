@@ -23,7 +23,14 @@ import org.jspecify.annotations.Nullable;
 import java.util.Locale;
 import java.util.Optional;
 
+/**
+ * A {@link ComponentBackedStorage} implementation backed by an {@link ItemContainerContents} data component, like
+ * shulker boxes.
+ */
 public class ContainerStorage extends ComponentBackedStorage {
+    /**
+     * Codec for a {@link ContainerStorage} instance.
+     */
     public static final MapCodec<ContainerStorage> CODEC = RecordCodecBuilder.mapCodec(instance -> {
         return instance.group(inventoryWidthCodec(),
                         inventoryHeightCodec(),
@@ -41,7 +48,13 @@ public class ContainerStorage extends ComponentBackedStorage {
                         });
     });
     private static final EquipmentSlot[] EQUIPMENT_SLOTS = EquipmentSlot.values();
+    /**
+     * The default number of columns of the inventory.
+     */
     public static final int DEFAULT_INVENTORY_WIDTH = 9;
+    /**
+     * The default number of rows of the inventory.
+     */
     public static final int DEFAULT_INVENTORY_HEIGHT = 3;
 
     final int inventoryWidth;
@@ -51,22 +64,44 @@ public class ContainerStorage extends ComponentBackedStorage {
     InteractionPermissions interactionPermissions = InteractionPermissions.ALWAYS;
     EquipmentSlotGroup equipmentSlots = EquipmentSlotGroup.ANY;
 
+    /**
+     * Creates a new storage with the default inventory size.
+     */
     public ContainerStorage() {
         this(DEFAULT_INVENTORY_WIDTH, DEFAULT_INVENTORY_HEIGHT);
     }
 
+    /**
+     * @param inventoryWidth  the number of columns of the inventory
+     * @param inventoryHeight the number of rows of the inventory
+     */
     public ContainerStorage(int inventoryWidth, int inventoryHeight) {
         this(inventoryWidth, inventoryHeight, null);
     }
 
+    /**
+     * @param inventoryWidth  the number of columns of the inventory
+     * @param inventoryHeight the number of rows of the inventory
+     * @param dyeColor        the dye color used for the tooltip image background, or {@code null} for the default
+     */
     public ContainerStorage(int inventoryWidth, int inventoryHeight, @Nullable DyeBackedColor dyeColor) {
         this(inventoryWidth, inventoryHeight, dyeColor, StorageOptions.DEFAULT);
     }
 
+    /**
+     * @param dyeColor       the dye color used for the tooltip image background, or {@code null} for the default
+     * @param storageOptions the common options for this storage
+     */
     public ContainerStorage(@Nullable DyeBackedColor dyeColor, StorageOptions storageOptions) {
         this(DEFAULT_INVENTORY_WIDTH, DEFAULT_INVENTORY_HEIGHT, dyeColor, storageOptions);
     }
 
+    /**
+     * @param inventoryWidth  the number of columns of the inventory
+     * @param inventoryHeight the number of rows of the inventory
+     * @param dyeColor        the dye color used for the tooltip image background, or {@code null} for the default
+     * @param storageOptions  the common options for this storage
+     */
     public ContainerStorage(int inventoryWidth, int inventoryHeight, @Nullable DyeBackedColor dyeColor, StorageOptions storageOptions) {
         super(storageOptions);
         this.inventoryWidth = inventoryWidth;
@@ -74,36 +109,68 @@ public class ContainerStorage extends ComponentBackedStorage {
         this.dyeColor = dyeColor;
     }
 
+    /**
+     * @param <T> the storage type
+     * @return the codec builder for {@link #getInventoryWidth()}
+     */
     protected static <T extends ContainerStorage> RecordCodecBuilder<T, Integer> inventoryWidthCodec() {
         return ExtraCodecs.POSITIVE_INT.fieldOf("inventory_width").forGetter(ContainerStorage::getInventoryWidth);
     }
 
+    /**
+     * @param <T> the storage type
+     * @return the codec builder for {@link #getInventoryHeight()}
+     */
     protected static <T extends ContainerStorage> RecordCodecBuilder<T, Integer> inventoryHeightCodec() {
         return ExtraCodecs.POSITIVE_INT.fieldOf("inventory_height").forGetter(ContainerStorage::getInventoryHeight);
     }
 
+    /**
+     * @param <T> the storage type
+     * @return the codec builder for {@link #getDyeColor()}
+     */
     protected static <T extends ContainerStorage> RecordCodecBuilder<T, Optional<DyeBackedColor>> backgroundColorCodec() {
         return DyeBackedColor.CODEC.optionalFieldOf("background_color")
                 .forGetter((T storage) -> Optional.ofNullable(storage.getDyeColor()));
     }
 
+    /**
+     * @param <T> the storage type
+     * @return the codec builder for {@link #getInteractionPermissions()}
+     */
     protected static <T extends ContainerStorage> RecordCodecBuilder<T, InteractionPermissions> interactionPermissionsCodec() {
         return InteractionPermissions.CODEC.fieldOf("interaction_permissions")
                 .orElse(InteractionPermissions.ALWAYS)
                 .forGetter(ContainerStorage::getInteractionPermissions);
     }
 
+    /**
+     * @param <T> the storage type
+     * @return the codec builder for {@link #getEquipmentSlots()}
+     */
     protected static <T extends ContainerStorage> RecordCodecBuilder<T, EquipmentSlotGroup> equipmentSlotsCodec() {
         return EquipmentSlotGroup.CODEC.fieldOf("equipment_slots")
                 .orElse(EquipmentSlotGroup.ANY)
                 .forGetter(ContainerStorage::getEquipmentSlots);
     }
 
+    /**
+     * Set the interaction permissions.
+     *
+     * @param interactionPermissions the new interaction permissions
+     * @return the updated storage
+     */
     public ContainerStorage interactionPermissions(InteractionPermissions interactionPermissions) {
         this.interactionPermissions = interactionPermissions;
         return this;
     }
 
+    /**
+     * Set the equipment slots required for interactions.
+     *
+     * @param equipmentSlots the new equipment slots
+     * @return the updated storage
+     */
     public ContainerStorage equipmentSlots(EquipmentSlotGroup equipmentSlots) {
         this.equipmentSlots = equipmentSlots;
         return this;
@@ -119,26 +186,44 @@ public class ContainerStorage extends ComponentBackedStorage {
         return this.getInventoryHeight();
     }
 
+    /**
+     * @return the number of columns of the inventory
+     */
     public int getInventoryWidth() {
         return this.inventoryWidth;
     }
 
+    /**
+     * @return the number of rows of the inventory
+     */
     public int getInventoryHeight() {
         return this.inventoryHeight;
     }
 
+    /**
+     * @return the total number of slots of the inventory
+     */
     public int getInventorySize() {
         return this.getInventoryWidth() * this.getInventoryHeight();
     }
 
+    /**
+     * @return the dye color used for the tooltip image background, or {@code null} for the default
+     */
     public @Nullable DyeBackedColor getDyeColor() {
         return this.dyeColor;
     }
 
+    /**
+     * @return the interaction permissions
+     */
     public InteractionPermissions getInteractionPermissions() {
         return this.interactionPermissions;
     }
 
+    /**
+     * @return the equipment slots required for interactions
+     */
     public EquipmentSlotGroup getEquipmentSlots() {
         return this.equipmentSlots;
     }
@@ -213,6 +298,9 @@ public class ContainerStorage extends ComponentBackedStorage {
                 this.getResolvedDyeColor());
     }
 
+    /**
+     * @return the resolved dye color value, or {@code -1} when no dye color is set
+     */
     public int getResolvedDyeColor() {
         return this.getDyeColor() != null ? this.getDyeColor().getValue() : -1;
     }
@@ -222,13 +310,32 @@ public class ContainerStorage extends ComponentBackedStorage {
         return ModRegistry.CONTAINER_ITEM_STORAGE_TYPE.value();
     }
 
+    /**
+     * The interaction permissions controlling who may modify the container.
+     */
     public enum InteractionPermissions implements StringRepresentable {
+        /**
+         * Player interactions are always allowed.
+         */
         ALWAYS,
+        /**
+         * Player interactions are only allowed in creative mode.
+         */
         CREATIVE_ONLY,
+        /**
+         * Player interactions are never allowed.
+         */
         NEVER;
 
+        /**
+         * Codec for an {@link InteractionPermissions} value.
+         */
         public static final Codec<InteractionPermissions> CODEC = StringRepresentable.fromValues(InteractionPermissions::values);
 
+        /**
+         * @param player the player performing the interaction
+         * @return are player interactions allowed
+         */
         public boolean allowsPlayerInteractions(Player player) {
             return this == ALWAYS || this != NEVER && player.getAbilities().instabuild;
         }

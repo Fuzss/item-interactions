@@ -12,6 +12,9 @@ import org.apache.commons.lang3.math.Fraction;
 import java.util.Optional;
 import java.util.OptionalInt;
 
+/**
+ * A {@link ContainerItemStorage} that additionally creates a tooltip image for displaying the container contents.
+ */
 public interface VisualItemStorage extends ContainerItemStorage {
 
     @Override
@@ -20,6 +23,14 @@ public interface VisualItemStorage extends ContainerItemStorage {
         return Optional.of(Optional.of(this.createTooltipImageComponent(itemStack, player, itemList)));
     }
 
+    /**
+     * Create the tooltip image component for displaying the container contents.
+     *
+     * @param itemStack the item stack providing the storage
+     * @param player    the player performing the interaction
+     * @param itemList  the items inside the container
+     * @return the tooltip image component
+     */
     TooltipComponent createTooltipImageComponent(ItemStack itemStack, Player player, NonNullList<ItemStack> itemList);
 
     /**
