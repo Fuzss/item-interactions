@@ -152,17 +152,28 @@ public final class ItemStackingContext {
     private int moveItemToEmptySlots(Container container, ItemStack sourceStack, int prioritizedSlot) {
         IntSet slotNums = IntLinkedOpenHashSet.of(prioritizedSlot);
         slotNums.addAll(IntSets.fromTo(0, container.getContainerSize()));
+        int lastUsedSlot = SelectedItem.DEFAULT_SELECTED_ITEM;
         for (int slotNum : slotNums.toIntArray()) {
             if (slotNum >= 0 && slotNum < container.getContainerSize()) {
                 ItemStack targetStack = container.getItem(slotNum);
                 if (targetStack.isEmpty()) {
-                    container.setItem(slotNum, sourceStack.copyAndClear());
-                    return slotNum;
+                    // We cannot assume a picked-up item stack fits into a single slot, split if necessary.
+                    int maxStackSize = this.storage.getMaxStackSize(container, slotNum, sourceStack);
+                    if (maxStackSize <= 0) {
+                        continue;
+                    }
+
+                    int count = Math.min(sourceStack.getCount(), maxStackSize);
+                    container.setItem(slotNum, sourceStack.split(count));
+                    lastUsedSlot = slotNum;
+                    if (sourceStack.isEmpty()) {
+                        break;
+                    }
                 }
             }
         }
 
-        return SelectedItem.DEFAULT_SELECTED_ITEM;
+        return lastUsedSlot;
     }
 
     /**
