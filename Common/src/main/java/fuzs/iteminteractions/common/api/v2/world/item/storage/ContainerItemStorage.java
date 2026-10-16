@@ -20,12 +20,35 @@ import net.minecraft.world.item.ItemStack;
 import org.joml.Vector2ic;
 import org.jspecify.annotations.Nullable;
 
+/**
+ * An {@link ItemStorage} implementation backed by a {@link Container} that arranges its contents in a grid for the
+ * tooltip preview.
+ */
 public interface ContainerItemStorage extends ItemStorage {
 
+    /**
+     * Get the number of columns of the container grid.
+     *
+     * @param itemCount the number of items in the container
+     * @return the grid width
+     */
     int getGridWidth(int itemCount);
 
+    /**
+     * Get the number of rows of the container grid.
+     *
+     * @param itemCount the number of items in the container
+     * @return the grid height
+     */
     int getGridHeight(int itemCount);
 
+    /**
+     * Is only a single item moved at a time, instead of the full stack.
+     *
+     * @param itemStack the item stack providing the storage
+     * @param player    the player performing the interaction
+     * @return is a single item moved at a time
+     */
     default boolean extractSingleItemOnly(ItemStack itemStack, Player player) {
         return ModRegistry.CONTROL_SCHEME_ATTACHMENT_TYPE.getOrDefault(player, ControlScheme.DEFAULT).moveSingleItem();
     }
@@ -44,6 +67,13 @@ public interface ContainerItemStorage extends ItemStorage {
         return ModRegistry.SELECTED_ITEM_ATTACHMENT_TYPE.getOrDefault(player, SelectedItem.DEFAULT).selectedItem();
     }
 
+    /**
+     * Set the selected item index inside the container.
+     *
+     * @param itemStack    the item stack providing the storage
+     * @param player       the player performing the interaction
+     * @param selectedItem the new selected item index
+     */
     default void setSelectedItem(ItemStack itemStack, Player player, int selectedItem) {
         ModRegistry.SELECTED_ITEM_ATTACHMENT_TYPE.set(player, SelectedItem.of(selectedItem));
     }
@@ -55,6 +85,14 @@ public interface ContainerItemStorage extends ItemStorage {
         }
     }
 
+    /**
+     * Get the slot index where inserted items are placed first, based on the selected item index and the removal
+     * direction.
+     *
+     * @param itemStack the item stack providing the storage
+     * @param player    the player performing the interaction
+     * @return the prioritized slot index
+     */
     default int getPrioritizedSlot(ItemStack itemStack, Player player) {
         int prioritizedSlot = this.getSelectedItem(itemStack, player);
         if (this.offsetPrioritizedSlot(prioritizedSlot)) {
@@ -64,12 +102,25 @@ public interface ContainerItemStorage extends ItemStorage {
         }
     }
 
+    /**
+     * Set the slot index where inserted items are placed first.
+     *
+     * @param itemStack       the item stack providing the storage
+     * @param player          the player performing the interaction
+     * @param prioritizedSlot the new prioritized slot index
+     */
     default void setPrioritizedSlot(ItemStack itemStack, Player player, int prioritizedSlot) {
         this.setSelectedItem(itemStack,
                 player,
                 this.offsetPrioritizedSlot(prioritizedSlot) ? prioritizedSlot - 1 : prioritizedSlot);
     }
 
+    /**
+     * Is the prioritized slot index offset by one to account for the removal direction.
+     *
+     * @param prioritizedSlot the prioritized slot index
+     * @return is the prioritized slot index offset
+     */
     default boolean offsetPrioritizedSlot(int prioritizedSlot) {
         return prioritizedSlot != SelectedItem.DEFAULT_SELECTED_ITEM
                 && this.getRemovalDirection() == Direction.AxisDirection.POSITIVE;
@@ -252,18 +303,24 @@ public interface ContainerItemStorage extends ItemStorage {
      *
      * @param itemStack the item stack providing the storage
      * @param player    the player performing the interaction
+     *
      * @see net.minecraft.world.item.BundleItem#broadcastChangesOnContainerMenu(Player)
      */
     default void broadcastChangesOnContainerMenu(ItemStack itemStack, Player player) {
         player.containerMenu.slotsChanged(player.getInventory());
     }
 
+    /**
+     * Get the direction in which the container is traversed when removing items.
+     *
+     * @return the removal direction
+     */
     default Direction.AxisDirection getRemovalDirection() {
         return Direction.AxisDirection.NEGATIVE;
     }
 
     /**
-     * Get the maximum stack size for this item in the current container.
+     * Get the maximum stack size for an item stack in the container.
      *
      * @param container the container
      * @param slotNum   the slot index
@@ -291,6 +348,10 @@ public interface ContainerItemStorage extends ItemStorage {
     }
 
     /**
+     * Plays a sound when inserting an item into the container fails.
+     *
+     * @param player the player performing the interaction
+     *
      * @see net.minecraft.world.item.BundleItem#playInsertFailSound(Entity)
      */
     default void playInsertFailSound(Player player) {

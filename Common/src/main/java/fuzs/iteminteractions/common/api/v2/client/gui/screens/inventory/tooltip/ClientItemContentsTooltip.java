@@ -18,8 +18,17 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.stream.Stream;
 
+/**
+ * A {@link ClientItemStorageTooltip} for displaying the contents of an arbitrary container item.
+ */
 public class ClientItemContentsTooltip implements ClientItemStorageTooltip {
+    /**
+     * The sprite used as the container background.
+     */
     public static final Identifier CONTAINER_SPRITE = ItemInteractions.id("container/container");
+    /**
+     * The sprite used to highlight the selected slot.
+     */
     public static final Identifier SLOT_SELECTION_SPRITE = ItemInteractions.id("container/slot_selection");
     private static final int BORDER_SIZE = 7;
     private static final int SLOT_SIZE = 18;
@@ -32,6 +41,9 @@ public class ClientItemContentsTooltip implements ClientItemStorageTooltip {
     private final boolean overflow;
     private final boolean combined;
 
+    /**
+     * @param tooltip the tooltip component created by the item storage
+     */
     public ClientItemContentsTooltip(ItemContentsTooltip tooltip) {
         this(tooltip.itemList(),
                 tooltip.selectedItem(),
@@ -100,6 +112,12 @@ public class ClientItemContentsTooltip implements ClientItemStorageTooltip {
     }
 
     /**
+     * Get the x offset required for horizontally centering the item grid.
+     *
+     * @param font         the font to render with
+     * @param tooltipWidth the width of the tooltip
+     * @return the content x offset
+     *
      * @see ClientBundleTooltip#getContentXOffset(int)
      */
     public int getContentXOffset(Font font, int tooltipWidth) {

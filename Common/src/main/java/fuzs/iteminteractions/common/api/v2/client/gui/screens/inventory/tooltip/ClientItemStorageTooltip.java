@@ -19,22 +19,48 @@ import org.jspecify.annotations.Nullable;
 import java.util.List;
 import java.util.stream.Stream;
 
+/**
+ * A client tooltip component for displaying the contents of an item storage, including a preview of the selected item.
+ */
 public interface ClientItemStorageTooltip extends ClientTooltipComponent, SelectedItemPreviewProvider {
+    /**
+     * The sprite used to indicate overflowing contents.
+     */
     Identifier ELLIPSIS_SPRITE = ItemInteractions.id("container/ellipsis");
 
+    /**
+     * @return the number of columns of the item grid
+     */
     int gridSizeX();
 
+    /**
+     * @return the number of rows of the item grid
+     */
     int gridSizeY();
 
+    /**
+     * @return the maximum number of columns of the item grid
+     */
     default int maxGridSizeX() {
         return this.gridSizeX();
     }
 
+    /**
+     * @return the maximum number of rows of the item grid
+     */
     default int maxGridSizeY() {
         return ItemInteractions.CONFIG.get(ClientConfig.class).maxContentsPreviewHeight;
     }
 
     /**
+     * Extract the tooltip for the currently selected item.
+     *
+     * @param font     the font to render with
+     * @param graphics the graphics helper
+     * @param x        the x position of the tooltip
+     * @param y        the y position of the tooltip
+     * @param w        the width of the tooltip
+     *
      * @see ClientBundleTooltip#extractSelectedItemTooltip(Font, GuiGraphicsExtractor, int, int, int)
      * @see GuiGraphicsExtractor#tooltip(Font, List, int, int, ClientTooltipPositioner, Identifier, boolean)
      */
@@ -65,6 +91,9 @@ public interface ClientItemStorageTooltip extends ClientTooltipComponent, Select
         }
     }
 
+    /**
+     * @return the currently selected item stack
+     */
     ItemStack getSelectedItem();
 
     @Override
@@ -102,7 +131,20 @@ public interface ClientItemStorageTooltip extends ClientTooltipComponent, Select
                 contentsPreview == ContentsPreview.COMBINED_ITEMS);
     }
 
+    /**
+     * Create the item preview shown alongside the selected item tooltip.
+     *
+     * @param previewItems the items to display
+     * @param gridWidth    the number of columns of the preview
+     * @param gridHeight   the number of rows of the preview
+     * @param overflow     is there more content than can be displayed
+     * @param combined     are the preview items combined by type
+     * @return the item preview component
+     */
     ClientTooltipComponent createItemPreview(NonNullList<ItemStack> previewItems, int gridWidth, int gridHeight, boolean overflow, boolean combined);
 
+    /**
+     * @return all items inside the container
+     */
     Stream<ItemStack> getAllItems();
 }

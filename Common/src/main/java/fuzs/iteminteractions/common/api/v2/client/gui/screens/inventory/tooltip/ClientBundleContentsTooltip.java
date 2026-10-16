@@ -18,6 +18,9 @@ import org.apache.commons.lang3.math.Fraction;
 import java.util.List;
 import java.util.stream.Stream;
 
+/**
+ * A {@link ClientItemStorageTooltip} for displaying the contents and weight of a bundle.
+ */
 public class ClientBundleContentsTooltip extends ClientBundleTooltip implements ClientItemStorageTooltip {
     private final Fraction weight;
     private final int gridWidth;
@@ -26,6 +29,9 @@ public class ClientBundleContentsTooltip extends ClientBundleTooltip implements 
     private final boolean combined;
     private final boolean drawProgressBar;
 
+    /**
+     * @param tooltip the tooltip component created by the bundle item storage
+     */
     public ClientBundleContentsTooltip(BundleContentsTooltip tooltip) {
         this(tooltip.contents(), tooltip.weight(), tooltip.gridWidth(), tooltip.gridHeight(), false, false, true);
     }
@@ -173,6 +179,12 @@ public class ClientBundleContentsTooltip extends ClientBundleTooltip implements 
     }
 
     /**
+     * Get the x offset required for horizontally centering the item grid.
+     *
+     * @param font         the font to render with
+     * @param tooltipWidth the width of the tooltip
+     * @return the content x offset
+     *
      * @see ClientBundleTooltip#getContentXOffset(int)
      */
     public int getCustomContentXOffset(Font font, int tooltipWidth) {
@@ -180,6 +192,14 @@ public class ClientBundleContentsTooltip extends ClientBundleTooltip implements 
     }
 
     /**
+     * Extract the progress bar showing the bundle weight.
+     *
+     * @param x        the x position of the progress bar
+     * @param y        the y position of the progress bar
+     * @param font     the font to render with
+     * @param graphics the graphics helper
+     * @param weight   the weight of the bundle relative to its maximum weight
+     *
      * @see ClientBundleTooltip#extractProgressbar(int, int, Font, GuiGraphicsExtractor, Fraction)
      */
     public void extractCustomProgressbar(int x, int y, Font font, GuiGraphicsExtractor graphics, Fraction weight) {
@@ -201,6 +221,10 @@ public class ClientBundleContentsTooltip extends ClientBundleTooltip implements 
     }
 
     /**
+     * @param weight           the weight of the bundle relative to its maximum weight
+     * @param progressBarWidth the width of the progress bar
+     * @return the width of the progress bar fill
+     *
      * @see ClientBundleTooltip#getProgressBarFill(Fraction)
      */
     public int getCustomProgressBarFill(Fraction weight, int progressBarWidth) {
@@ -209,6 +233,9 @@ public class ClientBundleContentsTooltip extends ClientBundleTooltip implements 
     }
 
     /**
+     * @param weight the weight of the bundle relative to its maximum weight
+     * @return the progress bar text
+     *
      * @see ClientBundleTooltip#getProgressBarFillText(Fraction)
      */
     public static Component getCustomProgressBarFillText(Fraction weight) {

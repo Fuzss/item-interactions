@@ -28,43 +28,80 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.stream.Stream;
 
+/**
+ * A {@link ComponentBackedStorage} implementation backed by a {@link BundleContents} data component, like bundles.
+ */
 public class BundleContentsStorage extends ComponentBackedStorage {
+    /**
+     * Codec for a {@link BundleContentsStorage} instance.
+     */
     public static final MapCodec<BundleContentsStorage> CODEC = RecordCodecBuilder.mapCodec(instance -> {
         return instance.group(capacityMultiplierCodec(), itemContentsCodec())
                 .apply(instance, BundleContentsStorage::new);
     });
+    /**
+     * The default capacity multiplier.
+     */
     public static final int DEFAULT_CAPACITY_MULTIPLIER = 1;
 
     final int capacityMultiplier;
 
+    /**
+     * Creates a new storage with the default capacity multiplier.
+     */
     public BundleContentsStorage() {
         this(StorageOptions.DEFAULT);
     }
 
+    /**
+     * @param storageOptions the common options for this storage
+     */
     public BundleContentsStorage(StorageOptions storageOptions) {
         this(DEFAULT_CAPACITY_MULTIPLIER, storageOptions);
     }
 
+    /**
+     * @param capacityMultiplier the capacity multiplier, must be positive
+     * @param storageOptions     the common options for this storage
+     */
     public BundleContentsStorage(int capacityMultiplier, StorageOptions storageOptions) {
         super(storageOptions);
         Preconditions.checkArgument(capacityMultiplier > 0, "capacity multiplier must be positive");
         this.capacityMultiplier = capacityMultiplier;
     }
 
+    /**
+     * Codec for the {@link #capacityMultiplier} stored under the {@code capacity_multiplier} key.
+     *
+     * @param <T> the storage type
+     * @return the record codec builder
+     */
     protected static <T extends BundleContentsStorage> RecordCodecBuilder<T, Integer> capacityMultiplierCodec() {
         return ExtraCodecs.POSITIVE_INT.fieldOf("capacity_multiplier")
                 .forGetter((T storage) -> storage.capacityMultiplier);
     }
 
+    /**
+     * @param itemStack the item stack providing the storage
+     * @return the maximum weight of the container
+     */
     public Fraction getMaxWeight(ItemStack itemStack) {
         return Fraction.getFraction(this.capacityMultiplier, DEFAULT_CAPACITY_MULTIPLIER);
     }
 
+    /**
+     * @param itemStack the item stack providing the storage
+     * @return the current weight of the container
+     */
     public Fraction getWeight(ItemStack itemStack) {
         BundleContents contents = itemStack.getOrDefault(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY);
         return BundleItem.getWeightSafe(contents);
     }
 
+    /**
+     * @param itemStack the item stack providing the storage
+     * @return the current weight of the container relative to its maximum weight
+     */
     public Fraction getRelativeWeight(ItemStack itemStack) {
         return this.getWeight(itemStack).divideBy(this.getMaxWeight(itemStack));
     }
@@ -144,6 +181,12 @@ public class BundleContentsStorage extends ComponentBackedStorage {
     }
 
     /**
+     * Get the maximum amount of items that can still be added to the container.
+     *
+     * @param itemStack the item stack providing the storage
+     * @param otherItem the stack to be added to the container
+     * @return the maximum amount of items that can be added
+     *
      * @see BundleContents.Mutable#getMaxAmountToAdd(Fraction)
      * @see BundleContents.Mutable#tryInsert(ItemStack)
      */
