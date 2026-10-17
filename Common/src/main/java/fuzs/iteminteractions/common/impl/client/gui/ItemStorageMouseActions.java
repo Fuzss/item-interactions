@@ -71,8 +71,7 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
         this.extractSlotHighlights(guiGraphics, mouseX, mouseY, AbstractContainerScreen.SLOT_HIGHLIGHT_BACK_SPRITE);
         ItemStack itemStack = this.getHoveredSlotTooltipItem();
         ItemStorageHolder holder = ItemStorageHolder.ofItem(itemStack);
-        if (holder.allowModification(itemStack, this.minecraft.player) && holder.hasContents(itemStack,
-                this.minecraft.player)) {
+        if (this.allowModification(holder, itemStack)) {
             guiGraphics.setTooltipForNextFrame(this.screen.getFont(),
                     this.screen.getTooltipFromContainerItem(itemStack),
                     itemStack.getTooltipImage(),
@@ -355,6 +354,10 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
         return false;
     }
 
+    private boolean allowModification(ItemStorageHolder holder, ItemStack itemStack) {
+        return this.allowModification(holder, null, OptionalInt.empty(), itemStack);
+    }
+
     /**
      * Don't use {@link net.minecraft.world.inventory.AbstractContainerMenu#getSlot(int)} for getting the slot for the
      * index, it does not work in the creative inventory menu.
@@ -410,53 +413,54 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
         }
 
         ItemStack storageItem = this.getStorageItem(slotIndex, itemStack);
-        ItemStorageHolder holder = ItemStorageHolder.ofItem(storageItem);
-        if (this.allowModification(holder, this.screen.hoveredSlot, slotIndex, storageItem)) {
-            if (ItemInteractions.CONFIG.get(ClientConfig.class).nestedItemTooltips) {
-                if (event.isSelection()) {
-                    if (this.pushNestedStorageItem(holder, slotIndex, storageItem)) {
-                        this.playButtonClickSound(SoundEvents.ITEM_FRAME_ADD_ITEM);
-                    } else {
-                        this.playButtonClickSound(SoundEvents.BUNDLE_INSERT_FAIL);
-                    }
+        ItemStorageHolder storageHolder = ItemStorageHolder.ofItem(storageItem);
+        if (!this.allowModification(storageHolder, this.screen.hoveredSlot, slotIndex, storageItem)) {
+            return false;
+        }
 
-                    return true;
-                } else if (event.key() == InputConstants.KEY_BACKSPACE) {
-                    if (this.popNestedStorageItem(slotIndex, itemStack)) {
-                        this.playButtonClickSound(SoundEvents.ITEM_FRAME_REMOVE_ITEM);
-                    } else {
-                        this.playButtonClickSound(SoundEvents.BUNDLE_INSERT_FAIL);
-                    }
-
-                    return true;
+        if (ItemInteractions.CONFIG.get(ClientConfig.class).nestedItemTooltips) {
+            if (event.isSelection()) {
+                if (this.pushNestedStorageItem(storageHolder, slotIndex, storageItem)) {
+                    this.playButtonClickSound(SoundEvents.ITEM_FRAME_ADD_ITEM);
+                } else {
+                    this.playButtonClickSound(SoundEvents.BUNDLE_INSERT_FAIL);
                 }
-            }
 
-            int scrollX = 0;
-            int scrollY = 0;
-            if (event.isLeft()) {
-                scrollX--;
-            }
+                return true;
+            } else if (event.key() == InputConstants.KEY_BACKSPACE) {
+                if (this.popNestedStorageItem(slotIndex, itemStack)) {
+                    this.playButtonClickSound(SoundEvents.ITEM_FRAME_REMOVE_ITEM);
+                } else {
+                    this.playButtonClickSound(SoundEvents.BUNDLE_INSERT_FAIL);
+                }
 
-            if (event.isRight()) {
-                scrollX++;
-            }
-
-            if (event.isUp()) {
-                scrollY--;
-            }
-
-            if (event.isDown()) {
-                scrollY++;
-            }
-
-            if (scrollX != 0 || scrollY != 0) {
-                this.scrollSelectedItem(holder, slotIndex, storageItem, new Vector2i(scrollX, scrollY));
                 return true;
             }
         }
 
-        // Better to not handle this then, as other keys like escape will be blocked.
+        int scrollX = 0;
+        int scrollY = 0;
+        if (event.isLeft()) {
+            scrollX--;
+        }
+
+        if (event.isRight()) {
+            scrollX++;
+        }
+
+        if (event.isUp()) {
+            scrollY--;
+        }
+
+        if (event.isDown()) {
+            scrollY++;
+        }
+
+        if (scrollX != 0 || scrollY != 0) {
+            this.scrollSelectedItem(storageHolder, slotIndex, storageItem, new Vector2i(scrollX, scrollY));
+            return true;
+        }
+
         return false;
     }
 
@@ -474,7 +478,7 @@ public class ItemStorageMouseActions extends BundleMouseActions implements Custo
         int selectedItem = holder.storage().getSelectedItem(itemStack, this.minecraft.player);
         ItemStack item = container.getItem(selectedItem);
         ItemStorageHolder itemHolder = ItemStorageHolder.ofItem(item);
-        if (!itemHolder.isEmpty()) {
+        if (this.allowModification(itemHolder, item)) {
             if (!Objects.equals(slotIndex, this.nestedStorageItemSlot)) {
                 this.nestedStorageItem.clear();
                 this.nestedStorageItemSlot = slotIndex;
