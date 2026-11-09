@@ -47,8 +47,6 @@ public class ClientEventHandler {
             SoundEvents.BUNDLE_INSERT_FAIL,
             SoundEvents.BUNDLE_REMOVE_ONE);
 
-    private static ControlScheme lastSentControlScheme = ControlScheme.DEFAULT;
-
     public static EventResult onPlaySoundAtEntity(Level level, Entity entity, MutableValue<Holder<SoundEvent>> soundEvent, MutableValue<SoundSource> soundSource, MutableFloat soundVolume, MutableFloat soundPitch) {
         // Prevent the bundle sounds from being spammed when dragging.
         // Not a nice solution, but it works.
@@ -118,8 +116,8 @@ public class ClientEventHandler {
      */
     public static void ensureHasSentContainerClientInput(Player player) {
         ControlScheme controlScheme = ItemInteractions.CONFIG.get(ClientConfig.class).packControlScheme();
-        if (!Objects.equals(controlScheme, lastSentControlScheme)) {
-            lastSentControlScheme = controlScheme;
+        if (!Objects.equals(controlScheme,
+                ModRegistry.CONTROL_SCHEME_ATTACHMENT_TYPE.getOrDefault(player, ControlScheme.DEFAULT))) {
             ModRegistry.CONTROL_SCHEME_ATTACHMENT_TYPE.set(player, controlScheme);
             MessageSender.broadcast(new ServerboundContainerClientInputMessage(controlScheme));
         }
